@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.json.JSONObject;
-import node.NeoNode;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -26,7 +25,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import collector.CUnit;
-import relationship.NeoRelation;
 import relationship.RelationType;
 
 public class NeoHello {

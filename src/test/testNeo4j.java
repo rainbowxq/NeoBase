@@ -9,9 +9,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 
-import relationship.NeoRelation;
 import net.sf.json.JSONObject;
-import node.NeoNode;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;

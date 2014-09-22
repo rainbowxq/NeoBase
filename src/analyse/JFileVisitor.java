@@ -1,13 +1,15 @@
 package analyse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONObject;
-import node.NeoNode;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -92,8 +94,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+import org.eclipse.osgi.internal.debug.Debug;
 
-import relationship.NeoRelation;
+import relationship.Relation;
+import relationship.RelationType;
+import node.NodeInfo;;
 /**
  * methods of visiting different kinds of nodes
  * @author xiaoq_zhu
@@ -101,8 +106,9 @@ import relationship.NeoRelation;
  */
 public class JFileVisitor extends ASTVisitor{
 	private String fileName;
-	private List<NeoNode> nodes=new ArrayList<NeoNode>();
-	private List<NeoRelation> relations=new ArrayList<NeoRelation>();
+	//private List<NeoNode> nodes=new ArrayList<NeoNode>();
+	private Map<ASTNode,NodeInfo> nodes=new HashMap<ASTNode,NodeInfo>();
+	private List<Relation> relations=new ArrayList<Relation>();
 	
 
 	public JFileVisitor(String name){
@@ -406,7 +412,6 @@ public class JFileVisitor extends ASTVisitor{
 	 */
 	public boolean visit(CompilationUnit node) {
 		/*create the root node of the file*/
-		NeoNode fileNode=new NeoNode(node);
 		
 		/*construct the query sentence by which to store the node*/
 		JSONObject query=new JSONObject();
@@ -417,9 +422,81 @@ public class JFileVisitor extends ASTVisitor{
 		
 		query.put("params", params);
 		System.out.println(query.toString());
-		fileNode.setCypherSentence(query.toString());
 		
-		this.nodes.add(fileNode);
+		NodeInfo info1=new NodeInfo(query.toString());
+		
+		this.nodes.put(node, info1);
+		
+		/*add child nodes and relationships between <node> and its children*/
+		
+		/*PackageDeclaration*/
+		PackageDeclaration packageNode=node.getPackage();
+		query=new JSONObject();
+		query.put("query", "CREATE (n: PackageDeclaration { name : {pkgName} }) RETURN id(n)");
+		
+		params=new JSONObject();
+		params.put("pkgName", packageNode.getName().getFullyQualifiedName());
+		//params.put("pkgKey", node.resolveBinding().getKey());
+		
+		query.put("params", params);
+		System.out.println(query.toString());
+		NodeInfo info2=new NodeInfo(query.toString());
+		this.nodes.put(packageNode,info2);
+		this.relations.add(new Relation(node,packageNode,RelationType.PACKAGE));
+		
+		/*ImportDeclaration*/
+		List<ImportDeclaration> imports=node.imports();
+		if(imports!=null){
+			for (int i=0;i<imports.size();i++){
+				ImportDeclaration importNode=imports.get(i);
+				String name=importNode.getName().getFullyQualifiedName();
+				boolean isStatic=importNode.isStatic();
+				boolean isOnDemand=importNode.isOnDemand();
+				
+				query=new JSONObject();
+				query.put("query", "CREATE (n: ImportDeclaration { name : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand} }) RETURN id(n)");
+				
+				params=new JSONObject();
+				params.put("ImportName", name);
+				params.put("Static", isStatic);
+				params.put("onDemand", isOnDemand);
+				
+				query.put("params", params);
+				System.out.println(query.toString());
+				NodeInfo info3=new NodeInfo(query.toString());
+				this.nodes.put(importNode, info3);
+				this.relations.add(new Relation(node,importNode,RelationType.IMPORT));
+			}
+		}
+		
+		/*TypeDeclaration*/
+		List<AbstractTypeDeclaration> types=node.types();
+		if(types!=null){
+			for (int i=0;i<types.size();i++){
+				if(types.get(i) instanceof TypeDeclaration){
+					TypeDeclaration tDeclaration=(TypeDeclaration) types.get(i);
+					query=new JSONObject();
+					query.put("query", "CREATE (n: TypeDeclaration { name : {typeName},INTERFACE : {isInterface} }) RETURN id(n)");
+					
+					params=new JSONObject();
+					params.put("typeName", tDeclaration.getName().getFullyQualifiedName());
+					params.put("isInterface", tDeclaration.isInterface());
+					
+					query.put("params", params);
+					Debug.println(query.toString());
+				}
+				else if(types.get(i) instanceof AnnotationTypeDeclaration){
+					
+				}
+				else{//EnumTypeDeclaration
+					
+				}
+				
+				this.nodes.put(types.get(i), new NodeInfo(query.toString()));
+				this.relations.add(new Relation(node,types.get(i),RelationType.TYPES));
+			}
+		}
+		
 		return true;
 	}
 
@@ -1374,6 +1451,25 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(TypeDeclaration node) {
+		JSONObject query;
+		JSONObject params;
+		
+		/*Modifier*/
+		List<Modifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			Modifier modifier=modifiers.get(i);
+			query=new JSONObject();
+			query.put("query", "CREATE (n: Modifier { KEY : {key} }) RETURN id(n)");
+			
+			params=new JSONObject();
+			params.put("key", modifier.getKeyword().toString());
+			
+			query.put("params", params);
+			Debug.println(query.toString());
+			
+			this.nodes.put(modifier, new NodeInfo(query.toString()));
+			this.relations.add(new Relation(node,modifier,RelationType.MODIFIERS));
+		}
 		return true;
 	}
 
@@ -2572,24 +2668,13 @@ public class JFileVisitor extends ASTVisitor{
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
-
-
-	public List<NeoNode> getNodes() {
-		return nodes;
+	
+	public Map<ASTNode,NodeInfo> getNodes(){
+		return this.nodes;
+	}
+	
+	public List<Relation> getRelations(){
+		return this.relations;
 	}
 
-
-	public void setNodes(List<NeoNode> nodes) {
-		this.nodes = nodes;
-	}
-
-
-	public List<NeoRelation> getRelations() {
-		return relations;
-	}
-
-
-	public void setRelations(List<NeoRelation> relations) {
-		this.relations = relations;
-	}
 }

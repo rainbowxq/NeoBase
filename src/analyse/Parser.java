@@ -3,20 +3,23 @@ package analyse;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
 import net.sf.json.JSONObject;
-import node.NeoNode;
+import node.NodeInfo;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.osgi.internal.debug.Debug;
 
-import relationship.NeoRelation;
+import relationship.Relation;
 import test.testNeo4j;
 
 import com.sun.jersey.api.client.Client;
@@ -29,8 +32,8 @@ public class Parser {
 	private String projectName;// assume projects don't have the same names 
 	private String fileName;
 	private String filePath;
-	private List<NeoNode> nodes=new ArrayList<NeoNode>();
-	private List<NeoRelation> relations=new ArrayList<NeoRelation>();
+	private Map<ASTNode,NodeInfo> nodes=new HashMap<ASTNode,NodeInfo>();
+	private List<Relation> relations=new ArrayList<Relation>();
 	
 	public Parser(String pName,String fName,String fPath){
 		this.setProjectName(pName);
@@ -60,6 +63,11 @@ public class Parser {
 
 	/*link to the database*/
 	
+	
+
+
+
+
 	private static final String SERVER_ROOT_URI = "http://127.0.0.1:7474/db/data";
 	/*[test to see if the Noe4j datase can be accessed]*/
 		public static void linkTest(){
@@ -93,22 +101,19 @@ public class Parser {
 			
 		}
 		
-		public static void addRelation(NeoRelation relation){
-			NeoNode from=relation.getFrom();
-			NeoNode to= relation.getTo();
+		public static void addRelation(long id1,long id2,String type){
 			JSONObject query=new JSONObject();
-			
-			String content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:"+relation.getRelationType()+"]->(t) return r";
+			String content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:"+type+"]->(t) return r";
 			query.put("query", content);
 			
 			JSONObject params=new JSONObject();
-			params.put("from",from.getId() );
-			params.put("to", to.getId());
+			params.put("from",id1 );
+			params.put("to", id2);
 			
 			query.put("params",params);
 			
 			System.out.println(query.toString());
-			testNeo4j.executeQuery(query.toString());
+//			testNeo4j.executeQuery(query.toString());
 //			System.out.println(json.toString());
 			
 		}
@@ -138,38 +143,53 @@ public class Parser {
 		this.filePath = filePath;
 	}
 	
-	public List<NeoNode> getNodes() {
-		return nodes;
-	}
-	
-	private void setNodes(List<NeoNode> nodes) {
-		// TODO Auto-generated method stub
-		this.nodes=nodes;
+
+	public void setNodeId(ASTNode node,long id) {
+		this.nodes.get(node).setId(id);
 	}
 
-	public void setNodeId(int index,long id) {
-		this.nodes.get(index).setId(id);
-	}
-
-	public List<NeoRelation> getRelations() {
+	public List<Relation> getRelations() {
 		return relations;
 	}
 
-	public void setRelations(List<NeoRelation> relations) {
+	public void setRelations(List<Relation> relations) {
 		this.relations = relations;
 	}
+	
+	private void setNodes(Map<ASTNode, NodeInfo> nodes2) {
+		// TODO Auto-generated method stub
+		this.nodes=nodes2;
+	}
+
 	
 	public static void main(String [] args){
 		Parser parser=new Parser("","HelloWorld.java","/home/xiaoq_zhu/zxq/workspace/HelloWorld/src/test/HelloWorld.java");
 		parser.analyse();
-		for(int i=0;i<parser.nodes.size();i++){
-			String a=Parser.executeQuery(parser.nodes.get(i).getCypherSentence());
+		Set<ASTNode> nodeSet= parser.nodes.keySet();
+		for(ASTNode node:nodeSet){
+			String a=Parser.executeQuery(parser.nodes.get(node).getCypherSentence());
 			String b[]=a.split(" ");
-//			for(int j=0;j<b.length;j++){
-//				System.out.println(b[j]+" "+j);
-//			}
-			parser.setNodeId(i,Long.parseLong(b[12]));
-			System.out.println(parser.nodes.get(i).getId());
+////			for(int j=0;j<b.length;j++){
+////				System.out.println(b[j]+" "+j);
+////			}
+			parser.setNodeId(node,Long.parseLong(b[12]));
+			System.out.println(parser.nodes.get(node).getId());
+			
 		}
+		for(int i=0;i<parser.relations.size();i++){
+			Relation r=parser.relations.get(i);
+			long id1=parser.nodes.get(r.getFrom()).getId();
+			long id2=parser.nodes.get(r.getTo()).getId();
+			Parser.addRelation(id1, id2, r.getRelationType());
+		}
+//		for (int i=0;i<parser.relations.size();i++){
+//			if(parser.nodes.containsKey(parser.relations.get(i).getFrom()) && parser.nodes.containsKey(parser.relations.get(i).getTo())){
+//				System.out.println("true");
+//			}
+//			else{
+//				Debug.println("false");
+//			}
+//		}
+		
 	}
 }
