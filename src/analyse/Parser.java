@@ -45,9 +45,15 @@ public class Parser {
 		CUnit unit=new CUnit();
 		unit.setProgram(this.filePath);
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		parser.setResolveBindings(true);
+//		String[] sources = null;
+//		String[] classpath = null;
+		parser.setUnitName(this.filePath);
+		parser.setEnvironment(null,null,null, true);
 		parser.setSource(unit.getProgram().toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;
+		
 		JFileVisitor visitor=new JFileVisitor(this.fileName);
 		javaUnit.accept(visitor);
 		this.setNodes(visitor.getNodes());

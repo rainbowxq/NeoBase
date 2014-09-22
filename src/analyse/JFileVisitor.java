@@ -412,59 +412,27 @@ public class JFileVisitor extends ASTVisitor{
 	 */
 	public boolean visit(CompilationUnit node) {
 		/*create the root node of the file*/
-		
+		String query="";
 		/*construct the query sentence by which to store the node*/
-		JSONObject query=new JSONObject();
-		query.put("query", "CREATE (n: CompilationUnit { name : {fileName} }) RETURN id(n)");
-		
-		JSONObject params=new JSONObject();
-		params.put("fileName", this.fileName);
-		
-		query.put("params", params);
-		System.out.println(query.toString());
-		
-		NodeInfo info1=new NodeInfo(query.toString());
-		
+		query=Query.cuQuery(node, fileName);
+		NodeInfo info1=new NodeInfo(query);
 		this.nodes.put(node, info1);
 		
 		/*add child nodes and relationships between <node> and its children*/
 		
 		/*PackageDeclaration*/
 		PackageDeclaration packageNode=node.getPackage();
-		query=new JSONObject();
-		query.put("query", "CREATE (n: PackageDeclaration { name : {pkgName} }) RETURN id(n)");
-		
-		params=new JSONObject();
-		params.put("pkgName", packageNode.getName().getFullyQualifiedName());
-		//params.put("pkgKey", node.resolveBinding().getKey());
-		
-		query.put("params", params);
-		System.out.println(query.toString());
-		NodeInfo info2=new NodeInfo(query.toString());
-		this.nodes.put(packageNode,info2);
+		query=Query.pdQuery(packageNode);
+		this.nodes.put(packageNode,new NodeInfo(query));
 		this.relations.add(new Relation(node,packageNode,RelationType.PACKAGE));
 		
 		/*ImportDeclaration*/
 		List<ImportDeclaration> imports=node.imports();
 		if(imports!=null){
 			for (int i=0;i<imports.size();i++){
-				ImportDeclaration importNode=imports.get(i);
-				String name=importNode.getName().getFullyQualifiedName();
-				boolean isStatic=importNode.isStatic();
-				boolean isOnDemand=importNode.isOnDemand();
-				
-				query=new JSONObject();
-				query.put("query", "CREATE (n: ImportDeclaration { name : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand} }) RETURN id(n)");
-				
-				params=new JSONObject();
-				params.put("ImportName", name);
-				params.put("Static", isStatic);
-				params.put("onDemand", isOnDemand);
-				
-				query.put("params", params);
-				System.out.println(query.toString());
-				NodeInfo info3=new NodeInfo(query.toString());
-				this.nodes.put(importNode, info3);
+				ImportDeclaration importNode=imports.get(i);	
+				query=Query.idQuery(importNode);
+				this.nodes.put(importNode,new NodeInfo(query));
 				this.relations.add(new Relation(node,importNode,RelationType.IMPORT));
 			}
 		}
@@ -474,25 +442,16 @@ public class JFileVisitor extends ASTVisitor{
 		if(types!=null){
 			for (int i=0;i<types.size();i++){
 				if(types.get(i) instanceof TypeDeclaration){
-					TypeDeclaration tDeclaration=(TypeDeclaration) types.get(i);
-					query=new JSONObject();
-					query.put("query", "CREATE (n: TypeDeclaration { name : {typeName},INTERFACE : {isInterface} }) RETURN id(n)");
-					
-					params=new JSONObject();
-					params.put("typeName", tDeclaration.getName().getFullyQualifiedName());
-					params.put("isInterface", tDeclaration.isInterface());
-					
-					query.put("params", params);
-					Debug.println(query.toString());
+					query=Query.tdQuery((TypeDeclaration) types.get(i));
 				}
 				else if(types.get(i) instanceof AnnotationTypeDeclaration){
-					
+					query=Query.adQuery((AnnotationTypeDeclaration) types.get(i));
 				}
-				else{//EnumTypeDeclaration
-					
+				else{//EnumDeclaration
+					query=Query.edQuery((EnumDeclaration) types.get(i));
 				}
 				
-				this.nodes.put(types.get(i), new NodeInfo(query.toString()));
+				this.nodes.put(types.get(i), new NodeInfo(query));
 				this.relations.add(new Relation(node,types.get(i),RelationType.TYPES));
 			}
 		}
@@ -1451,23 +1410,13 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(TypeDeclaration node) {
-		JSONObject query;
-		JSONObject params;
-		
+		String query="";
 		/*Modifier*/
 		List<Modifier> modifiers=node.modifiers();
 		for (int i=0;i<modifiers.size();i++){
 			Modifier modifier=modifiers.get(i);
-			query=new JSONObject();
-			query.put("query", "CREATE (n: Modifier { KEY : {key} }) RETURN id(n)");
-			
-			params=new JSONObject();
-			params.put("key", modifier.getKeyword().toString());
-			
-			query.put("params", params);
-			Debug.println(query.toString());
-			
-			this.nodes.put(modifier, new NodeInfo(query.toString()));
+			query=Query.modifierQuery(modifier);
+			this.nodes.put(modifier, new NodeInfo(query));
 			this.relations.add(new Relation(node,modifier,RelationType.MODIFIERS));
 		}
 		return true;
