@@ -12,6 +12,8 @@ public class RelationType {
 	public static final String TYPE_PARAMETERS="TYPE_PARAMETERS";	//
 	public static final String BODY_DECLARATIONS="BODY_DECLARATIONS"; 	//
 	public static final String JAVA_DOC="JAVA_DOC";	//
+	public static final String TAGS="TAGS";
+	public static final String COMMENTS="COMMENTS";
 	
 	public static final String NAME="NAME";	//
 	public static final String QUANTIFIER="QUANTIFIER";	//

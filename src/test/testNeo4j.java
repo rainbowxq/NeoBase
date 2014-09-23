@@ -1,13 +1,10 @@
 package test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
+
 
 import net.sf.json.JSONObject;
 

@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -456,6 +457,16 @@ public class JFileVisitor extends ASTVisitor{
 			}
 		}
 		
+		List<Comment> comments=node.getCommentList();
+		for(int i=0;i<comments.size();i++){
+			if(comments.get(i).isDocComment()){
+				Javadoc javadoc=(Javadoc) comments.get(i);
+				this.nodes.put(javadoc, new NodeInfo(Query.javadocQuery(javadoc)));
+				this.relations.add(new Relation(node,javadoc,RelationType.COMMENTS));
+				this.visit(javadoc);
+			}
+		}
+		
 		return true;
 	}
 
@@ -587,6 +598,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(EnumDeclaration node) {
+		String query;
+		/**/
 		return true;
 	}
 
@@ -751,10 +764,17 @@ public class JFileVisitor extends ASTVisitor{
 	 * @see #ASTVisitor()
 	 * @see #ASTVisitor(boolean)
 	 */
-//	public boolean visit(Javadoc node) {
-//		// visit tag elements inside doc comments only if requested
-//		
-//	}
+	public boolean visit(Javadoc node) {
+		/*tags*/
+		List<TagElement> tags=node.tags();
+		for(int i=0;i<tags.size();i++){
+			TagElement tag=tags.get(i);
+			String query=Query.tagElementQuery(tag);
+			this.nodes.put(tag, new NodeInfo(query));
+			this.relations.add(new Relation(node,tag,RelationType.TAGS));
+		}
+		return true;
+	}
 
 	/**
 	 * Visits the given type-specific AST node.
@@ -999,6 +1019,31 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(PackageDeclaration node) {
+		String query;
+		/*child node
+		 * Javadoc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			query=Query.javadocQuery(javadoc);
+			this.nodes.put(javadoc, new NodeInfo(query));
+			this.relations.add(new Relation(node,javadoc,RelationType.JAVA_DOC));
+		}
+		
+		
+		/*child node
+		 * ANNOTATIONS
+		 * */
+		List<Annotation> annotations=node.annotations();
+		for(int i=0;i<annotations.size();i++){
+			Annotation annotation=annotations.get(i);
+			if(annotation instanceof NormalAnnotation){
+				
+			}else if(annotation instanceof MarkerAnnotation){
+				
+			}else{//SingleMemberAnnotation
+				
+			}
+		}
 		
 		return true;
 	}
