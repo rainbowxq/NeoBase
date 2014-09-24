@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -766,13 +766,13 @@ public class JFileVisitor extends ASTVisitor{
 	 */
 	public boolean visit(Javadoc node) {
 		/*tags*/
-		List<TagElement> tags=node.tags();
-		for(int i=0;i<tags.size();i++){
-			TagElement tag=tags.get(i);
-			String query=Query.tagElementQuery(tag);
-			this.nodes.put(tag, new NodeInfo(query));
-			this.relations.add(new Relation(node,tag,RelationType.TAGS));
-		}
+//		List<TagElement> tags=node.tags();
+//		for(int i=0;i<tags.size();i++){
+//			TagElement tag=tags.get(i);
+//			String query=Query.tagElementQuery(tag);
+//			this.nodes.put(tag, new NodeInfo(query));
+//			this.relations.add(new Relation(node,tag,RelationType.TAGS));
+//		}
 		return true;
 	}
 
@@ -1373,6 +1373,21 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.0
 	 */
 	public boolean visit(TagElement node) {
+//		List<ASTNode> fragments=node.fragments(); 
+//		for(int i=0;i<fragments.size();i++){
+//			ASTNode fragment=fragments.get(i);
+//			if(fragment instanceof TextElement){
+//				
+//			}else if(fragment instanceof TagElement){
+//				
+//			}else if(fragment instanceof Name){
+//				
+//			}else if(fragment instanceof MemberRef){
+//				
+//			}else{//MethodRef
+//				
+//			}
+//		}
 		return true;
 	}
 
@@ -1460,11 +1475,55 @@ public class JFileVisitor extends ASTVisitor{
 		List<Modifier> modifiers=node.modifiers();
 		for (int i=0;i<modifiers.size();i++){
 			Modifier modifier=modifiers.get(i);
-			query=Query.modifierQuery(modifier);
-			this.nodes.put(modifier, new NodeInfo(query));
-			this.relations.add(new Relation(node,modifier,RelationType.MODIFIERS));
+			this.addModifier(node, modifier);
 		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*TypeParameter*/
+		List<TypeParameter> typeParameters=node.typeParameters();
+		for(int i=0;i<typeParameters.size();i++){
+			TypeParameter tpara=typeParameters.get(i);
+			this.addTypeParameter(node, tpara);
+		}
+		/**/
+		
 		return true;
+	}
+	
+	
+	
+	/**
+	 * add tpara to <nodes> and the relation <node,TYPE_PARAMETERS,tpara> to <relations>
+	 * @param node
+	 * @param tpara
+	 */
+	public void addTypeParameter(ASTNode node,TypeParameter tpara){
+		this.nodes.put(tpara, new NodeInfo(Query.typeParameterQuery(tpara)));
+		this.relations.add(new Relation(node,tpara,RelationType.TYPE_PARAMETERS));
+	}
+	/**
+	 * add javadoc to <nodes> and the relation <node,JAVA_DOC,javadoc> to <relations>
+	 * @param node
+	 * @param javadoc
+	 */
+	public void addJavadoc(ASTNode node,Javadoc javadoc){
+		String query=Query.javadocQuery(javadoc);
+		this.nodes.put(javadoc, new NodeInfo(query));
+		this.relations.add(new Relation(node,javadoc,RelationType.JAVA_DOC));
+	}
+	
+	/**
+	 * add modifier to <nodes> and the relation <node,MODIFIERS,modifier> to <relations>
+	 * @param node
+	 * @param modifier
+	 */
+	public void addModifier(ASTNode node,Modifier modifier){
+		String query=Query.modifierQuery(modifier);
+		this.nodes.put(modifier, new NodeInfo(query));
+		this.relations.add(new Relation(node,modifier,RelationType.MODIFIERS));
 	}
 
 	/**
