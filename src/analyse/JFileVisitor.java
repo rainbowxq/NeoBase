@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -1063,6 +1064,11 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(ParameterizedType node) {
+		List<Type> types=node.typeArguments();
+		for(int i=0;i<types.size();i++){
+			this.addType(node, types.get(i), RelationType.TYPE_ARGUMENTS);
+		}
+		this.addType(node, node.getType(), RelationType.TYPE);
 		return true;
 	}
 
@@ -1160,6 +1166,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(QualifiedType node) {
+		this.addType(node, node.getQualifier(), RelationType.QUALIFIER);
 		return true;
 	}
 
@@ -1488,7 +1495,19 @@ public class JFileVisitor extends ASTVisitor{
 			TypeParameter tpara=typeParameters.get(i);
 			this.addTypeParameter(node, tpara);
 		}
-		/**/
+		/*SUPERCLASS TYPE*/
+		if(node.getSuperclassType()!=null){
+			this.addType(node, node.getSuperclassType(), RelationType.SUPERCLASS_TYPE);
+		}
+		
+		/*SUPER INTERFACE TYPES*/
+		List<Type> sInterfaces=node.superInterfaceTypes();
+		for(int i=0;i<sInterfaces.size();i++){
+			this.addType(node, sInterfaces.get(i), RelationType.SUPER_INTERFACE_TYPES);
+		}
+		
+		/*BODY DECLARATIONS*/
+		
 		
 		return true;
 	}
@@ -1572,7 +1591,20 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(TypeParameter node) {
+		List<Type> types=node.typeBounds();
+		for(int i=0;i<types.size();i++){
+			this.addType(node, types.get(i),RelationType.TYPE_BOUNDS);
+		}
 		return true;
+	}
+	/**
+	 * add type to <nodes> and the relation <node,TYPE_PARAMETERS,tpara> to <relations>
+	 * @param node
+	 * @param type
+	 */
+	public void addType(ASTNode node,Type type,String rtype){
+		this.nodes.put(node, new NodeInfo(Query.typeQuery(type)));
+		this.relations.add(new Relation(node,type,rtype));
 	}
 
 	/**
@@ -1589,6 +1621,11 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.7.1
 	 */
 	public boolean visit(UnionType node) {
+		List<Type> types=node.types();
+		for(int i=0;i<types.size();i++){
+			this.addType(node, types.get(i), RelationType.TYPES);
+		}
+		
 		return true;
 	}
 
@@ -1670,6 +1707,9 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(WildcardType node) {
+		if(node.getBound()!=null){
+			this.addType(node, node.getBound(), RelationType.BOUND);
+		}
 		return true;
 	}
 

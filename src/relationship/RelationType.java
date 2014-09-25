@@ -16,7 +16,6 @@ public class RelationType {
 	public static final String COMMENTS="COMMENTS";
 	
 	public static final String NAME="NAME";	//
-	public static final String QUANTIFIER="QUANTIFIER";	//
 	
 	public static final String RETURN_TYPE="RETURN_TYPE";	// method declaration --> type
 	public static final String PARAMETERS="PARAMETERS";	// method declearation --> SingleVariableDeclaration
@@ -28,4 +27,7 @@ public class RelationType {
 	public static final String TYPE_ARGUMENTS="TYPE_ARGUMENTS";	// __ --> type  //can be more than one
 	public static final String COMPONENT_TYPE="COMPONENT_TYPE";
 	public static final String TYPE="TYPE";
+	public static final String TYPE_BOUNDS="TYPE_BOUNDS";
+	public static final String BOUND="BOUND";
+	public static final String QUALIFIER="QUALIFIER";
 }

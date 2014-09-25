@@ -6,6 +6,7 @@ import net.sf.json.JSONObject;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -16,10 +17,17 @@ import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.osgi.internal.debug.Debug;
 
 public class Query {
@@ -228,4 +236,71 @@ public class Query {
 		return query.toString();
 	}
 	
+	/*Type*/
+	public static String typeQuery(Type node){
+		JSONObject query=new JSONObject();
+		JSONObject params=new JSONObject();
+		
+		if(node instanceof PrimitiveType){
+			
+			query.put("query", "CREATE (n: PrimitiveType { PRIMITIVE_TYPE_CODE : {code},"
+					+ "KEY : {key}}) RETURN id(n)");
+			params.put("code", ((PrimitiveType) node).getPrimitiveTypeCode().toString());
+			params.put("key", node.resolveBinding().getKey());
+			query.put("params", params);
+			
+		}else if(node instanceof SimpleType){
+			
+			query.put("query", "CREATE (n: SimpleType { NAME : {name},"
+					+ "KEY : {key}}) RETURN id(n)");
+			params.put("name", ((SimpleType) node).getName().getFullyQualifiedName());
+			params.put("key", node.resolveBinding().getKey());
+			query.put("params", params);
+			
+		}else if(node instanceof ArrayType){
+
+			query.put("query", "CREATE (n: ArrayType { ELEMENT_TYPE : {ename},"
+					+ "ELEMENT_KEY : {key}, DIMENTIONS:{dimentions}}) RETURN id(n)");
+			
+			params.put("ename", node.resolveBinding().getElementType().getName());
+			params.put("key", node.resolveBinding().getElementType().getKey());
+			params.put("dimentions", node.resolveBinding().getDimensions());
+			query.put("params", params);
+			
+		}else if(node instanceof UnionType){
+			
+			query.put("query", "CREATE (n: UnionType { NAME : {name},"
+					+ "KEY : {key}}) RETURN id(n)");
+			params.put("name", node.resolveBinding().getName());
+			params.put("key", node.resolveBinding().getKey());
+			query.put("params", params);
+			
+		}else if(node instanceof QualifiedType){
+			
+			query.put("query", "CREATE (n: QualifiedType { NAME : {name},"
+					+ "KEY : {key}}) RETURN id(n)");
+			params.put("name", ((QualifiedType) node).getName().getFullyQualifiedName());
+			params.put("key", node.resolveBinding().getKey());
+			query.put("params", params);
+			
+			
+		}else if(node instanceof ParameterizedType){
+			
+			query.put("query", "CREATE (n: ParameterizedType { NAME : {name},"
+					+ "KEY : {key}}) RETURN id(n)");
+			params.put("name", node.resolveBinding().getName());
+			params.put("key", node.resolveBinding().getKey());
+			query.put("params", params);
+			
+		}else if(node instanceof WildcardType){
+			
+			query.put("query", "CREATE (n: WildcardType { NAME : {name},"
+					+ "KEY : {key},UPPER_BOUND:{ub}}) RETURN id(n)");
+			params.put("name", node.resolveBinding().getName());
+			params.put("key", node.resolveBinding().getKey());
+			params.put("ub", ((WildcardType) node).isUpperBound());
+			query.put("params", params);
+		}
+		return query.toString();
+	}
 }
