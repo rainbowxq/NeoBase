@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BlockComment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -649,7 +650,33 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(FieldDeclaration node) {
+		String query="";
+		/*Modifier*/
+		List<Modifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			Modifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*Type*/
+		Type type=node.getType();
+		this.addType(node, type, RelationType.TYPE);
+		/*VariableDeclarationFragment*/
+		List<VariableDeclarationFragment> fragments=node.fragments();
+		for(int i=0;i<fragments.size();i++){
+			this.addVariableDeclarationFragment(node, fragments.get(i), RelationType.FRAGMENTS);
+		}
+		
 		return true;
+	}
+	
+	public void addVariableDeclarationFragment(ASTNode node,VariableDeclarationFragment vf,String rtype){
+		this.nodes.put(vf, new NodeInfo(Query.variableDeclarationFragmentQuery(vf)));
+		this.relations.add(new Relation(node,vf,rtype));
 	}
 
 	/**
@@ -958,20 +985,24 @@ public class JFileVisitor extends ASTVisitor{
 	}
 
 
-	/**
-	 * Visits the given type-specific AST node.
-	 * <p>
-	 * The default implementation does nothing and return true.
-	 * Subclasses may reimplement.
-	 * </p>
-	 *
-	 * @param node the node to visit
-	 * @return <code>true</code> if the children of this node should be
-	 * visited, and <code>false</code> if the children of this node should
-	 * be skipped
-	 * @since 3.1
-	 */
+	/** example
+	 @ClassPreamble (
+		   author = "John Doe",
+		   date = "3/17/2002",
+		   currentRevision = 6,
+		   lastModified = "4/12/2004",
+		   lastModifiedBy = "Jane Doe",
+		   // Note array notation
+		   reviewers = {"Alice", "Bob", "Cindy"}
+		)
+	*/
 	public boolean visit(NormalAnnotation node) {
+		List <MemberValuePair> mvPairs=node.values();
+		for(int i=0;i<mvPairs.size();i++){
+			MemberValuePair mvPair=mvPairs.get(i);
+			this.nodes.put(mvPair, new NodeInfo(Query.MemberValuePairQuery(mvPair)));
+			this.relations.add(new Relation(node,mvPair,RelationType.VALUES));
+		}
 		return true;
 	}
 
@@ -1037,16 +1068,19 @@ public class JFileVisitor extends ASTVisitor{
 		List<Annotation> annotations=node.annotations();
 		for(int i=0;i<annotations.size();i++){
 			Annotation annotation=annotations.get(i);
-			if(annotation instanceof NormalAnnotation){
-				
-			}else if(annotation instanceof MarkerAnnotation){
-				
-			}else{//SingleMemberAnnotation
-				
-			}
+			this.addAnnotation(node, annotation,RelationType.ANNOTATIONS);
 		}
 		
 		return true;
+	}
+	/**
+	 * add annotation to <nodes> and <node,annotation,>
+	 * @param node
+	 * @param annotation
+	 */
+	public void addAnnotation(ASTNode node, Annotation annotation,String rtype){
+		this.nodes.put(annotation, new NodeInfo(Query.AnnotationQuery(annotation)));
+		this.relations.add(new Relation(node,annotation,rtype));
 	}
 
 
@@ -1507,12 +1541,46 @@ public class JFileVisitor extends ASTVisitor{
 		}
 		
 		/*BODY DECLARATIONS*/
-		
+		List<BodyDeclaration> bodyDeclarations=node.bodyDeclarations();
+		this.addBodyDeclarations(node, bodyDeclarations);
 		
 		return true;
 	}
-	
-	
+	/**
+	 * if the node is the instance of 
+	 * <TypeDeclaration>,
+	 * <AnnotationTypeDeclaration>,
+	 * <AnonymousClassDeclaration>
+	 * @param node
+	 */
+	public void addBodyDeclarations(ASTNode node,List<BodyDeclaration> bodyDeclarations){
+		for(int i=0;i<bodyDeclarations.size();i++){
+			BodyDeclaration bd=bodyDeclarations.get(i);
+			switch(bd.getNodeType()){
+				case ASTNode.ANNOTATION_TYPE_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) bd)));
+					break;
+				case ASTNode.ENUM_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.edQuery((EnumDeclaration) bd)));
+					break;
+				case ASTNode.TYPE_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.tdQuery((TypeDeclaration) bd)));
+					break;
+				case ASTNode.FIELD_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.fieldDeclarationQuery((FieldDeclaration) bd)));
+					break;
+				case ASTNode.INITIALIZER:
+					break;
+				case ASTNode.METHOD_DECLARATION:
+					break;
+				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+					break;
+				case ASTNode.ENUM_CONSTANT_DECLARATION:
+					break;
+			}
+			this.relations.add(new Relation(node,bd,RelationType.BODY_DECLARATIONS));
+		}
+	}
 	
 	/**
 	 * add tpara to <nodes> and the relation <node,TYPE_PARAMETERS,tpara> to <relations>

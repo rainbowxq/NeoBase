@@ -30,4 +30,6 @@ public class RelationType {
 	public static final String TYPE_BOUNDS="TYPE_BOUNDS";
 	public static final String BOUND="BOUND";
 	public static final String QUALIFIER="QUALIFIER";
+	public static final String VALUES="VALUES";
+	public static final String FRAGMENTS="FRAGMENTS";
 }
