@@ -1742,6 +1742,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
+		
 		return true;
 	}
 
