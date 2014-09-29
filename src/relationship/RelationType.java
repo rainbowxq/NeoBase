@@ -32,4 +32,7 @@ public class RelationType {
 	public static final String QUALIFIER="QUALIFIER";
 	public static final String VALUES="VALUES";
 	public static final String FRAGMENTS="FRAGMENTS";
+	public static final String INITIALIZER="INITIALIZER";
+	public static final String ARRAY="ARRAY";
+	public static final String INDEX="INDEX";
 }
