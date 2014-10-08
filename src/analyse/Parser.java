@@ -18,10 +18,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.osgi.internal.debug.Debug;
 
 import relationship.Relation;
-import test.testNeo4j;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -45,6 +43,7 @@ public class Parser {
 	public void analyse(){
 		CUnit unit=new CUnit();
 		unit.setProgram(this.filePath);
+		@SuppressWarnings("deprecation")
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
 //		String[] sources = null;

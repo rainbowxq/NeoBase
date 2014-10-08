@@ -2,7 +2,6 @@ package relationship;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import test.NeoNode;
 
 /**
  * the parent class of all relationships in Neo4j

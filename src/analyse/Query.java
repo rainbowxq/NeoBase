@@ -7,26 +7,33 @@ import net.sf.json.JSONObject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
-import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
@@ -42,6 +49,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -64,7 +72,7 @@ public class Query {
 	public static String pdQuery(PackageDeclaration node) {
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: PackageDeclaration { name : {pkgName},KEY:{Key} }) RETURN id(n)");
+				"CREATE (n: PackageDeclaration { name : {pkgName},P_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pkgName", node.getName().getFullyQualifiedName());
@@ -81,7 +89,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put(
 				"query",
-				"CREATE (n: ImportDeclaration { name : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand} ,KEY:{Key}}) RETURN id(n)");
+				"CREATE (n: ImportDeclaration { name : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand} ,T_KEY:{Key}}) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("ImportName", node.getName().getFullyQualifiedName());
@@ -102,7 +110,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put("query",
 				"CREATE (n: TypeDeclaration { name : {typeName},INTERFACE : {isInterface},"
-						+ "KEY:{Key} }) RETURN id(n)");
+						+ "T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("typeName", node.getName().getFullyQualifiedName());
@@ -122,7 +130,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put(
 				"query",
-				"CREATE (n: AnnotationTypeDeclaration { name : {atypeName},KEY:{Key} }) RETURN id(n)");
+				"CREATE (n: AnnotationTypeDeclaration { name : {atypeName},T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("atypeName", node.getName().getFullyQualifiedName());
@@ -138,7 +146,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: EnumDeclaration { name : {etypeName},KEY:{Key} }) RETURN id(n)");
+				"CREATE (n: EnumDeclaration { name : {etypeName},T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("typeName", node.getName().getFullyQualifiedName());
@@ -148,7 +156,25 @@ public class Query {
 		Debug.println(query.toString());
 		return query.toString();
 	}
+	
+	/*EnumConstantDeclaration*/
+	public static String enumConstantDeclarationQuery(EnumConstantDeclaration node) {
 
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: EnumConstantDeclaration { name : {etypeName},M_KEY:{mKey},"
+				+ "V_Key:{vkey} }) RETURN id(n)");
+
+		JSONObject params = new JSONObject();
+		params.put("typeName", node.getName().getFullyQualifiedName());
+		params.put("mKey", node.resolveConstructorBinding().getKey());
+		params.put("vkey", node.resolveVariable().getKey());
+
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	
 	/* CompilationUnit */
 	public static String cuQuery(CompilationUnit node, String fileName) {
 		JSONObject query = new JSONObject();
@@ -181,6 +207,7 @@ public class Query {
 	/* Javadoc */
 	public static String javadocQuery(Javadoc node) {
 		String content = "";
+		@SuppressWarnings("unchecked")
 		List<TagElement> tagelements = node.tags();
 		for (int i = 0; i < tagelements.size(); i++) {
 			TagElement tagelement = tagelements.get(i);
@@ -207,6 +234,7 @@ public class Query {
 			content += tagName + " ";
 		}
 
+		@SuppressWarnings("unchecked")
 		List<ASTNode> fragments = tagelement.fragments();
 		for (int j = 0; j < fragments.size(); j++) {
 			ASTNode fragment = fragments.get(j);
@@ -235,6 +263,7 @@ public class Query {
 					content += qualifier + ".";
 				}
 				content += ((MemberRef) fragment).getName() + "(";
+				@SuppressWarnings("unchecked")
 				List<MethodRefParameter> paras = ((MethodRef) fragment)
 						.parameters();
 				for (int i = 0; i < paras.size(); i++) {
@@ -275,7 +304,7 @@ public class Query {
 	public static String typeParameterQuery(TypeParameter node) {
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: TypeParameter { NAME : {name}, KEY : {key} }) RETURN id(n)");
+				"CREATE (n: TypeParameter { NAME : {name}, T_KEY : {key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("name", node.getName().getFullyQualifiedName());
@@ -295,7 +324,7 @@ public class Query {
 
 			query.put("query",
 					"CREATE (n: PrimitiveType { PRIMITIVE_TYPE_CODE : {code},"
-							+ "KEY : {key}}) RETURN id(n)");
+							+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("code", ((PrimitiveType) node).getPrimitiveTypeCode()
 					.toString());
 			params.put("key", node.resolveBinding().getKey());
@@ -304,7 +333,7 @@ public class Query {
 		} else if (node instanceof SimpleType) {
 
 			query.put("query", "CREATE (n: SimpleType { NAME : {name},"
-					+ "KEY : {key}}) RETURN id(n)");
+					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", ((SimpleType) node).getName()
 					.getFullyQualifiedName());
 			params.put("key", node.resolveBinding().getKey());
@@ -315,7 +344,7 @@ public class Query {
 			query.put(
 					"query",
 					"CREATE (n: ArrayType { ELEMENT_TYPE : {ename},"
-							+ "ELEMENT_KEY : {key}, DIMENTIONS:{dimentions}}) RETURN id(n)");
+							+ "ELEMENT_T_KEY : {key}, DIMENTIONS:{dimentions}}) RETURN id(n)");
 
 			params.put("ename", node.resolveBinding().getElementType()
 					.getName());
@@ -326,7 +355,7 @@ public class Query {
 		} else if (node instanceof UnionType) {
 
 			query.put("query", "CREATE (n: UnionType { NAME : {name},"
-					+ "KEY : {key}}) RETURN id(n)");
+					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", node.resolveBinding().getName());
 			params.put("key", node.resolveBinding().getKey());
 			query.put("params", params);
@@ -334,7 +363,7 @@ public class Query {
 		} else if (node instanceof QualifiedType) {
 
 			query.put("query", "CREATE (n: QualifiedType { NAME : {name},"
-					+ "KEY : {key}}) RETURN id(n)");
+					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", ((QualifiedType) node).getName()
 					.getFullyQualifiedName());
 			params.put("key", node.resolveBinding().getKey());
@@ -343,7 +372,7 @@ public class Query {
 		} else if (node instanceof ParameterizedType) {
 
 			query.put("query", "CREATE (n: ParameterizedType { NAME : {name},"
-					+ "KEY : {key}}) RETURN id(n)");
+					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", node.resolveBinding().getName());
 			params.put("key", node.resolveBinding().getKey());
 			query.put("params", params);
@@ -351,7 +380,7 @@ public class Query {
 		} else if (node instanceof WildcardType) {
 
 			query.put("query", "CREATE (n: WildcardType { NAME : {name},"
-					+ "KEY : {key},UPPER_BOUND:{ub}}) RETURN id(n)");
+					+ "T_KEY : {key},UPPER_BOUND:{ub}}) RETURN id(n)");
 			params.put("name", node.resolveBinding().getName());
 			params.put("key", node.resolveBinding().getKey());
 			params.put("ub", ((WildcardType) node).isUpperBound());
@@ -368,23 +397,33 @@ public class Query {
 		if (node instanceof NormalAnnotation) {
 			//the key recorded here is type binding 
 			query.put("query", "CREATE (n: NormalAnnotation { TYPE_NAME : {tname},"
-					+ "KEY:{key},ConstantExpressionValue:{cev} }) RETURN id(n)");
+					+ "T_KEY:{key},A_KEY:{akey},ConstantExpressionValue:{cev} }) RETURN id(n)");
 			
 		} else if (node instanceof MarkerAnnotation) {
 			query.put("query", "CREATE (n: MarkerAnnotation { TYPE_NAME : {tname},"
-					+ "KEY:{key},ConstantExpressionValue:{cev} }) RETURN id(n)");
+					+ "T_KEY:{key},A_KEY:{akey},ConstantExpressionValue:{cev} }) RETURN id(n)");
 			
 		} else if (node instanceof SingleMemberAnnotation) {// SingleMemberAnnotation
-			query.put("query", "CREATE (n: SingleMemberAnnotation { TYPE_NAME : {tname},VALUE : {value},KEY:{key},"
+			query.put("query", "CREATE (n: SingleMemberAnnotation { TYPE_NAME : {tname},VALUE : {value},T_KEY:{key},A_KEY:{akey},"
 					+ "ConstantExpressionValue:{cev} }) RETURN id(n)");
 			params.put("value", ((SingleMemberAnnotation) node).getValue().toString());
 		}
 		params.put("tname", node.getTypeName().getFullyQualifiedName());
 		params.put("key", node.resolveTypeBinding().getKey());
+		params.put("akey", node.resolveAnnotationBinding().getKey());
 		params.put("cev", node.resolveConstantExpressionValue());
 		query.put("params", params);
 		Debug.println(query.toString());
 		return query.toString();
+	}
+	
+	/*IExtendedModifier*/
+	public static String iExtendedModifier(IExtendedModifier node){
+		if (node instanceof Modifier)
+			return Query.modifierQuery((Modifier) node);
+		if (node instanceof Annotation)
+			return Query.AnnotationQuery((Annotation) node);
+		return null;
 	}
 
 	/*MemberValuePair*/
@@ -419,7 +458,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put("query",
 				"CREATE (n: VariableDeclarationFragment "
-				+ "{NAME : {name},KEY :{key},EXTRA_DIMENSIONS:{ed} }) RETURN id(n)");
+				+ "{NAME : {name},V_KEY :{key},EXTRA_DIMENSIONS:{ed} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("name",node.getName().getFullyQualifiedName());
@@ -434,7 +473,9 @@ public class Query {
 	public static String expressionQuery(Expression node){
 		JSONObject query = new JSONObject();
 		JSONObject params = new JSONObject();
-		String common="KEY:{key},ConstantExpressionValue:{cev}";
+		String common="T_KEY:{key},ConstantExpressionValue:{cev}";
+		params.put("key", node.resolveTypeBinding());
+		params.put("cev", node.resolveConstantExpressionValue());
 		switch(node.getNodeType()){
 			case ASTNode.MARKER_ANNOTATION:
 			case ASTNode.NORMAL_ANNOTATION:
@@ -488,8 +529,9 @@ public class Query {
 				
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				query.put("query",
-						"CREATE (n: ClassInstanceCreation {"
+						"CREATE (n: ClassInstanceCreation {M_KEY:{mkey},"
 						+ common+"}) RETURN id(n)");
+				params.put("mkey",((ClassInstanceCreation)node).resolveConstructorBinding().getKey());
 				break;
 			case ASTNode.CONDITIONAL_EXPRESSION:
 				query.put("query",
@@ -581,7 +623,7 @@ public class Query {
 				break;
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				query.put("query",
-						"CREATE (n: SuperMethodInvocation {QUALIFIER:{qualifier},NAME:{name},MKEY:{mkey},"
+						"CREATE (n: SuperMethodInvocation {QUALIFIER:{qualifier},NAME:{name},M_KEY:{mkey},"
 						+ common+"}) RETURN id(n)");
 				params.put("qualifier", ((SuperMethodInvocation)node).getQualifier().getFullyQualifiedName());
 				params.put("name", ((SuperMethodInvocation)node).getName().getFullyQualifiedName());
@@ -609,6 +651,7 @@ public class Query {
 		Debug.println(query.toString());
 		return query.toString();
 	}
+	
 	/*Statement*/
 	public static String statementQuery(Statement node){
 		JSONObject query = new JSONObject();
@@ -712,10 +755,92 @@ public class Query {
 				query.put("query",
 						"CREATE (n: WhileStatement ) RETURN id(n)");
 				break;
+			default:
+				return null;
+					
 		}
-
+		
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	/*Initializer*/
+	public static String initializerQuery(Initializer node){
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: Initializer) RETURN id(n)");
 		Debug.println(query.toString());
 		return query.toString();
 	}
 	
+	/*SingleVariableDeclaration*/
+	public static String singleVariableDeclarationQuery(SingleVariableDeclaration node){
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: SingleVariableDeclaration "
+				+ "{NAME : {name},V_KEY :{key},VARARGS:{varargs},EXTRA_DIMENSIONS:{ed} }) RETURN id(n)");
+
+		JSONObject params = new JSONObject();
+		params.put("name",node.getName().getFullyQualifiedName());
+		params.put("key",node.resolveBinding().getKey());
+		params.put("varargs", node.isVarargs());
+		params.put("ed", node.getExtraDimensions());
+
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	/*MethodDeclaration*/
+	public static String methodDeclarationQuery(MethodDeclaration node){
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: MethodDeclaration "
+				+ "{NAME : {name},M_KEY :{key},CONSTRUCTOR:{constructor},EXTRA_DIMENSIONS:{ed} }) RETURN id(n)");
+
+		JSONObject params = new JSONObject();
+		params.put("name",node.getName().getFullyQualifiedName());
+		params.put("key",node.resolveBinding().getKey());
+		params.put("constructor", node.isConstructor());
+		params.put("ed", node.getExtraDimensions());
+
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	
+	/*AnonymousClassDeclaration*/
+	public static String anonymousClassDeclarationQuery(AnonymousClassDeclaration node){
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: AnonymousClassDeclaration {T_KEY :{key}} ) RETURN id(n)");
+
+		JSONObject params = new JSONObject();
+		params.put("key",node.resolveBinding().getKey());
+
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	/*AnnotationTypeMemberDeclaration*/
+	public static String annotationTypeMemberDeclarationQuery(AnnotationTypeMemberDeclaration node){
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: AnnotationTypeMemberDeclaration {NAME:{name},T_KEY :{key}} ) RETURN id(n)");
+
+		JSONObject params = new JSONObject();
+		params.put("name", node.getName().getFullyQualifiedName());
+		params.put("key",node.resolveBinding().getKey());
+
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	/*CatchClause*/
+	public static String catchClauseQuery(CatchClause node){
+		JSONObject query = new JSONObject();
+		query.put("query",
+				"CREATE (n: CatchClause) RETURN id(n)");
+
+		Debug.println(query.toString());
+		return query.toString();
+	}
 }

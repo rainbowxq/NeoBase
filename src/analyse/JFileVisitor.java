@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -60,8 +61,6 @@ import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -99,7 +98,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
-import org.eclipse.osgi.internal.debug.Debug;
 
 import relationship.Relation;
 import relationship.RelationType;
@@ -134,7 +132,22 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(AnnotationTypeDeclaration node) {
-		
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			IExtendedModifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*BODY DECLARATIONS*/
+		@SuppressWarnings("unchecked")
+		List<BodyDeclaration> bodyDeclarations=node.bodyDeclarations();
+		this.addBodyDeclarations(node, bodyDeclarations);
 		return true;
 	}
 
@@ -153,6 +166,25 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			IExtendedModifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*Type*/
+		Type type=node.getType();
+		this.addType(node, type, RelationType.TYPE);
+		/*Default*/
+		Expression defau=node.getDefault();
+		if(defau!=null)
+			this.addExpression(node, defau, RelationType.DEFAULT);
 		return true;
 	}
 
@@ -169,6 +201,10 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(AnonymousClassDeclaration node) {
+		/*BODY DECLARATIONS*/
+		@SuppressWarnings("unchecked")
+		List<BodyDeclaration> bodyDeclarations=node.bodyDeclarations();
+		this.addBodyDeclarations(node, bodyDeclarations);
 		return true;
 	}
 
@@ -203,6 +239,19 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ArrayCreation node) {
+		/*type*/
+		this.addType(node, node.getType(), RelationType.TYPE);
+		/*dimensions*/
+		@SuppressWarnings("unchecked")
+		List<Expression> dimensions=node.dimensions();
+		for(int i=0;i<dimensions.size();i++){
+			this.addExpression(node, dimensions.get(i), RelationType.DIMENSIONS);
+		}
+		/*initializer*/
+		ArrayInitializer ini=node.getInitializer();
+		if(ini!=null){
+			this.addExpression(node, ini, RelationType.INITIALIZER);
+		}
 		return true;
 	}
 
@@ -219,6 +268,11 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ArrayInitializer node) {
+		@SuppressWarnings("unchecked")
+		List<Expression> expressions=node.expressions();
+		for(int i=0;i<expressions.size();i++){
+			this.addExpression(node, expressions.get(i), RelationType.EXPRESSIONS);
+		}
 		return true;
 	}
 
@@ -251,6 +305,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(AssertStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getMessage(), RelationType.MESSAGE);
 		return true;
 	}
 
@@ -267,6 +323,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(Assignment node) {
+		this.addExpression(node, node.getLeftHandSide(), RelationType.LEFT_HAND_SIDE);
+		this.addExpression(node, node.getRightHandSide(), RelationType.RIGHT_HAND_SIDE);
 		return true;
 	}
 
@@ -283,6 +341,10 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(Block node) {
+		@SuppressWarnings("unchecked")
+		List<Statement> statements=node.statements();
+		for(int i=0;i<statements.size();i++)
+			this.addStatement(node, statements.get(i), RelationType.STATEMENTS);
 		return true;
 	}
 
@@ -354,6 +416,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(CastExpression node) {
+		this.addType(node, node.getType(), RelationType.TYPE);
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -370,6 +434,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(CatchClause node) {
+		this.addSingleVariableDeclaration(node, node.getException(), RelationType.EXCEPTION);
+		this.addStatement(node, node.getBody(), RelationType.BODY);
 		return true;
 	}
 
@@ -402,6 +468,32 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ClassInstanceCreation node) {
+		/*Expression*/
+		Expression exp=node.getExpression();
+		if(exp!=null)
+			this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		/*TYPE ARGUMENTS*/
+		@SuppressWarnings("unchecked")
+		List<Type> tas=node.typeArguments();
+		for(int i=0;i<tas.size();i++){
+			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+		}
+		
+		/*Type*/
+		Type type=node.getType();
+		this.addType(node, type, RelationType.TYPE);
+		
+		/*Arguments*/
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments=node.arguments();
+		for(int i=0;i<arguments.size();i++)
+			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+		
+		/*ANONYMOUS CLASS DECLARATION*/
+		AnonymousClassDeclaration acd=node.getAnonymousClassDeclaration();
+		if(acd!=null){
+			this.addAnonymousClassDeclaration(node, acd);
+		}
 		return true;
 	}
 
@@ -434,6 +526,7 @@ public class JFileVisitor extends ASTVisitor{
 		this.relations.add(new Relation(node,packageNode,RelationType.PACKAGE));
 		
 		/*ImportDeclaration*/
+		@SuppressWarnings("unchecked")
 		List<ImportDeclaration> imports=node.imports();
 		if(imports!=null){
 			for (int i=0;i<imports.size();i++){
@@ -445,6 +538,7 @@ public class JFileVisitor extends ASTVisitor{
 		}
 		
 		/*TypeDeclaration*/
+		@SuppressWarnings("unchecked")
 		List<AbstractTypeDeclaration> types=node.types();
 		if(types!=null){
 			for (int i=0;i<types.size();i++){
@@ -463,6 +557,7 @@ public class JFileVisitor extends ASTVisitor{
 			}
 		}
 		
+		@SuppressWarnings("unchecked")
 		List<Comment> comments=node.getCommentList();
 		for(int i=0;i<comments.size();i++){
 			if(comments.get(i).isDocComment()){
@@ -489,6 +584,10 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ConditionalExpression node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getThenExpression(), RelationType.THEN_EXPRESSION);
+		if(node.getElseExpression()!=null)
+			this.addExpression(node, node.getElseExpression(), RelationType.ELSE_EXPRESSION);
 		return true;
 	}
 
@@ -505,6 +604,18 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ConstructorInvocation node) {
+		/*TYPE ARGUMENTS*/
+		@SuppressWarnings("unchecked")
+		List<Type> tas=node.typeArguments();
+		for(int i=0;i<tas.size();i++){
+			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+		}
+		/*arguments*/
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments=node.arguments();
+		for(int i=0;i<arguments.size();i++){
+			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+		}
 		return true;
 	}
 
@@ -537,6 +648,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(DoStatement node) {
+		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -570,6 +683,9 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(EnhancedForStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addSingleVariableDeclaration(node, node.getParameter(), RelationType.PARAMETER);
 		return true;
 	}
 
@@ -587,9 +703,35 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(EnumConstantDeclaration node) {
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			IExtendedModifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*arguments*/
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments=node.arguments();
+		for(int i=0;i<arguments.size();i++){
+			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+		}
+		/*ANONYMOUS_CLASS_DECLARATION*/
+		AnonymousClassDeclaration acd=node.getAnonymousClassDeclaration();
+		if(acd!=null){
+			this.addAnonymousClassDeclaration(node, acd);
+		}
 		return true;
 	}
-
+public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration acd){
+	this.nodes.put(acd, new NodeInfo(Query.anonymousClassDeclarationQuery(acd)));
+	this.relations.add(new Relation(node,acd,RelationType.ANONYMOUS_CLASS_DECLARATION));
+}
 	/**
 	 * Visits the given type-specific AST node.
 	 * <p>
@@ -604,8 +746,31 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(EnumDeclaration node) {
-		String query;
-		/**/
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<Modifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			Modifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*SUPER INTERFACE TYPES*/
+		@SuppressWarnings("unchecked")
+		List<Type> sInterfaces=node.superInterfaceTypes();
+		for(int i=0;i<sInterfaces.size();i++){
+			this.addType(node, sInterfaces.get(i), RelationType.SUPER_INTERFACE_TYPES);
+		}
+		/*ENUM CONSTANTS*/
+		@SuppressWarnings("unchecked")
+		List<EnumConstantDeclaration> ecds=node.enumConstants();
+		for(int i=0;i<ecds.size();i++){
+			this.nodes.put(ecds.get(i), new NodeInfo(Query.enumConstantDeclarationQuery(ecds.get(i))));
+			this.relations.add(new Relation(node,ecds.get(i),RelationType.ENUM_CONSTANTS));
+		}
 		return true;
 	}
 
@@ -622,6 +787,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ExpressionStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -638,6 +804,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(FieldAccess node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -654,11 +821,11 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(FieldDeclaration node) {
-		String query="";
 		/*Modifier*/
-		List<Modifier> modifiers=node.modifiers();
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
 		for (int i=0;i<modifiers.size();i++){
-			Modifier modifier=modifiers.get(i);
+			IExtendedModifier modifier=modifiers.get(i);
 			this.addModifier(node, modifier);
 		}
 		/*java doc*/
@@ -670,6 +837,7 @@ public class JFileVisitor extends ASTVisitor{
 		Type type=node.getType();
 		this.addType(node, type, RelationType.TYPE);
 		/*VariableDeclarationFragment*/
+		@SuppressWarnings("unchecked")
 		List<VariableDeclarationFragment> fragments=node.fragments();
 		for(int i=0;i<fragments.size();i++){
 			this.addVariableDeclarationFragment(node, fragments.get(i), RelationType.FRAGMENTS);
@@ -696,6 +864,20 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ForStatement node) {
+		/*INITIALIZERS*/
+		@SuppressWarnings("unchecked")
+		List<Expression> initializers=node.initializers();
+		for(int i=0;i<initializers.size();i++)
+			this.addExpression(node, initializers.get(i), RelationType.INITIALIZERS);
+		/*EXPRESSION*/
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		/*UPDATERS*/
+		@SuppressWarnings("unchecked")
+		List<Expression> updates=node.updaters();
+		for(int i=0;i<updates.size();i++)
+			this.addExpression(node, updates.get(i), RelationType.UPDATES);
+		/*body*/
+		this.addStatement(node, node.getBody(), RelationType.BODY);
 		return true;
 	}
 
@@ -712,6 +894,9 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(IfStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addStatement(node, node.getThenStatement(),RelationType.THEN_STATEMENT);
+		this.addStatement(node, node.getElseStatement(), RelationType.ELSE_STATEMENT);
 		return true;
 	}
 
@@ -744,6 +929,12 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(InfixExpression node) {
+		this.addExpression(node, node.getLeftOperand(), RelationType.LEFT_OPERAND);
+		this.addExpression(node, node.getRightOperand(), RelationType.RIGHT_OPERAND);
+		@SuppressWarnings("unchecked")
+		List<Expression> edos=node.extendedOperands();
+		for(int i=0;i<edos.size();i++)
+			this.addExpression(node, edos.get(i), RelationType.EXTENDED_OPERANDS);
 		return true;
 	}
 
@@ -760,6 +951,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(InstanceofExpression node) {
+		this.addExpression(node, node.getLeftOperand(),RelationType.LEFT_OPERAND);
+		this.addType(node, node.getRightOperand(), RelationType.RIGHT_OPERAND);
 		return true;
 	}
 
@@ -777,9 +970,10 @@ public class JFileVisitor extends ASTVisitor{
 	 */
 	public boolean visit(Initializer node) {
 		/*Modifier*/
-		List<Modifier> modifiers=node.modifiers();
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
 		for (int i=0;i<modifiers.size();i++){
-			Modifier modifier=modifiers.get(i);
+			IExtendedModifier modifier=modifiers.get(i);
 			this.addModifier(node, modifier);
 		}
 		/*java doc*/
@@ -794,8 +988,10 @@ public class JFileVisitor extends ASTVisitor{
 	}
 	
 	public void addStatement(ASTNode node,Statement statement,String rtype){
-		this.nodes.put(statement, new NodeInfo(Query.statementQuery(statement)));
-		this.relations.add(new Relation(node,statement,rtype));
+		if(statement!=null){
+			this.nodes.put(statement, new NodeInfo(Query.statementQuery(statement)));
+			this.relations.add(new Relation(node,statement,rtype));
+		}
 	}
 
 	/**
@@ -840,6 +1036,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(LabeledStatement node) {
+		/*body*/
+		this.addStatement(node, node.getBody(), RelationType.BODY);
 		return true;
 	}
 
@@ -970,6 +1168,45 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(MethodDeclaration node) {
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			IExtendedModifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*java doc*/
+		Javadoc javadoc=node.getJavadoc();
+		if(javadoc!=null){
+			this.addJavadoc(node, javadoc);
+		}
+		/*TypeParameter*/
+		@SuppressWarnings("unchecked")
+		List<TypeParameter> typeParameters=node.typeParameters();
+		for(int i=0;i<typeParameters.size();i++){
+			TypeParameter tpara=typeParameters.get(i);
+			this.addTypeParameter(node, tpara);
+		}
+		/*return type*/
+		Type rtype=node.getReturnType2();
+		if(rtype!=null)
+			this.addType(node, rtype, RelationType.RETURN_TYPE);
+		/*PARAMETERS*/
+		@SuppressWarnings("unchecked")
+		List<SingleVariableDeclaration> svds=node.parameters();
+		for(int i=0;i<svds.size();i++)
+			this.addSingleVariableDeclaration(node, svds.get(i), RelationType.PARAMETERS);
+		/*THROWN EXCEPTIONS*/
+		@SuppressWarnings("unchecked")
+		List<Name> t_exceptions=node.thrownExceptions();
+		for(int i=0;i<t_exceptions.size();i++){
+			this.addExpression(node, t_exceptions.get(i), RelationType.THROWN_EXCEPTIONS);
+		}
+		/*BODY*/
+		Block block=node.getBody();
+		if(block!=null){
+			this.addStatement(node, block, RelationType.BODY);
+		}
 		return true;
 	}
 
@@ -986,24 +1223,19 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(MethodInvocation node) {
-		return true;
-	}
-
-
-	/**
-	 * Visits the given type-specific AST node.
-	 * <p>
-	 * The default implementation does nothing and return true.
-	 * Subclasses may reimplement.
-	 * </p>
-	 *
-	 * @param node the node to visit
-	 * @return <code>true</code> if the children of this node should be
-	 * visited, and <code>false</code> if the children of this node should
-	 * be skipped
-	 * @since 3.1
-	 */
-	public boolean visit(Modifier node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		/*TYPE ARGUMENTS*/
+		@SuppressWarnings("unchecked")
+		List<Type> tas=node.typeArguments();
+		for(int i=0;i<tas.size();i++){
+			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+		}
+		/*arguments*/
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments=node.arguments();
+		for(int i=0;i<arguments.size();i++){
+			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+		}
 		return true;
 	}
 
@@ -1020,6 +1252,7 @@ public class JFileVisitor extends ASTVisitor{
 		)
 	*/
 	public boolean visit(NormalAnnotation node) {
+		@SuppressWarnings("unchecked")
 		List <MemberValuePair> mvPairs=node.values();
 		for(int i=0;i<mvPairs.size();i++){
 			MemberValuePair mvPair=mvPairs.get(i);
@@ -1028,51 +1261,8 @@ public class JFileVisitor extends ASTVisitor{
 		}
 		return true;
 	}
-
-	/**
-	 * Visits the given type-specific AST node.
-	 * <p>
-	 * The default implementation does nothing and return true.
-	 * Subclasses may reimplement.
-	 * </p>
-	 *
-	 * @param node the node to visit
-	 * @return <code>true</code> if the children of this node should be
-	 * visited, and <code>false</code> if the children of this node should
-	 * be skipped
-	 */
-	public boolean visit(NullLiteral node) {
-		return true;
-	}
-
-	/**
-	 * Visits the given type-specific AST node.
-	 * <p>
-	 * The default implementation does nothing and return true.
-	 * Subclasses may reimplement.
-	 * </p>
-	 *
-	 * @param node the node to visit
-	 * @return <code>true</code> if the children of this node should be
-	 * visited, and <code>false</code> if the children of this node should
-	 * be skipped
-	 */
-	public boolean visit(NumberLiteral node) {
-		return true;
-	}
-
-	/**
-	 * Visits the given type-specific AST node.
-	 * <p>
-	 * The default implementation does nothing and return true.
-	 * Subclasses may reimplement.
-	 * </p>
-	 *
-	 * @param node the node to visit
-	 * @return <code>true</code> if the children of this node should be
-	 * visited, and <code>false</code> if the children of this node should
-	 * be skipped
-	 */
+	
+	
 	public boolean visit(PackageDeclaration node) {
 		String query;
 		/*child node
@@ -1088,6 +1278,7 @@ public class JFileVisitor extends ASTVisitor{
 		/*child node
 		 * ANNOTATIONS
 		 * */
+		@SuppressWarnings("unchecked")
 		List<Annotation> annotations=node.annotations();
 		for(int i=0;i<annotations.size();i++){
 			Annotation annotation=annotations.get(i);
@@ -1121,6 +1312,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(ParameterizedType node) {
+		@SuppressWarnings("unchecked")
 		List<Type> types=node.typeArguments();
 		for(int i=0;i<types.size();i++){
 			this.addType(node, types.get(i), RelationType.TYPE_ARGUMENTS);
@@ -1142,6 +1334,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ParenthesizedExpression node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -1158,6 +1351,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(PostfixExpression node) {
+		this.addExpression(node, node.getOperand(), RelationType.OPERAND);
 		return true;
 	}
 
@@ -1174,6 +1368,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(PrefixExpression node) {
+		this.addExpression(node, node.getOperand(), RelationType.OPERAND);
 		return true;
 	}
 
@@ -1240,6 +1435,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ReturnStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -1307,9 +1503,27 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			IExtendedModifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*type*/
+		Type type=node.getType();
+		this.addType(node, type, RelationType.TYPE);
+		/*INITILIZER*/
+		Expression initializer=node.getInitializer();
+		if(initializer!=null)
+			this.addExpression(node, initializer, RelationType.INITIALIZER);
 		return true;
 	}
 
+	public void addSingleVariableDeclaration(ASTNode node,SingleVariableDeclaration svd,String rtype){
+		this.nodes.put(svd, new NodeInfo(Query.singleVariableDeclarationQuery(svd)));
+		this.relations.add(new Relation(node,svd,rtype));
+	}
 	/**
 	 * Visits the given type-specific AST node.
 	 * <p>
@@ -1339,6 +1553,19 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SuperConstructorInvocation node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		/*TYPE ARGUMENTS*/
+		@SuppressWarnings("unchecked")
+		List<Type> tas=node.typeArguments();
+		for(int i=0;i<tas.size();i++){
+			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+		}
+		/*arguments*/
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments=node.arguments();
+		for(int i=0;i<arguments.size();i++){
+			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+		}
 		return true;
 	}
 
@@ -1355,6 +1582,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SuperFieldAccess node) {
+		
 		return true;
 	}
 
@@ -1371,6 +1599,18 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SuperMethodInvocation node) {
+		/*TYPE ARGUMENTS*/
+		@SuppressWarnings("unchecked")
+		List<Type> tas=node.typeArguments();
+		for(int i=0;i<tas.size();i++){
+			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+		}
+		/*arguments*/
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments=node.arguments();
+		for(int i=0;i<arguments.size();i++){
+			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+		}
 		return true;
 	}
 
@@ -1387,6 +1627,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SwitchCase node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -1403,6 +1644,11 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SwitchStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		@SuppressWarnings("unchecked")
+		List<Statement> statements=node.statements();
+		for(int i=0;i<statements.size();i++)
+			this.addStatement(node, statements.get(i), RelationType.STATEMENTS);
 		return true;
 	}
 
@@ -1419,6 +1665,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(SynchronizedStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addStatement(node, node.getBody(), RelationType.BODY);
 		return true;
 	}
 
@@ -1503,6 +1751,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ThrowStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
 		return true;
 	}
 
@@ -1519,6 +1768,23 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(TryStatement node) {
+		/*RESOURCES*/
+		@SuppressWarnings("unchecked")
+		List<VariableDeclarationExpression> vdes=node.resources();
+		for(int i=0;i<vdes.size();i++){
+			this.nodes.put(vdes.get(i), new NodeInfo(Query.expressionQuery(vdes.get(i))));
+			this.relations.add(new Relation(node,vdes.get(i),RelationType.RESOURCES));
+		}
+		/*Body*/
+		this.addStatement(node, node.getBody(), RelationType.BODY);
+		/*CATCH CLAUSES*/
+		@SuppressWarnings("unchecked")
+		List<CatchClause> clauses=node.catchClauses();
+		for(int i=0;i<clauses.size();i++){
+			this.nodes.put(clauses.get(i), new NodeInfo(Query.catchClauseQuery(clauses.get(i))));
+		}
+		/*FINALLY*/
+		this.addStatement(node, node.getFinally(), RelationType.FINALLY);
 		return true;
 	}
 	/**
@@ -1535,9 +1801,10 @@ public class JFileVisitor extends ASTVisitor{
 	 */
 	public boolean visit(TypeDeclaration node) {
 		/*Modifier*/
-		List<Modifier> modifiers=node.modifiers();
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
 		for (int i=0;i<modifiers.size();i++){
-			Modifier modifier=modifiers.get(i);
+			IExtendedModifier modifier=modifiers.get(i);
 			this.addModifier(node, modifier);
 		}
 		/*java doc*/
@@ -1546,6 +1813,7 @@ public class JFileVisitor extends ASTVisitor{
 			this.addJavadoc(node, javadoc);
 		}
 		/*TypeParameter*/
+		@SuppressWarnings("unchecked")
 		List<TypeParameter> typeParameters=node.typeParameters();
 		for(int i=0;i<typeParameters.size();i++){
 			TypeParameter tpara=typeParameters.get(i);
@@ -1557,12 +1825,14 @@ public class JFileVisitor extends ASTVisitor{
 		}
 		
 		/*SUPER INTERFACE TYPES*/
+		@SuppressWarnings("unchecked")
 		List<Type> sInterfaces=node.superInterfaceTypes();
 		for(int i=0;i<sInterfaces.size();i++){
 			this.addType(node, sInterfaces.get(i), RelationType.SUPER_INTERFACE_TYPES);
 		}
 		
 		/*BODY DECLARATIONS*/
+		@SuppressWarnings("unchecked")
 		List<BodyDeclaration> bodyDeclarations=node.bodyDeclarations();
 		this.addBodyDeclarations(node, bodyDeclarations);
 		
@@ -1592,12 +1862,16 @@ public class JFileVisitor extends ASTVisitor{
 					this.nodes.put(bd, new NodeInfo(Query.fieldDeclarationQuery((FieldDeclaration) bd)));
 					break;
 				case ASTNode.INITIALIZER:
+					this.nodes.put(bd, new NodeInfo(Query.initializerQuery((Initializer) bd)));
 					break;
 				case ASTNode.METHOD_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.methodDeclarationQuery((MethodDeclaration) bd)));
 					break;
 				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.annotationTypeMemberDeclarationQuery((AnnotationTypeMemberDeclaration) bd)));
 					break;
 				case ASTNode.ENUM_CONSTANT_DECLARATION:
+					this.nodes.put(bd, new NodeInfo(Query.enumConstantDeclarationQuery((EnumConstantDeclaration) bd)));
 					break;
 			}
 			this.relations.add(new Relation(node,bd,RelationType.BODY_DECLARATIONS));
@@ -1629,10 +1903,10 @@ public class JFileVisitor extends ASTVisitor{
 	 * @param node
 	 * @param modifier
 	 */
-	public void addModifier(ASTNode node,Modifier modifier){
-		String query=Query.modifierQuery(modifier);
-		this.nodes.put(modifier, new NodeInfo(query));
-		this.relations.add(new Relation(node,modifier,RelationType.MODIFIERS));
+	public void addModifier(ASTNode node,IExtendedModifier modifier){
+		String query=Query.iExtendedModifier(modifier);
+		this.nodes.put((ASTNode) modifier, new NodeInfo(query));
+		this.relations.add(new Relation(node,(ASTNode) modifier,RelationType.MODIFIERS));
 	}
 
 	/**
@@ -1648,6 +1922,19 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
+		AbstractTypeDeclaration atd=node.getDeclaration();
+		switch(atd.getNodeType()){
+		case ASTNode.TYPE_DECLARATION:
+			this.nodes.put(atd, new NodeInfo(Query.tdQuery((TypeDeclaration) atd)));
+			break;
+		case ASTNode.ENUM_DECLARATION:
+			this.nodes.put(atd, new NodeInfo(Query.edQuery((EnumDeclaration) atd)));
+			break;
+		case ASTNode.ANNOTATION_TYPE_DECLARATION:
+			this.nodes.put(atd, new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) atd)));
+			break;
+		}
+		this.relations.add(new Relation(node,atd,RelationType.DECLARATION));
 		return true;
 	}
 
@@ -1664,6 +1951,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(TypeLiteral node) {
+		this.addType(node, node.getType(), RelationType.TYPE);
 		return true;
 	}
 
@@ -1681,6 +1969,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(TypeParameter node) {
+		@SuppressWarnings("unchecked")
 		List<Type> types=node.typeBounds();
 		for(int i=0;i<types.size();i++){
 			this.addType(node, types.get(i),RelationType.TYPE_BOUNDS);
@@ -1711,6 +2000,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.7.1
 	 */
 	public boolean visit(UnionType node) {
+		@SuppressWarnings("unchecked")
 		List<Type> types=node.types();
 		for(int i=0;i<types.size();i++){
 			this.addType(node, types.get(i), RelationType.TYPES);
@@ -1732,6 +2022,11 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
+		this.addType(node, node.getType(), RelationType.TYPE);
+		@SuppressWarnings("unchecked")
+		List<VariableDeclarationFragment> fragments=node.fragments();
+		for(int i=0;i<fragments.size();i++)
+			this.addVariableDeclarationFragment(node, fragments.get(i), RelationType.FRAGMENTS);
 		return true;
 	}
 
@@ -1748,6 +2043,21 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(VariableDeclarationStatement node) {
+		/*Modifier*/
+		@SuppressWarnings("unchecked")
+		List<IExtendedModifier> modifiers=node.modifiers();
+		for (int i=0;i<modifiers.size();i++){
+			IExtendedModifier modifier=modifiers.get(i);
+			this.addModifier(node, modifier);
+		}
+		/*type*/
+		this.addType(node, node.getType(), RelationType.TYPE);
+		/*fragments*/
+		@SuppressWarnings("unchecked")
+		List<VariableDeclarationFragment> vdfs=node.fragments();
+		for(int i=0;i<vdfs.size();i++){
+			this.addVariableDeclarationFragment(node, vdfs.get(i), RelationType.FRAGMENTS);
+		}
 		return true;
 	}
 
@@ -1769,8 +2079,11 @@ public class JFileVisitor extends ASTVisitor{
 	}
 	
 	public void addExpression(ASTNode node,Expression expression,String rtype){
-		this.nodes.put(expression, new NodeInfo(Query.expressionQuery(expression)));
-		this.relations.add(new Relation(node,expression,rtype));
+		String query=Query.expressionQuery(expression);
+		if(query!=null){
+			this.nodes.put(expression, new NodeInfo(query));
+			this.relations.add(new Relation(node,expression,rtype));
+		}
 	}
 
 	/**
@@ -1786,6 +2099,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(WhileStatement node) {
+		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addStatement(node, node.getBody(), RelationType.BODY);
 		return true;
 	}
 

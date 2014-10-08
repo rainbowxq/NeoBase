@@ -19,6 +19,7 @@ public class RelationType {
 	
 	public static final String RETURN_TYPE="RETURN_TYPE";	// method declaration --> type
 	public static final String PARAMETERS="PARAMETERS";	// method declearation --> SingleVariableDeclaration
+	public static final String PARAMETER="PARAMETER";
 	public static final String BODY="BODY";	// __ --> block
 	public static final String STATEMENTS="STATEMENTS";	// block --> statement
 	public static final String EXPRESSION="EXPRESSION";	//__ --> expression
@@ -33,6 +34,29 @@ public class RelationType {
 	public static final String VALUES="VALUES";
 	public static final String FRAGMENTS="FRAGMENTS";
 	public static final String INITIALIZER="INITIALIZER";
+	public static final String INITIALIZERS="INITIALIZERS";
+	public static final String UPDATES="UPDATES";
 	public static final String ARRAY="ARRAY";
 	public static final String INDEX="INDEX";
+	public static final String THROWN_EXCEPTIONS="THROWN_EXCEPTIONS";
+	public static final String ANONYMOUS_CLASS_DECLARATION="ANONYMOUS_CLASS_DECLARATION";
+	public static final String ENUM_CONSTANTS="ENUM_CONSTANTS";
+	public static final String DEFAULT="DEFAULT";
+	public static final String DIMENSIONS="DIMENSIONS";
+	public static final String LEFT_HAND_SIDE="LEFT_HAND_SIDE";
+	public static final String RIGHT_HAND_SIDE="RIGHT_HAND_SIDE";
+	public static final String THEN_EXPRESSION="THEN_EXPRESSION";
+	public static final String ELSE_EXPRESSION="ELSE_EXPRESSION";
+	public static final String THEN_STATEMENT="THEN_STATEMENT";
+	public static final String ELSE_STATEMENT="ELSE_STATEMENT";
+	public static final String LEFT_OPERAND="LEFT_OPERAND";
+	public static final String RIGHT_OPERAND="RIGHT_OPERAND";
+	public static final String EXTENDED_OPERANDS="EXTENDED_OPERANDS";
+	public static final String OPERAND="OPERAND";
+	public static final String MESSAGE="MESSAGE";
+	public static final String RESOURCES="RESOURCES";
+	public static final String CATCH_CLAUSES="CATCH_CLAUSES";
+	public static final String FINALLY="FINALLY";
+	public static final String EXCEPTION="EXCEPTION";
+	public static final String DECLARATION="DECLARATION";
 }
