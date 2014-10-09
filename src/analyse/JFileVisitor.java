@@ -1,9 +1,8 @@
 package analyse;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -109,8 +108,8 @@ import node.NodeInfo;;
  */
 public class JFileVisitor extends ASTVisitor{
 	private String fileName;
-	//private List<NeoNode> nodes=new ArrayList<NeoNode>();
-	private Map<ASTNode,NodeInfo> nodes=new HashMap<ASTNode,NodeInfo>();
+	private List<ASTNode> nodes=new ArrayList<ASTNode>();
+	private List<NodeInfo> infos=new ArrayList<NodeInfo>();
 	private List<Relation> relations=new ArrayList<Relation>();
 	
 
@@ -330,7 +329,7 @@ public class JFileVisitor extends ASTVisitor{
 
 	/**
 	 * Visits the given type-specific AST node.
-	 * <p>
+	 * <p>relations
 	 * The default implementation does nothing and return true.
 	 * Subclasses may reimplement.
 	 * </p>
@@ -515,14 +514,16 @@ public class JFileVisitor extends ASTVisitor{
 		/*construct the query sentence by which to store the node*/
 		query=Query.cuQuery(node, fileName);
 		NodeInfo info1=new NodeInfo(query);
-		this.nodes.put(node, info1);
+		this.nodes.add(node);
+		this.infos.add(info1);
 		
 		/*add child nodes and relationships between <node> and its children*/
 		
 		/*PackageDeclaration*/
 		PackageDeclaration packageNode=node.getPackage();
 		query=Query.pdQuery(packageNode);
-		this.nodes.put(packageNode,new NodeInfo(query));
+		this.nodes.add(packageNode);
+		this.infos.add(new NodeInfo(query));
 		this.relations.add(new Relation(node,packageNode,RelationType.PACKAGE));
 		
 		/*ImportDeclaration*/
@@ -532,7 +533,8 @@ public class JFileVisitor extends ASTVisitor{
 			for (int i=0;i<imports.size();i++){
 				ImportDeclaration importNode=imports.get(i);	
 				query=Query.idQuery(importNode);
-				this.nodes.put(importNode,new NodeInfo(query));
+				this.nodes.add(importNode);
+				this.infos.add(new NodeInfo(query));
 				this.relations.add(new Relation(node,importNode,RelationType.IMPORT));
 			}
 		}
@@ -552,7 +554,8 @@ public class JFileVisitor extends ASTVisitor{
 					query=Query.edQuery((EnumDeclaration) types.get(i));
 				}
 				
-				this.nodes.put(types.get(i), new NodeInfo(query));
+				this.nodes.add(types.get(i));
+				this.infos.add(new NodeInfo(query));
 				this.relations.add(new Relation(node,types.get(i),RelationType.TYPES));
 			}
 		}
@@ -562,7 +565,8 @@ public class JFileVisitor extends ASTVisitor{
 		for(int i=0;i<comments.size();i++){
 			if(comments.get(i).isDocComment()){
 				Javadoc javadoc=(Javadoc) comments.get(i);
-				this.nodes.put(javadoc, new NodeInfo(Query.javadocQuery(javadoc)));
+				this.nodes.add(javadoc);
+				this.infos.add(new NodeInfo(Query.javadocQuery(javadoc)));
 				this.relations.add(new Relation(node,javadoc,RelationType.COMMENTS));
 				this.visit(javadoc);
 			}
@@ -729,7 +733,8 @@ public class JFileVisitor extends ASTVisitor{
 		return true;
 	}
 public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration acd){
-	this.nodes.put(acd, new NodeInfo(Query.anonymousClassDeclarationQuery(acd)));
+	this.nodes.add(acd);
+	this.infos.add(new NodeInfo(Query.anonymousClassDeclarationQuery(acd)));
 	this.relations.add(new Relation(node,acd,RelationType.ANONYMOUS_CLASS_DECLARATION));
 }
 	/**
@@ -768,7 +773,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<EnumConstantDeclaration> ecds=node.enumConstants();
 		for(int i=0;i<ecds.size();i++){
-			this.nodes.put(ecds.get(i), new NodeInfo(Query.enumConstantDeclarationQuery(ecds.get(i))));
+			this.nodes.add(ecds.get(i));
+			this.infos.add(new NodeInfo(Query.enumConstantDeclarationQuery(ecds.get(i))));
 			this.relations.add(new Relation(node,ecds.get(i),RelationType.ENUM_CONSTANTS));
 		}
 		return true;
@@ -847,7 +853,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	}
 	
 	public void addVariableDeclarationFragment(ASTNode node,VariableDeclarationFragment vf,String rtype){
-		this.nodes.put(vf, new NodeInfo(Query.variableDeclarationFragmentQuery(vf)));
+		this.nodes.add(vf);
+		this.infos.add(new NodeInfo(Query.variableDeclarationFragmentQuery(vf)));
 		this.relations.add(new Relation(node,vf,rtype));
 	}
 
@@ -989,7 +996,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	
 	public void addStatement(ASTNode node,Statement statement,String rtype){
 		if(statement!=null){
-			this.nodes.put(statement, new NodeInfo(Query.statementQuery(statement)));
+			this.nodes.add(statement);
+			this.infos.add(new NodeInfo(Query.statementQuery(statement)));
 			this.relations.add(new Relation(node,statement,rtype));
 		}
 	}
@@ -1256,7 +1264,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		List <MemberValuePair> mvPairs=node.values();
 		for(int i=0;i<mvPairs.size();i++){
 			MemberValuePair mvPair=mvPairs.get(i);
-			this.nodes.put(mvPair, new NodeInfo(Query.MemberValuePairQuery(mvPair)));
+			this.nodes.add(mvPair);
+			this.infos.add(new NodeInfo(Query.MemberValuePairQuery(mvPair)));
 			this.relations.add(new Relation(node,mvPair,RelationType.VALUES));
 		}
 		return true;
@@ -1270,7 +1279,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		Javadoc javadoc=node.getJavadoc();
 		if(javadoc!=null){
 			query=Query.javadocQuery(javadoc);
-			this.nodes.put(javadoc, new NodeInfo(query));
+			this.nodes.add(javadoc);
+			this.infos.add(new NodeInfo(query));
 			this.relations.add(new Relation(node,javadoc,RelationType.JAVA_DOC));
 		}
 		
@@ -1293,7 +1303,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @param annotation
 	 */
 	public void addAnnotation(ASTNode node, Annotation annotation,String rtype){
-		this.nodes.put(annotation, new NodeInfo(Query.AnnotationQuery(annotation)));
+		this.nodes.add(annotation);
+		this.infos.add(new NodeInfo(Query.AnnotationQuery(annotation)));
 		this.relations.add(new Relation(node,annotation,rtype));
 	}
 
@@ -1521,7 +1532,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	}
 
 	public void addSingleVariableDeclaration(ASTNode node,SingleVariableDeclaration svd,String rtype){
-		this.nodes.put(svd, new NodeInfo(Query.singleVariableDeclarationQuery(svd)));
+		this.nodes.add(svd);
+		this.infos.add(new NodeInfo(Query.singleVariableDeclarationQuery(svd)));
 		this.relations.add(new Relation(node,svd,rtype));
 	}
 	/**
@@ -1772,7 +1784,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<VariableDeclarationExpression> vdes=node.resources();
 		for(int i=0;i<vdes.size();i++){
-			this.nodes.put(vdes.get(i), new NodeInfo(Query.expressionQuery(vdes.get(i))));
+			this.nodes.add(vdes.get(i));
+			this.infos.add(new NodeInfo(Query.expressionQuery(vdes.get(i))));
 			this.relations.add(new Relation(node,vdes.get(i),RelationType.RESOURCES));
 		}
 		/*Body*/
@@ -1781,7 +1794,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<CatchClause> clauses=node.catchClauses();
 		for(int i=0;i<clauses.size();i++){
-			this.nodes.put(clauses.get(i), new NodeInfo(Query.catchClauseQuery(clauses.get(i))));
+			this.nodes.add(clauses.get(i));
+			this.infos.add(new NodeInfo(Query.catchClauseQuery(clauses.get(i))));
 		}
 		/*FINALLY*/
 		this.addStatement(node, node.getFinally(), RelationType.FINALLY);
@@ -1848,30 +1862,31 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addBodyDeclarations(ASTNode node,List<BodyDeclaration> bodyDeclarations){
 		for(int i=0;i<bodyDeclarations.size();i++){
 			BodyDeclaration bd=bodyDeclarations.get(i);
+			this.nodes.add(bd);
 			switch(bd.getNodeType()){
 				case ASTNode.ANNOTATION_TYPE_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) bd)));
 					break;
 				case ASTNode.ENUM_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.edQuery((EnumDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.edQuery((EnumDeclaration) bd)));
 					break;
 				case ASTNode.TYPE_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.tdQuery((TypeDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.tdQuery((TypeDeclaration) bd)));
 					break;
 				case ASTNode.FIELD_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.fieldDeclarationQuery((FieldDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.fieldDeclarationQuery((FieldDeclaration) bd)));
 					break;
 				case ASTNode.INITIALIZER:
-					this.nodes.put(bd, new NodeInfo(Query.initializerQuery((Initializer) bd)));
+					this.infos.add(new NodeInfo(Query.initializerQuery((Initializer) bd)));
 					break;
 				case ASTNode.METHOD_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.methodDeclarationQuery((MethodDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.methodDeclarationQuery((MethodDeclaration) bd)));
 					break;
 				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.annotationTypeMemberDeclarationQuery((AnnotationTypeMemberDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.annotationTypeMemberDeclarationQuery((AnnotationTypeMemberDeclaration) bd)));
 					break;
 				case ASTNode.ENUM_CONSTANT_DECLARATION:
-					this.nodes.put(bd, new NodeInfo(Query.enumConstantDeclarationQuery((EnumConstantDeclaration) bd)));
+					this.infos.add(new NodeInfo(Query.enumConstantDeclarationQuery((EnumConstantDeclaration) bd)));
 					break;
 			}
 			this.relations.add(new Relation(node,bd,RelationType.BODY_DECLARATIONS));
@@ -1884,7 +1899,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @param tpara
 	 */
 	public void addTypeParameter(ASTNode node,TypeParameter tpara){
-		this.nodes.put(tpara, new NodeInfo(Query.typeParameterQuery(tpara)));
+		this.nodes.add(tpara);
+		this.infos.add(new NodeInfo(Query.typeParameterQuery(tpara)));
 		this.relations.add(new Relation(node,tpara,RelationType.TYPE_PARAMETERS));
 	}
 	/**
@@ -1894,7 +1910,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 */
 	public void addJavadoc(ASTNode node,Javadoc javadoc){
 		String query=Query.javadocQuery(javadoc);
-		this.nodes.put(javadoc, new NodeInfo(query));
+		this.nodes.add(javadoc);
+		this.infos.add(new NodeInfo(query));
 		this.relations.add(new Relation(node,javadoc,RelationType.JAVA_DOC));
 	}
 	
@@ -1905,7 +1922,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 */
 	public void addModifier(ASTNode node,IExtendedModifier modifier){
 		String query=Query.iExtendedModifier(modifier);
-		this.nodes.put((ASTNode) modifier, new NodeInfo(query));
+		this.nodes.add((ASTNode) modifier);
+		this.infos.add( new NodeInfo(query));
 		this.relations.add(new Relation(node,(ASTNode) modifier,RelationType.MODIFIERS));
 	}
 
@@ -1923,15 +1941,16 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
 		AbstractTypeDeclaration atd=node.getDeclaration();
+		this.nodes.add(atd);
 		switch(atd.getNodeType()){
 		case ASTNode.TYPE_DECLARATION:
-			this.nodes.put(atd, new NodeInfo(Query.tdQuery((TypeDeclaration) atd)));
+			this.infos.add(new NodeInfo(Query.tdQuery((TypeDeclaration) atd)));
 			break;
 		case ASTNode.ENUM_DECLARATION:
-			this.nodes.put(atd, new NodeInfo(Query.edQuery((EnumDeclaration) atd)));
+			this.infos.add(new NodeInfo(Query.edQuery((EnumDeclaration) atd)));
 			break;
 		case ASTNode.ANNOTATION_TYPE_DECLARATION:
-			this.nodes.put(atd, new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) atd)));
+			this.infos.add(new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) atd)));
 			break;
 		}
 		this.relations.add(new Relation(node,atd,RelationType.DECLARATION));
@@ -1982,7 +2001,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @param type
 	 */
 	public void addType(ASTNode node,Type type,String rtype){
-		this.nodes.put(node, new NodeInfo(Query.typeQuery(type)));
+		this.nodes.add(type);
+		this.infos.add(new NodeInfo(Query.typeQuery(type)));
 		this.relations.add(new Relation(node,type,rtype));
 	}
 
@@ -2079,9 +2099,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	}
 	
 	public void addExpression(ASTNode node,Expression expression,String rtype){
-		String query=Query.expressionQuery(expression);
-		if(query!=null){
-			this.nodes.put(expression, new NodeInfo(query));
+		if(expression!=null){
+			String query=Query.expressionQuery(expression);
+			this.nodes.add(expression);
+			this.infos.add(new NodeInfo(query));
 			this.relations.add(new Relation(node,expression,rtype));
 		}
 	}
@@ -2136,8 +2157,12 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		this.fileName = fileName;
 	}
 	
-	public Map<ASTNode,NodeInfo> getNodes(){
+	public List<ASTNode> getNodes(){
 		return this.nodes;
+	}
+	
+	public List<NodeInfo> getInfos(){
+		return this.infos;
 	}
 	
 	public List<Relation> getRelations(){

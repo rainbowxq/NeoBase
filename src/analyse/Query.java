@@ -474,8 +474,12 @@ public class Query {
 		JSONObject query = new JSONObject();
 		JSONObject params = new JSONObject();
 		String common="T_KEY:{key},ConstantExpressionValue:{cev}";
-		params.put("key", node.resolveTypeBinding());
-		params.put("cev", node.resolveConstantExpressionValue());
+		params.put("key", node.resolveTypeBinding().getKey());
+		if(node.resolveConstantExpressionValue()!=null)
+			params.put("cev", node.resolveConstantExpressionValue());
+		else
+			params.put("cev","not exist");
+//		Debug.println("hahahhahah   "+node.resolveConstantExpressionValue()+"    hahhahahh");
 		switch(node.getNodeType()){
 			case ASTNode.MARKER_ANNOTATION:
 			case ASTNode.NORMAL_ANNOTATION:
@@ -755,8 +759,6 @@ public class Query {
 				query.put("query",
 						"CREATE (n: WhileStatement ) RETURN id(n)");
 				break;
-			default:
-				return null;
 					
 		}
 		

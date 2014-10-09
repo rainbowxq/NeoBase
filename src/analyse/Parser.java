@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.osgi.internal.debug.Debug;
 
 import relationship.Relation;
 
@@ -31,7 +32,8 @@ public class Parser {
 	private String projectName;// assume projects don't have the same names 
 	private String fileName;
 	private String filePath;
-	private Map<ASTNode,NodeInfo> nodes=new HashMap<ASTNode,NodeInfo>();
+	private List<ASTNode> nodes=new ArrayList<ASTNode>();
+	private List<NodeInfo> infos=new ArrayList<NodeInfo>();
 	private List<Relation> relations=new ArrayList<Relation>();
 	
 	public Parser(String pName,String fName,String fPath){
@@ -57,6 +59,7 @@ public class Parser {
 		JFileVisitor visitor=new JFileVisitor(this.fileName);
 		javaUnit.accept(visitor);
 		this.setNodes(visitor.getNodes());
+		this.setInfos(visitor.getInfos());
 		this.setRelations(visitor.getRelations());
 //		HWVisitor visitor=new HWVisitor();
 //		helloworld.accept(visitor);
@@ -119,7 +122,7 @@ public class Parser {
 			query.put("params",params);
 			
 			System.out.println(query.toString());
-//			testNeo4j.executeQuery(query.toString());
+			Parser.executeQuery(query.toString());
 //			System.out.println(json.toString());
 			
 		}
@@ -150,10 +153,6 @@ public class Parser {
 	}
 	
 
-	public void setNodeId(ASTNode node,long id) {
-		this.nodes.get(node).setId(id);
-	}
-
 	public List<Relation> getRelations() {
 		return relations;
 	}
@@ -162,32 +161,59 @@ public class Parser {
 		this.relations = relations;
 	}
 	
-	private void setNodes(Map<ASTNode, NodeInfo> nodes2) {
-		// TODO Auto-generated method stub
-		this.nodes=nodes2;
-	}
+
 
 	
 	public static void main(String [] args){
 		Parser parser=new Parser("","HelloWorld.java","/home/xiaoq_zhu/zxq/workspace/HelloWorld/src/test/HelloWorld.java");
 		parser.analyse();
-		Set<ASTNode> nodeSet= parser.nodes.keySet();
-		for(ASTNode node:nodeSet){
-			String a=Parser.executeQuery(parser.nodes.get(node).getCypherSentence());
+		
+		for(int i=0;i<parser.infos.size();i++){
+//			Debug.println(parser.infos.get(i).getCypherSentence());
+			String a=Parser.executeQuery(parser.infos.get(i).getCypherSentence());
 			String b[]=a.split(" ");
-////			for(int j=0;j<b.length;j++){
-////				System.out.println(b[j]+" "+j);
-////			}
-			parser.setNodeId(node,Long.parseLong(b[12]));
-			System.out.println(parser.nodes.get(node).getId());
-			
+//			for(int j=0;j<b.length;j++){
+//				System.out.println(b[j]+" "+j);
+//			}
+			parser.setNodeId(i,Long.parseLong(b[12]));
+			System.out.println(parser.infos.get(i).getId());
 		}
+		
 		for(int i=0;i<parser.relations.size();i++){
+//			Debug.println("the index of from is: "+parser.nodes.indexOf(parser.relations.get(i).getFrom()));
+//			Debug.println("the relation type is: "+parser.relations.get(i).getRelationType());
+//			Debug.println("the index of to is: "+parser.nodes.indexOf(parser.relations.get(i).getTo()));
 			Relation r=parser.relations.get(i);
-			long id1=parser.nodes.get(r.getFrom()).getId();
-			long id2=parser.nodes.get(r.getTo()).getId();
-			Parser.addRelation(id1, id2, r.getRelationType());
+			int fromIndex=parser.nodes.indexOf(r.getFrom());
+			int toIndex=parser.nodes.indexOf(r.getTo());
+			assert fromIndex!=-1 : "the from node doesn't exist";
+			assert toIndex!=-1 : "the to node doesn't exist";
+			
+			long fromId=parser.infos.get(fromIndex).getId();
+			long toId=parser.infos.get(toIndex).getId();
+			
+			Parser.addRelation(fromId, toId, r.getRelationType());
 		}
+//		for(ASTNode node:nodeSet){
+//			Debug.println(parser.nodes.get(node).getCypherSentence());
+//			String a=Parser.executeQuery(parser.nodes.get(node).getCypherSentence());
+//			String b[]=a.split(" ");
+//////			for(int j=0;j<b.length;j++){
+//////				System.out.println(b[j]+" "+j);
+//////			}
+//			parser.setNodeId(node,Long.parseLong(b[12]));
+//			System.out.println(parser.nodes.get(node).getId());
+			
+//		}
+//		for(int i=0;i<parser.relations.size();i++){
+//			assert parser.nodes.containsKey(parser.relations.get(i).getFrom()):"from doesn't exist";
+//			assert	parser.nodes.containsKey(parser.relations.get(i).getTo()):"to doesn't exist";
+//			Relation r=parser.relations.get(i);
+//			long id1=parser.nodes.get(r.getFrom()).getId();
+//			long id2=parser.nodes.get(r.getTo()).getId();
+//			Parser.addRelation(id1, id2, r.getRelationType());
+//		}
+		
 //		for (int i=0;i<parser.relations.size();i++){
 //			if(parser.nodes.containsKey(parser.relations.get(i).getFrom()) && parser.nodes.containsKey(parser.relations.get(i).getTo())){
 //				System.out.println("true");
@@ -197,5 +223,26 @@ public class Parser {
 //			}
 //		}
 		
+	}
+
+	private void setNodeId(int i, long parseLong) {
+		// TODO Auto-generated method stub
+		this.infos.get(i).setId(parseLong);
+	}
+
+	public List<NodeInfo> getInfos() {
+		return infos;
+	}
+
+	public void setInfos(List<NodeInfo> infos) {
+		this.infos = infos;
+	}
+	
+	public List<ASTNode> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(List<ASTNode> nodes) {
+		this.nodes=nodes;
 	}
 }
