@@ -1,7 +1,6 @@
 package analyse;
 
 import java.util.ArrayList;
-
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -542,18 +541,20 @@ public class JFileVisitor extends ASTVisitor{
 		/*TypeDeclaration*/
 		@SuppressWarnings("unchecked")
 		List<AbstractTypeDeclaration> types=node.types();
+//		System.out.println("the number of types is: "+types.size());
 		if(types!=null){
 			for (int i=0;i<types.size();i++){
-				if(types.get(i) instanceof TypeDeclaration){
+				switch(types.get(i).getNodeType()){
+				case ASTNode.TYPE_DECLARATION:
 					query=Query.tdQuery((TypeDeclaration) types.get(i));
-				}
-				else if(types.get(i) instanceof AnnotationTypeDeclaration){
+					break;
+				case ASTNode.ANNOTATION_TYPE_DECLARATION:
 					query=Query.adQuery((AnnotationTypeDeclaration) types.get(i));
-				}
-				else{//EnumDeclaration
+					break;
+				case ASTNode.ENUM_DECLARATION:
 					query=Query.edQuery((EnumDeclaration) types.get(i));
+					break;
 				}
-				
 				this.nodes.add(types.get(i));
 				this.infos.add(new NodeInfo(query));
 				this.relations.add(new Relation(node,types.get(i),RelationType.TYPES));
@@ -1123,7 +1124,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.1
 	 */
 	public boolean visit(MemberValuePair node) {
-		return true;
+		return false;
 	}
 
 

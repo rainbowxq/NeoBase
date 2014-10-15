@@ -76,7 +76,10 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("pkgName", node.getName().getFullyQualifiedName());
-		params.put("Key", node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("Key", node.resolveBinding().getKey());
+		else
+			params.put("Key", "null");
 		// params.put("pkgKey", node.resolveBinding().getKey());
 
 		query.put("params", params);
@@ -95,7 +98,10 @@ public class Query {
 		params.put("ImportName", node.getName().getFullyQualifiedName());
 		params.put("Static", node.isStatic());
 		params.put("onDemand", node.isOnDemand());
-		params.put("Key", node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("Key", node.resolveBinding().getKey());
+		else
+			params.put("Key", "null");
 
 		query.put("params", params);
 		System.out.println(query.toString());
@@ -115,7 +121,10 @@ public class Query {
 		JSONObject params = new JSONObject();
 		params.put("typeName", node.getName().getFullyQualifiedName());
 		params.put("isInterface", node.isInterface());
-		params.put("Key", node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("Key", node.resolveBinding().getKey());
+		else
+			params.put("Key", "null");
 
 		query.put("params", params);
 		Debug.println(query.toString());
@@ -134,7 +143,10 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("atypeName", node.getName().getFullyQualifiedName());
-		params.put("Key", node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("Key", node.resolveBinding().getKey());
+		else
+			params.put("Key", "null");
 
 		query.put("params", params);
 		Debug.println(query.toString());
@@ -149,8 +161,11 @@ public class Query {
 				"CREATE (n: EnumDeclaration { name : {etypeName},T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
-		params.put("typeName", node.getName().getFullyQualifiedName());
-		params.put("Key", node.resolveBinding().getKey());
+		params.put("etypeName", node.getName().getFullyQualifiedName());
+		if(node.resolveBinding()!=null)
+			params.put("Key", node.resolveBinding().getKey());
+		else
+			params.put("Key", "null");
 
 		query.put("params", params);
 		Debug.println(query.toString());
@@ -166,9 +181,15 @@ public class Query {
 				+ "V_Key:{vkey} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
-		params.put("typeName", node.getName().getFullyQualifiedName());
-		params.put("mKey", node.resolveConstructorBinding().getKey());
-		params.put("vkey", node.resolveVariable().getKey());
+		params.put("etypeName", node.getName().getFullyQualifiedName());
+		if(node.resolveConstructorBinding()!=null)
+			params.put("mKey", node.resolveConstructorBinding().getKey());
+		else
+			params.put("mKey", "null");
+		if(node.resolveVariable()!=null)
+			params.put("vkey", node.resolveVariable().getKey());
+		else
+			params.put("vkey", "null");
 
 		query.put("params", params);
 		Debug.println(query.toString());
@@ -308,8 +329,10 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("name", node.getName().getFullyQualifiedName());
-		params.put("key", node.resolveBinding().getKey());
-
+		if(node.resolveBinding()!=null)
+			params.put("key", node.resolveBinding().getKey());
+		else
+			params.put("key", "null");
 		query.put("params", params);
 		Debug.println(query.toString());
 		return query.toString();
@@ -327,7 +350,10 @@ public class Query {
 							+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("code", ((PrimitiveType) node).getPrimitiveTypeCode()
 					.toString());
-			params.put("key", node.resolveBinding().getKey());
+			if(node.resolveBinding()!=null)
+				params.put("key", node.resolveBinding().getKey());
+			else
+				params.put("key", "null");
 			query.put("params", params);
 
 		} else if (node instanceof SimpleType) {
@@ -336,7 +362,10 @@ public class Query {
 					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", ((SimpleType) node).getName()
 					.getFullyQualifiedName());
-			params.put("key", node.resolveBinding().getKey());
+			if(node.resolveBinding()!=null)
+				params.put("key", node.resolveBinding().getKey());
+			else
+				params.put("key", "null");
 			query.put("params", params);
 
 		} else if (node instanceof ArrayType) {
@@ -346,9 +375,15 @@ public class Query {
 					"CREATE (n: ArrayType { ELEMENT_TYPE : {ename},"
 							+ "ELEMENT_T_KEY : {key}, DIMENTIONS:{dimentions}}) RETURN id(n)");
 
-			params.put("ename", node.resolveBinding().getElementType()
-					.getName());
-			params.put("key", node.resolveBinding().getElementType().getKey());
+			if(node.resolveBinding()!=null){
+				params.put("ename", node.resolveBinding().getElementType()
+						.getName());
+				params.put("key", node.resolveBinding().getElementType().getKey());
+			}
+			else{
+				params.put("ename", "null");
+				params.put("key", "null");
+			}
 			params.put("dimentions", node.resolveBinding().getDimensions());
 			query.put("params", params);
 
@@ -356,8 +391,14 @@ public class Query {
 
 			query.put("query", "CREATE (n: UnionType { NAME : {name},"
 					+ "T_KEY : {key}}) RETURN id(n)");
-			params.put("name", node.resolveBinding().getName());
-			params.put("key", node.resolveBinding().getKey());
+			if(node.resolveBinding()!=null){
+				params.put("name", node.resolveBinding().getName());
+				params.put("key", node.resolveBinding().getKey());
+			}
+			else{
+				params.put("name", "null");
+				params.put("key", "null");
+			}
 			query.put("params", params);
 
 		} else if (node instanceof QualifiedType) {
@@ -366,7 +407,10 @@ public class Query {
 					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", ((QualifiedType) node).getName()
 					.getFullyQualifiedName());
-			params.put("key", node.resolveBinding().getKey());
+			if(node.resolveBinding()!=null)
+				params.put("key", node.resolveBinding().getKey());
+			else
+				params.put("key", "null");
 			query.put("params", params);
 
 		} else if (node instanceof ParameterizedType) {
@@ -374,7 +418,10 @@ public class Query {
 			query.put("query", "CREATE (n: ParameterizedType { NAME : {name},"
 					+ "T_KEY : {key}}) RETURN id(n)");
 			params.put("name", node.resolveBinding().getName());
-			params.put("key", node.resolveBinding().getKey());
+			if(node.resolveBinding()!=null)
+				params.put("key", node.resolveBinding().getKey());
+			else
+				params.put("key", "null");
 			query.put("params", params);
 
 		} else if (node instanceof WildcardType) {
@@ -382,7 +429,10 @@ public class Query {
 			query.put("query", "CREATE (n: WildcardType { NAME : {name},"
 					+ "T_KEY : {key},UPPER_BOUND:{ub}}) RETURN id(n)");
 			params.put("name", node.resolveBinding().getName());
-			params.put("key", node.resolveBinding().getKey());
+			if(node.resolveBinding()!=null)
+				params.put("key", node.resolveBinding().getKey());
+			else
+				params.put("key", "null");
 			params.put("ub", ((WildcardType) node).isUpperBound());
 			query.put("params", params);
 		}
@@ -409,9 +459,18 @@ public class Query {
 			params.put("value", ((SingleMemberAnnotation) node).getValue().toString());
 		}
 		params.put("tname", node.getTypeName().getFullyQualifiedName());
-		params.put("key", node.resolveTypeBinding().getKey());
-		params.put("akey", node.resolveAnnotationBinding().getKey());
-		params.put("cev", node.resolveConstantExpressionValue());
+		if(node.resolveTypeBinding()!=null)
+			params.put("key", node.resolveTypeBinding().getKey());
+		else
+			params.put("key", "null");
+		if(node.resolveAnnotationBinding()!=null)
+			params.put("akey", node.resolveAnnotationBinding().getKey());
+		else
+			params.put("akey", "null");
+		if(node.resolveConstantExpressionValue()!=null)
+			params.put("cev", node.resolveConstantExpressionValue());
+		else
+			params.put("cev", "not exist");
 		query.put("params", params);
 		Debug.println(query.toString());
 		return query.toString();
@@ -462,7 +521,11 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("name",node.getName().getFullyQualifiedName());
-		params.put("key",node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("key", node.resolveBinding().getKey());
+		else
+			params.put("key", "null");
+		
 		params.put("ed", node.getExtraDimensions());
 
 		query.put("params", params);
@@ -474,7 +537,10 @@ public class Query {
 		JSONObject query = new JSONObject();
 		JSONObject params = new JSONObject();
 		String common="T_KEY:{key},ConstantExpressionValue:{cev}";
-		params.put("key", node.resolveTypeBinding().getKey());
+		if(node.resolveTypeBinding()!=null)
+			params.put("key", node.resolveTypeBinding().getKey());
+		else
+			params.put("key", "null");
 		if(node.resolveConstantExpressionValue()!=null)
 			params.put("cev", node.resolveConstantExpressionValue());
 		else
@@ -631,7 +697,10 @@ public class Query {
 						+ common+"}) RETURN id(n)");
 				params.put("qualifier", ((SuperMethodInvocation)node).getQualifier().getFullyQualifiedName());
 				params.put("name", ((SuperMethodInvocation)node).getName().getFullyQualifiedName());
-				params.put("mkey", ((SuperMethodInvocation)node).resolveMethodBinding().getKey());
+				if(((SuperMethodInvocation)node).resolveMethodBinding()!=null)
+					params.put("mkey", ((SuperMethodInvocation)node).resolveMethodBinding().getKey());
+				else
+					params.put("mkey", "null");
 				query.put("params", params);
 				break;
 			case ASTNode.THIS_EXPRESSION:
@@ -678,7 +747,10 @@ public class Query {
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				query.put("query",
 						"CREATE (n: ConstructorInvocation {M_KEY:{mkey}}) RETURN id(n)");
-				params.put("mkey", ((ConstructorInvocation)node).resolveConstructorBinding().getKey());
+				if(((ConstructorInvocation)node).resolveConstructorBinding()!=null)
+					params.put("mkey", ((ConstructorInvocation)node).resolveConstructorBinding().getKey());
+				else
+					params.put("mkey", "null");
 				query.put("params", params);
 				break;
 			case ASTNode.CONTINUE_STATEMENT:
@@ -724,7 +796,11 @@ public class Query {
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				query.put("query",
 						"CREATE (n: SuperConstructorInvocation {M_KEY:{mkey}}) RETURN id(n)");
-				params.put("mkey", ((SuperConstructorInvocation)node).resolveConstructorBinding().getKey());
+				if(((SuperConstructorInvocation)node).resolveConstructorBinding()!=null)
+					params.put("mkey", ((SuperConstructorInvocation)node).resolveConstructorBinding().getKey());
+				else
+					params.put("mkey", "null");
+		
 				query.put("params", params);
 				break;
 			case ASTNode.SWITCH_CASE:
@@ -783,7 +859,10 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("name",node.getName().getFullyQualifiedName());
-		params.put("key",node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("key",node.resolveBinding().getKey());
+		else
+			params.put("key", "null");
 		params.put("varargs", node.isVarargs());
 		params.put("ed", node.getExtraDimensions());
 
@@ -800,7 +879,10 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("name",node.getName().getFullyQualifiedName());
-		params.put("key",node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("key",node.resolveBinding().getKey());
+		else
+			params.put("key", "null");
 		params.put("constructor", node.isConstructor());
 		params.put("ed", node.getExtraDimensions());
 
@@ -830,7 +912,10 @@ public class Query {
 
 		JSONObject params = new JSONObject();
 		params.put("name", node.getName().getFullyQualifiedName());
-		params.put("key",node.resolveBinding().getKey());
+		if(node.resolveBinding()!=null)
+			params.put("key",node.resolveBinding().getKey());
+		else
+			params.put("key", "null");
 
 		query.put("params", params);
 		Debug.println(query.toString());

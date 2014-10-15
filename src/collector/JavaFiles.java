@@ -52,7 +52,7 @@ public class JavaFiles {
 	}
 	public static void main(String[] args){
 		JavaFiles files=new JavaFiles();
-		files.readFolder("/home/xiaoq_zhu/zxq/workspace/HelloWorld");
+		files.readFolder("/home/xiaoq_zhu/workspace/NeoBase");
 		for(int i=0;i<files.paths.size();i++){
 			System.out.println(files.paths.get(i));
 			System.out.println(files.names.get(i));
