@@ -7,9 +7,9 @@ import java.util.List;
 
 public class JavaFiles {
 	/*[store the java files' absolute paths under a project ]*/
-	List<String> paths=new ArrayList<String>();
-	List<String> names=new ArrayList<String>();
-	
+	ArrayList<String> filepaths=new ArrayList<String>();
+	ArrayList<String> names=new ArrayList<String>();
+	ArrayList<String> classpaths=new ArrayList<String>();
 	/**
 	 * 读取文件夹下所有子目录下的txt文件，并将其保存到list集合中。
 	 * 
@@ -32,7 +32,18 @@ public class JavaFiles {
 					this.readFolder(files[i].getPath());
 				} else {
 					if (files[i].getName().endsWith(".java")) {
-						paths.add(files[i].getAbsolutePath());
+						filepaths.add(files[i].getAbsolutePath());
+						
+						String classpath=files[i].getAbsolutePath().replaceFirst("/src/", "/bin/");
+						String[] parts=classpath.split("java");
+						classpath=parts[0];
+						for(int j=1;j<parts.length;j++){
+							classpath+=parts[i];
+							classpath+="java";
+						}
+						classpath+="class";
+						classpaths.add(classpath);
+						
 						this.names.add(files[i].getName());
 					}
 				}
@@ -43,18 +54,23 @@ public class JavaFiles {
 		}
 	}
 	
-	public List<String> getPaths(int i){
-		return this.paths;
+	public ArrayList<String> getfilePaths(){
+		return this.filepaths;
 	}
 	
-	public List<String> getNames(int i){
+	public ArrayList<String> getclasspaths(){
+		return this.classpaths;
+	}
+	
+	public ArrayList<String> getNames(){
 		return this.names;
 	}
 	public static void main(String[] args){
 		JavaFiles files=new JavaFiles();
 		files.readFolder("/home/xiaoq_zhu/workspace/NeoBase");
-		for(int i=0;i<files.paths.size();i++){
-			System.out.println(files.paths.get(i));
+		for(int i=0;i<files.filepaths.size();i++){
+			System.out.println(files.filepaths.get(i));
+			System.out.println(files.classpaths.get(i));
 			System.out.println(files.names.get(i));
 		}
 	}

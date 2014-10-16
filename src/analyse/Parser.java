@@ -23,6 +23,8 @@ public class Parser {
 	private String projectName;// assume projects don't have the same names 
 	private String fileName;
 	private String filePath;
+//	private String[] filePaths;
+//	private String[] classPaths;
 	private List<ASTNode> nodes=new ArrayList<ASTNode>();
 	private List<NodeInfo> infos=new ArrayList<NodeInfo>();
 	private List<Relation> relations=new ArrayList<Relation>();
@@ -33,7 +35,7 @@ public class Parser {
 		this.setFilePath(fPath);
 	}
 	
-	public void analyse(){
+	public void analyse(String[]classPaths,String[]filePaths){
 		CUnit unit=new CUnit();
 		unit.setProgram(this.filePath);
 		Map options = JavaCore.getOptions();
@@ -42,14 +44,13 @@ public class Parser {
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		parser.setCompilerOptions(options);
 		parser.setResolveBindings(true);
-//		String[] sources = null;
-//		String[] classpath = null;
-		parser.setUnitName(this.filePath);
-		parser.setEnvironment(null,null,null, true);
+
+		parser.setUnitName(this.fileName);
+		parser.setEnvironment(classPaths,filePaths,new String[] { "UTF-8" }, true);
 		parser.setSource(unit.getProgram().toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;
-		
+//		parser.createASTs(null, null, null, null);
 		JFileVisitor visitor=new JFileVisitor(this.fileName);
 		javaUnit.accept(visitor);
 		this.setNodes(visitor.getNodes());
@@ -100,8 +101,8 @@ public class Parser {
 
 
 	
-	public void ececute(){
-		this.analyse();
+	public void ececute(String[]classPaths,String[]filePaths){
+		this.analyse(classPaths,filePaths);
 		for(int i=0;i<this.infos.size();i++){
 			String a=Neo4jOp.executeQuery(this.infos.get(i).getCypherSentence());
 			String b[]=a.split(" ");

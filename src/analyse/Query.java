@@ -566,13 +566,14 @@ public class Query {
 				query.put("query",
 						"CREATE (n: ArrayInitializer {"
 						+ common+"}) RETURN id(n)");
+				params.put("content", node.toString());
 				break;
 			case ASTNode.ASSIGNMENT:
 				query.put("query",
 						"CREATE (n: Assignment {OPERATOR:{operator},"
 						+ common+"}) RETURN id(n)");
 				params.put("operator", ((Assignment)node).getOperator().toString());
-				query.put("params", params);
+				
 				break;
 				
 			case ASTNode.BOOLEAN_LITERAL:
@@ -580,7 +581,7 @@ public class Query {
 						"CREATE (n: BooleanLiteral {BOOLEAN_VALUE:{value},"
 						+ common+"}) RETURN id(n)");
 				params.put("value", ((BooleanLiteral)node).booleanValue());
-				query.put("params", params);
+
 				break;
 				
 			case ASTNode.CAST_EXPRESSION:
@@ -594,7 +595,7 @@ public class Query {
 						"CREATE (n: CharacterLiteral {BOOLEAN_VALUE:{value},"
 						+ common+"}) RETURN id(n)");
 				params.put("value", ((CharacterLiteral)node).getEscapedValue());
-				query.put("params", params);
+				
 				break;
 				
 			case ASTNode.CLASS_INSTANCE_CREATION:
@@ -613,14 +614,14 @@ public class Query {
 						"CREATE (n: FieldAccess {NAME:{name},"
 						+ common+"}) RETURN id(n)");
 				params.put("name", ((FieldAccess)node).getName().getFullyQualifiedName());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.INFIX_EXPRESSION:
 				query.put("query",
 						"CREATE (n: InfixExpression {OPERATOR:{operator},"
 						+ common+"}) RETURN id(n)");
 				params.put("operator", ((InfixExpression)node).getOperator().toString());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				query.put("query",
@@ -633,7 +634,7 @@ public class Query {
 						"CREATE (n: MethodInvocation {M_KEY:{mkey},"
 						+ common+"}) RETURN id(n)");
 				params.put("mkey", ((MethodInvocation)node).resolveMethodBinding().getKey());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.QUALIFIED_NAME:
 			case ASTNode.SIMPLE_NAME:
@@ -641,7 +642,7 @@ public class Query {
 						"CREATE (n: Name {NAME:{name},"
 						+ common+"}) RETURN id(n)");
 				params.put("name", ((Name)node).getFullyQualifiedName());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.NULL_LITERAL:
 				query.put("query",
@@ -653,7 +654,7 @@ public class Query {
 						"CREATE (n: NumberLiteral {TOKEN:{token},"
 						+ common+"}) RETURN id(n)");
 				params.put("token", ((NumberLiteral)node).getToken());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.PARENTHESIZED_EXPRESSION:
 				query.put("query",
@@ -665,7 +666,7 @@ public class Query {
 						"CREATE (n: PostfixExpression {OPERATOR:{operator},"
 						+ common+"}) RETURN id(n)");
 				params.put("operator", ((PostfixExpression)node).getOperator().toString());
-				query.put("params", params);
+				
 				break;
 				
 			case ASTNode.PREFIX_EXPRESSION:
@@ -673,14 +674,14 @@ public class Query {
 						"CREATE (n: PrefixExpression {OPERATOR:{operator},"
 						+ common+"}) RETURN id(n)");
 				params.put("operator", ((PrefixExpression)node).getOperator().toString());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.STRING_LITERAL:
 				query.put("query",
 						"CREATE (n: StringLiteral {ESCAPED_VALUE:{value},"
 						+ common+"}) RETURN id(n)");
 				params.put("value", ((StringLiteral)node).getEscapedValue());
-				query.put("params", params);
+				
 				break;
 				
 			case ASTNode.SUPER_FIELD_ACCESS:
@@ -689,7 +690,7 @@ public class Query {
 						+ common+"}) RETURN id(n)");
 				params.put("qualifier", ((SuperFieldAccess)node).getQualifier().getFullyQualifiedName());
 				params.put("name", ((SuperFieldAccess)node).getName().getFullyQualifiedName());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				query.put("query",
@@ -701,14 +702,14 @@ public class Query {
 					params.put("mkey", ((SuperMethodInvocation)node).resolveMethodBinding().getKey());
 				else
 					params.put("mkey", "null");
-				query.put("params", params);
+				
 				break;
 			case ASTNode.THIS_EXPRESSION:
 				query.put("query",
 						"CREATE (n: ThisExpression {QUALIFIER:{qualifier},"
 						+ common+"}) RETURN id(n)");
 				params.put("qualifier", ((ThisExpression)node).getQualifier().getFullyQualifiedName());
-				query.put("params", params);
+				
 				break;
 			case ASTNode.TYPE_LITERAL:
 				query.put("query",
@@ -721,6 +722,7 @@ public class Query {
 						+ common+"}) RETURN id(n)");
 				break;
 		}
+		query.put("params", params);
 		Debug.println(query.toString());
 		return query.toString();
 	}
