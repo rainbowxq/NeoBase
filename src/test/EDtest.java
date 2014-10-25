@@ -3,8 +3,8 @@ package test;
 import analyse.Parser;
 
 public class EDtest {
-	public void eTest(String[] filePaths,String[] classPaths){
-		Parser parser=new Parser("","Enum.java","./src/testcases/Enum.java",filePaths,classPaths);
-		parser.ececute();
+	public void eTest(String[] classPaths,String[] filePaths){
+		Parser parser=new Parser("","Enum.java","./src/testcases/Enum.java");
+		parser.ececute(classPaths,filePaths);
 	}
 }

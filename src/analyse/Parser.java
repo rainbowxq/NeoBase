@@ -41,7 +41,7 @@ public class Parser {
 		Map options = JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5); //or newer version
 		@SuppressWarnings("deprecation")
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setCompilerOptions(options);
 		parser.setResolveBindings(true);
 

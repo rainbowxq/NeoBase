@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -561,17 +560,17 @@ public class JFileVisitor extends ASTVisitor{
 			}
 		}
 		
-		@SuppressWarnings("unchecked")
-		List<Comment> comments=node.getCommentList();
-		for(int i=0;i<comments.size();i++){
-			if(comments.get(i).isDocComment()){
-				Javadoc javadoc=(Javadoc) comments.get(i);
-				this.nodes.add(javadoc);
-				this.infos.add(new NodeInfo(Query.javadocQuery(javadoc)));
-				this.relations.add(new Relation(node,javadoc,RelationType.COMMENTS));
-				this.visit(javadoc);
-			}
-		}
+//		@SuppressWarnings("unchecked")
+//		List<Comment> comments=node.getCommentList();
+//		for(int i=0;i<comments.size();i++){
+//			if(comments.get(i).isDocComment()){
+//				Javadoc javadoc=(Javadoc) comments.get(i);
+//				this.nodes.add(javadoc);
+//				this.infos.add(new NodeInfo(Query.javadocQuery(javadoc)));
+//				this.relations.add(new Relation(node,javadoc,RelationType.COMMENTS));
+//				this.visit(javadoc);
+//			}
+//		}
 		
 		return true;
 	}
@@ -1797,6 +1796,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		for(int i=0;i<clauses.size();i++){
 			this.nodes.add(clauses.get(i));
 			this.infos.add(new NodeInfo(Query.catchClauseQuery(clauses.get(i))));
+			this.relations.add(new Relation(node,clauses.get(i),RelationType.CATCH_CLAUSES));
 		}
 		/*FINALLY*/
 		this.addStatement(node, node.getFinally(), RelationType.FINALLY);
