@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -83,6 +84,7 @@ public class MethodVisitor extends ASTVisitor {
 		case ASTNode.BLOCK:
 			List<Statement> stmts=((Block)stmt).statements();
 			tmpInfos=new ArrayList<SEInfo>();
+//			System.out.println("aaaaaaaaaaaaaaaaaaaaa  "+stmts.size());
 			for(int i=0;i<stmts.size();i++){
 				tmpinfo=stmtCfg(stmts.get(i),key);
 				assert(tmpinfo!=null);
@@ -146,7 +148,27 @@ public class MethodVisitor extends ASTVisitor {
 		case ASTNode.FOR_STATEMENT:
 		break;
 		case ASTNode.IF_STATEMENT:
-		break;
+			SEInfo ifinfo=new SEInfo();
+			Expression ifexp=((IfStatement)stmt).getExpression();
+			ifinfo.setStart(ifexp);
+			this.cfgN.add(ifexp);
+			this.infos.add(new NodeInfo(Query.expressionQuery(ifexp)));
+			
+			Statement tstmt=((IfStatement)stmt).getThenStatement();
+			tmpinfo=stmtCfg(tstmt,key);
+			this.cfgR.add(new Relation(ifexp,tmpinfo.getStart(),rtype,key));
+			ifinfo.addEnds(tmpinfo.getEnds());
+			
+			Statement estmt=((IfStatement)stmt).getElseStatement();
+			if(estmt!=null){
+				tmpinfo=stmtCfg(estmt,key);
+				this.cfgR.add(new Relation(ifexp,tmpinfo.getStart(),rtype,key));
+				ifinfo.addEnds(tmpinfo.getEnds());
+			}
+			else{
+				ifinfo.addEnd(ifexp);
+			}
+			return ifinfo;
 		case ASTNode.RETURN_STATEMENT:
 		break;
 		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
@@ -162,7 +184,8 @@ public class MethodVisitor extends ASTVisitor {
 		case ASTNode.TRY_STATEMENT:
 		break;
 		case ASTNode.TYPE_DECLARATION_STATEMENT:
-		break;
+			return this.addStmtNode(stmt);
+
 		case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 			exps=new ArrayList<Expression>();
 			List<VariableDeclarationFragment>fragments=((VariableDeclarationStatement)stmt).fragments();

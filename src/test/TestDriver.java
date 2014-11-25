@@ -52,9 +52,9 @@ public class TestDriver {
 //		TestDriver.eTest("ThrowTest.java","./src/testcases/ThrowTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
 		
+		TestDriver.eTest("HelloWorld.java","./src/testcases/HelloWorld.java",
+				new String[]{"./target/classes"},new String[]{"./src"});
 		
-		TestDriver.eTest("HelloWorld.java","/home/xiaoq_zhu/zxq/workspace/HelloWorld/src/test/HelloWorld.java",
-				new String[]{"/home/xiaoq_zhu/zxq/workspace/HelloWorld/bin"},new String[]{"/home/xiaoq_zhu/zxq/workspace/HelloWorld/src"});
 		
 //		TestDriver.eTest("hello.java",
 //				"/home/xiaoq_zhu/zxq/workspace/HelloWorld/src/test/HelloWorld.java",
