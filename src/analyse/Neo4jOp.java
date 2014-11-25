@@ -44,14 +44,16 @@ public class Neo4jOp {
 			
 		}
 		
-		public static void addRelation(long id1,long id2,String type){
+		public static void addRelation(long id1,long id2,String type,String key){
 			JSONObject query=new JSONObject();
-			String content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:"+type+"]->(t) return r";
+			String content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:"+type+
+					"{M_KEY:{key}}]->(t) return r";
 			query.put("query", content);
 			
 			JSONObject params=new JSONObject();
 			params.put("from",id1 );
 			params.put("to", id2);
+			params.put("key", key);
 			
 			query.put("params",params);
 			
@@ -60,4 +62,10 @@ public class Neo4jOp {
 //			System.out.println(json.toString());
 			
 		}
+		
+		public static void main(String[]args){
+			Neo4jOp.linkTest();
+		}
+		
+		
 }

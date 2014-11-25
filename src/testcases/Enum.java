@@ -3,5 +3,8 @@ package testcases;
 public enum Enum {
 	one,
 	two,
-	three
+	three;
+	int a;
+	class A{}
+	Enum(){}
 }

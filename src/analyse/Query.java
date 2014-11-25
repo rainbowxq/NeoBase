@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -73,7 +74,7 @@ public class Query {
 	public static String pdQuery(PackageDeclaration node) {
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: PackageDeclaration { name : {pkgName},P_KEY:{Key} }) RETURN id(n)");
+				"MERGE (n: PackageDeclaration { 	NAME : {pkgName},P_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pkgName", node.getName().getFullyQualifiedName());
@@ -93,7 +94,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put(
 				"query",
-				"CREATE (n: ImportDeclaration { name : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand} ,T_KEY:{Key}}) RETURN id(n)");
+				"CREATE (n: ImportDeclaration { NAME : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand} ,T_KEY:{Key}}) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("ImportName", node.getName().getFullyQualifiedName());
@@ -117,7 +118,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: TypeDeclaration { name : {typeName},INTERFACE : {isInterface},"
+				"CREATE (n: TypeDeclaration { NAME : {typeName},INTERFACE : {isInterface},"
 						+ "T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
@@ -142,7 +143,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put(
 				"query",
-				"CREATE (n: AnnotationTypeDeclaration { name : {atypeName},T_KEY:{Key} }) RETURN id(n)");
+				"CREATE (n: AnnotationTypeDeclaration { NAME : {atypeName},T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("atypeName", node.getName().getFullyQualifiedName());
@@ -161,7 +162,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: EnumDeclaration { name : {etypeName},T_KEY:{Key} }) RETURN id(n)");
+				"CREATE (n: EnumDeclaration { NAME : {etypeName},T_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("etypeName", node.getName().getFullyQualifiedName());
@@ -180,7 +181,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: EnumConstantDeclaration { name : {etypeName},M_KEY:{mKey},"
+				"CREATE (n: EnumConstantDeclaration { NAME : {etypeName},M_KEY:{mKey},"
 				+ "V_Key:{vkey} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
@@ -203,7 +204,7 @@ public class Query {
 	public static String cuQuery(CompilationUnit node, String fileName) {
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: CompilationUnit { name : {fileName} }) RETURN id(n)");
+				"CREATE (n: CompilationUnit { NAME : {fileName} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("fileName", fileName);
@@ -384,18 +385,16 @@ public class Query {
 			query.put(
 					"query",
 					"CREATE (n: ArrayType { ELEMENT_TYPE : {ename},"
-							+ "ELEMENT_T_KEY : {key},IS_FROMSOURCE:{isFS}, DIMENTIONS:{dimentions}}) RETURN id(n)");
+							+ "ELEMENT_T_KEY : {key},DIMENTIONS:{dimentions}}) RETURN id(n)");
 
 			if(node.resolveBinding()!=null){
 				params.put("ename", node.resolveBinding().getElementType()
 						.getName());
 				params.put("key", node.resolveBinding().getElementType().getKey());
-				params.put("isFS", node.resolveBinding().getElementType().isFromSource());
 			}
 			else{
 				params.put("ename", "null");
 				params.put("key", "null");
-				params.put("isFS", "null");
 			}
 			params.put("dimentions", ((ArrayType) node).getDimensions());
 			query.put("params", params);
@@ -649,10 +648,10 @@ public class Query {
 				
 			case ASTNode.METHOD_INVOCATION:
 				query.put("query",
-						"CREATE (n: MethodInvocation {M_KEY:{mkey},"
+						"CREATE (n: MethodInvocation {M_KEY:{mkey},NAME:{name},"
 						+ common+"}) RETURN id(n)");
 				params.put("mkey", ((MethodInvocation)node).resolveMethodBinding().getKey());
-				
+				params.put("name",((MethodInvocation)node).getName().getFullyQualifiedName());
 				break;
 			case ASTNode.QUALIFIED_NAME:
 			case ASTNode.SIMPLE_NAME:
@@ -792,15 +791,15 @@ public class Query {
 		switch(node.getNodeType()){
 			case ASTNode.ASSERT_STATEMENT:
 				query.put("query",
-						"CREATE (n: AssertStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: AssertStatement ) RETURN id(n)");
 				break;
 			case ASTNode.BLOCK:
 				query.put("query",
-						"CREATE (n: Block {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: Block ) RETURN id(n)");
 				break;
 			case ASTNode.BREAK_STATEMENT:
 				query.put("query",
-						"CREATE (n: BreakStatement {LABEL:{label},START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: BreakStatement {LABEL:{label}}) RETURN id(n)");
 				if(((BreakStatement)node).getLabel()!=null)
 					params.put("label", ((BreakStatement)node).getLabel().getFullyQualifiedName());
 				else
@@ -808,7 +807,7 @@ public class Query {
 				break;
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				query.put("query",
-						"CREATE (n: ConstructorInvocation {M_KEY:{mkey},START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: ConstructorInvocation {M_KEY:{mkey}}) RETURN id(n)");
 				if(((ConstructorInvocation)node).resolveConstructorBinding()!=null)
 					params.put("mkey", ((ConstructorInvocation)node).resolveConstructorBinding().getKey());
 				else
@@ -816,7 +815,7 @@ public class Query {
 				break;
 			case ASTNode.CONTINUE_STATEMENT:
 				query.put("query",
-						"CREATE (n: ContinueStatement {LABEL:{label},START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: ContinueStatement {LABEL:{label}}) RETURN id(n)");
 				if(((ContinueStatement)node).getLabel()!=null)
 					params.put("label", ((ContinueStatement)node).getLabel().getFullyQualifiedName());
 				else
@@ -824,40 +823,41 @@ public class Query {
 				break;
 			case ASTNode.DO_STATEMENT:
 				query.put("query",
-						"CREATE (n: DoStatement {START_POSITION:{sp}} ) RETURN id(n)");
+						"CREATE (n: DoStatement ) RETURN id(n)");
 				break;
 			case ASTNode.EMPTY_STATEMENT:
 				query.put("query",
-						"CREATE (n: EmptyStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: EmptyStatement) RETURN id(n)");
 				break;
 			case ASTNode.ENHANCED_FOR_STATEMENT:
 				query.put("query",
-						"CREATE (n: EnhancedForStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: EnhancedForStatement ) RETURN id(n)");
 				break;
 			case ASTNode.EXPRESSION_STATEMENT:
 				query.put("query",
-						"CREATE (n: ExpressionStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: ExpressionStatement ) RETURN id(n)");
 				break;
 			case ASTNode.FOR_STATEMENT:
 				query.put("query",
-						"CREATE (n: ForStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: ForStatement ) RETURN id(n)");
 				break;
 			case ASTNode.IF_STATEMENT:
 				query.put("query",
-						"CREATE (n: IfStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: IfStatement {CONDITION:{cond}}) RETURN id(n)");
+				params.put("cond", ((IfStatement)node).getExpression().toString() );
 				break;
 			case ASTNode.LABELED_STATEMENT:
 				query.put("query",
-						"CREATE (n: LabeledStatement {LABEL:{label},START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: LabeledStatement {LABEL:{label}) RETURN id(n)");
 				params.put("label", ((LabeledStatement)node).getLabel().getFullyQualifiedName());
 				break;
 			case ASTNode.RETURN_STATEMENT:
 				query.put("query",
-						"CREATE (n: ReturnStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: ReturnStatement) RETURN id(n)");
 				break;
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				query.put("query",
-						"CREATE (n: SuperConstructorInvocation {M_KEY:{mkey},START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: SuperConstructorInvocation {M_KEY:{mkey}}) RETURN id(n)");
 				if(((SuperConstructorInvocation)node).resolveConstructorBinding()!=null)
 					params.put("mkey", ((SuperConstructorInvocation)node).resolveConstructorBinding().getKey());
 				else
@@ -866,39 +866,38 @@ public class Query {
 				break;
 			case ASTNode.SWITCH_CASE:
 				query.put("query",
-						"CREATE (n: SwitchCase {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: SwitchCase) RETURN id(n)");
 				break;
 			case ASTNode.SWITCH_STATEMENT:
 				query.put("query",
-						"CREATE (n: SwitchStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: SwitchStatement) RETURN id(n)");
 				break;
 			case ASTNode.SYNCHRONIZED_STATEMENT:
 				query.put("query",
-						"CREATE (n: SynchronizedStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: SynchronizedStatement) RETURN id(n)");
 				break;
 			case ASTNode.THROW_STATEMENT:
 				query.put("query",
-						"CREATE (n: ThrowStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: ThrowStatement) RETURN id(n)");
 				break;
 			case ASTNode.TRY_STATEMENT:
 				query.put("query",
-						"CREATE (n: TryStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: TryStatement) RETURN id(n)");
 				break;
 			case ASTNode.TYPE_DECLARATION_STATEMENT:
 				query.put("query",
-						"CREATE (n: TypeDeclarationStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: TypeDeclarationStatement) RETURN id(n)");
 				break;
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 				query.put("query",
-						"CREATE (n: VariableDeclarationStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: VariableDeclarationStatement ) RETURN id(n)");
 				break;
 			case ASTNode.WHILE_STATEMENT:
 				query.put("query",
-						"CREATE (n: WhileStatement {START_POSITION:{sp}}) RETURN id(n)");
+						"CREATE (n: WhileStatement) RETURN id(n)");
 				break;
 					
 		}
-		params.put("sp", node.getStartPosition());
 		query.put("params", params);
 		Debug.println(query.toString());
 		return query.toString();
@@ -992,4 +991,29 @@ public class Query {
 		Debug.println(query.toString());
 		return query.toString();
 	}
+	
+	/*start node in cfg*/
+	public static String startQuery(String key){
+		JSONObject query = new JSONObject();
+		JSONObject params = new JSONObject();
+		query.put("query",
+				"CREATE (n: Start {M_KEY:{key}}) RETURN id(n)");
+		params.put("key", key);
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	
+	/*end node in cfg*/
+	public static String endQuery(String key){
+		JSONObject query = new JSONObject();
+		JSONObject params = new JSONObject();
+		query.put("query",
+				"CREATE (n: End {M_KEY:{key}}) RETURN id(n)");
+		params.put("key", key);
+		query.put("params", params);
+		Debug.println(query.toString());
+		return query.toString();
+	}
+	
 }

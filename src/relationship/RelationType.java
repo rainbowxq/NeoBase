@@ -24,7 +24,7 @@ public class RelationType {
 	public static final String EXTENDED_OPERANDS="EXTENDED_OPERANDS";
 	public static final String FINALLY="FINALLY";
 	public static final String FRAGMENTS="FRAGMENTS";
-	public static final String IMPORT="IMPORT";	// java file --> import declaration
+	public static final String IMPORTS="IMPORTS";	// java file --> import declaration
 	public static final String INDEX="INDEX";
 	public static final String INITIALIZER="INITIALIZER";
 	public static final String INITIALIZERS="INITIALIZERS";

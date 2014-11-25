@@ -11,10 +11,15 @@ public abstract class IfTest implements Runnable{
 	 */
 	int get(int a){
 		if(a>3){
-			
+			a=2;
 		}
 		else{
-			synchronized (this){}
+			a=1;
+//			synchronized (this){}
+		}
+		
+		if(a<5){
+			a=1;
 		}
 		return 0;
 	}

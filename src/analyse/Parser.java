@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.osgi.internal.debug.Debug;
 
+import cfg.MethodVisitor;
+import cfg.SENode;
 import relationship.Relation;
 import collector.CUnit;
 
@@ -28,6 +30,7 @@ public class Parser {
 	private List<ASTNode> nodes=new ArrayList<ASTNode>();
 	private List<NodeInfo> infos=new ArrayList<NodeInfo>();
 	private List<Relation> relations=new ArrayList<Relation>();
+	private List<SENode> senodes=new ArrayList<SENode>();
 	
 	public Parser(String pName,String fName,String fPath){
 		this.setProjectName(pName);
@@ -51,12 +54,21 @@ public class Parser {
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;
 //		parser.createASTs(null, null, null, null);
-		JFileVisitor visitor=new JFileVisitor(this.fileName);
+//		JFileVisitor visitor=new JFileVisitor(this.fileName);
+		MethodVisitor visitor=new MethodVisitor();
 		javaUnit.accept(visitor);
-		this.setNodes(visitor.getNodes());
+//		this.setNodes(visitor.getNodes());
+//		this.setInfos(visitor.getInfos());
+//		this.setRelations(visitor.getRelations());
+		this.setNodes(visitor.getCfgN());
 		this.setInfos(visitor.getInfos());
-		this.setRelations(visitor.getRelations());
-//		HWVisitor visitor=new HWVisitor();
+		this.setRelations(visitor.getCfgR());
+		this.setSenodes(visitor.getSeNodes());
+		
+		
+		
+		
+		//		HWVisitor visitor=new HWVisitor();
 //		helloworld.accept(visitor);
 		
 	}
@@ -127,7 +139,35 @@ public class Parser {
 			
 			long toId=this.infos.get(toIndex).getId();
 			
-			Neo4jOp.addRelation(fromId, toId, r.getRelationType());
+			Neo4jOp.addRelation(fromId, toId, r.getRelationType(),r.getProperty());
+		}
+		////for cfg, add start and end node
+		List<Long> startids=new ArrayList<Long>();
+		List<Long> endids=new ArrayList<Long>();
+		for(int i=0;i<this.senodes.size();i++){
+			String key=senodes.get(i).getM_key();
+			String a=Neo4jOp.executeQuery(Query.startQuery(key));
+			String b[]=a.split(" ");
+//			for(int j=0;j<b.length;j++){
+//				System.out.println(b[j]+" "+j);
+//			}
+			long sid=Long.parseLong(b[12]);
+			int stindex=this.nodes.indexOf(senodes.get(i).getStart_to());
+			long stid=this.infos.get(stindex).getId();
+			Neo4jOp.addRelation(sid, stid, "CFG",key);
+			
+			String c=Neo4jOp.executeQuery(Query.endQuery(key));
+			String d[]=c.split(" ");
+//			for(int j=0;j<b.length;j++){
+//				System.out.println(b[j]+" "+j);
+//			}
+			long eid=Long.parseLong(d[12]);
+			List<ASTNode> ends=this.senodes.get(i).getEnd_from();
+			for(int j=0;j<ends.size();j++){
+				int efindex=this.nodes.indexOf(ends.get(j));
+				long efid=this.infos.get(efindex).getId();
+				Neo4jOp.addRelation(efid, eid, "CFG",key);
+			}
 		}
 		
 	}
@@ -151,5 +191,13 @@ public class Parser {
 
 	public void setNodes(List<ASTNode> nodes) {
 		this.nodes=nodes;
+	}
+
+	public List<SENode> getSenodes() {
+		return senodes;
+	}
+
+	public void setSenodes(List<SENode> senodes) {
+		this.senodes = senodes;
 	}
 }

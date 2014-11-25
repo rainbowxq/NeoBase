@@ -533,7 +533,7 @@ public class JFileVisitor extends ASTVisitor{
 				query=Query.idQuery(importNode);
 				this.nodes.add(importNode);
 				this.infos.add(new NodeInfo(query));
-				this.relations.add(new Relation(node,importNode,RelationType.IMPORT));
+				this.relations.add(new Relation(node,importNode,RelationType.IMPORTS));
 			}
 		}
 		
@@ -777,6 +777,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			this.infos.add(new NodeInfo(Query.enumConstantDeclarationQuery(ecds.get(i))));
 			this.relations.add(new Relation(node,ecds.get(i),RelationType.ENUM_CONSTANTS));
 		}
+		/*BODY DECLARATIONS*/
+		@SuppressWarnings("unchecked")
+		List<BodyDeclaration> bodyDeclarations=node.bodyDeclarations();
+		this.addBodyDeclarations(node, bodyDeclarations);
 		return true;
 	}
 
@@ -919,9 +923,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
 	 */
-	public boolean visit(ImportDeclaration node) {
-		return true;
-	}
+//	public boolean visit(ImportDeclaration node) {
+//		return true;
+//	}
 
 	/**
 	 * Visits the given type-specific AST node.
