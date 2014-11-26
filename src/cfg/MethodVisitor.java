@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -52,15 +53,15 @@ public class MethodVisitor extends ASTVisitor {
 		String key=node.resolveBinding().getKey();
 		SENode start_end=new SENode(key);
 		Block block=node.getBody();
-		SEInfo info=stmtCfg(block,key);
+		SEInfo info=stmtCfg(block,start_end);
 		start_end.setStart_to(info.getStart());
-		start_end.setEnd_from(info.getEnds());
+		start_end.addEnds_from(info.getEnds());
 		this.seNodes.add(start_end);
 		return false;
 	}
 	
-	public SEInfo stmtCfg(Statement stmt,String key){
-		
+	public SEInfo stmtCfg(Statement stmt,SENode senode){
+		String key=senode.getM_key();
 		List<SEInfo> tmpInfos;
 		SEInfo tmpinfo;
 		List<Expression> exps;
@@ -86,7 +87,7 @@ public class MethodVisitor extends ASTVisitor {
 			tmpInfos=new ArrayList<SEInfo>();
 //			System.out.println("aaaaaaaaaaaaaaaaaaaaa  "+stmts.size());
 			for(int i=0;i<stmts.size();i++){
-				tmpinfo=stmtCfg(stmts.get(i),key);
+				tmpinfo=stmtCfg(stmts.get(i),senode);
 				assert(tmpinfo!=null);
 				tmpInfos.add(tmpinfo);
 			}
@@ -107,7 +108,7 @@ public class MethodVisitor extends ASTVisitor {
 			this.infos.add(new NodeInfo(Query.statementQuery(stmt)));
 			
 			Statement dostmt=((DoStatement)stmt).getBody();
-			SEInfo dostmtinfo=stmtCfg(dostmt,key);
+			SEInfo dostmtinfo=stmtCfg(dostmt,senode);
 			this.cfgR.add(new Relation(stmt,dostmtinfo.getStart(),rtype,key));
 			
 			
@@ -155,13 +156,13 @@ public class MethodVisitor extends ASTVisitor {
 			this.infos.add(new NodeInfo(Query.expressionQuery(ifexp)));
 			
 			Statement tstmt=((IfStatement)stmt).getThenStatement();
-			tmpinfo=stmtCfg(tstmt,key);
+			tmpinfo=stmtCfg(tstmt,senode);
 			this.cfgR.add(new Relation(ifexp,tmpinfo.getStart(),rtype,key));
 			ifinfo.addEnds(tmpinfo.getEnds());
 			
 			Statement estmt=((IfStatement)stmt).getElseStatement();
 			if(estmt!=null){
-				tmpinfo=stmtCfg(estmt,key);
+				tmpinfo=stmtCfg(estmt,senode);
 				this.cfgR.add(new Relation(ifexp,tmpinfo.getStart(),rtype,key));
 				ifinfo.addEnds(tmpinfo.getEnds());
 			}
@@ -170,7 +171,19 @@ public class MethodVisitor extends ASTVisitor {
 			}
 			return ifinfo;
 		case ASTNode.RETURN_STATEMENT:
-		break;
+			Expression returnexp=((ReturnStatement)stmt).getExpression();
+			if(returnexp!=null){
+				tmpinfo=this.expCfg(returnexp, key);
+				if(tmpinfo!=null){
+					senode.addEnds_from(tmpinfo.getEnds());
+					tmpinfo.setEnds(null);
+					return tmpinfo;
+				}
+			}
+			senode.addEnd_from(stmt);
+			return this.addStmtNode(stmt);
+			
+
 		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 		break;
 		case ASTNode.SWITCH_CASE:
@@ -212,7 +225,7 @@ public class MethodVisitor extends ASTVisitor {
 			this.infos.add(new NodeInfo(Query.expressionQuery(wexp)));
 			
 			Statement wbody=((WhileStatement)stmt).getBody();
-			SEInfo wbodyinfo=stmtCfg(wbody,key);
+			SEInfo wbodyinfo=stmtCfg(wbody,senode);
 			this.cfgR.add(new Relation(wexp,wbodyinfo.getStart(),rtype,key));
 			this.concatSE(wbodyinfo.getEnds(), winfo.getStart(), key);
 			return winfo;
@@ -229,7 +242,10 @@ public class MethodVisitor extends ASTVisitor {
 		this.infos.add(new NodeInfo(Query.statementQuery(stmt)));
 		
 		info.setStart(stmt);
-		info.addEnd(stmt);
+		if(stmt.getNodeType()!=ASTNode.RETURN_STATEMENT)
+			info.addEnd(stmt);
+		else
+			info.setEnds(null);
 		return info;
 	}
 	
@@ -455,19 +471,20 @@ public class MethodVisitor extends ASTVisitor {
 			this.ends=ends;
 		}
 		public void addEnds(List<ASTNode> ends){
-			this.ends.addAll(ends);
+			if(ends!=null)
+				this.ends.addAll(ends);
 		}
 	}
 	
 	public static void main(String[] args){
 		int k=3;
-		int a=3;
-		A:while (k-->0){
+		int a=11;
+	A:	do{
 		B:	for(int j=1;j<10;j+=3)
 		C: {
 			System.out.println(j);
 				if(a>10)
-					break A;
+					continue A;
 				else if(a>5)
 					break B;
 				else if (a>2)
@@ -475,7 +492,7 @@ public class MethodVisitor extends ASTVisitor {
 				else
 					break C;
 			}
-		}
+		}while (k-->0);
 	}
 
 	public List<NodeInfo> getInfos() {
