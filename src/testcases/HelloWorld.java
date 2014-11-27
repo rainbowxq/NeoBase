@@ -2,19 +2,22 @@
 package testcases;
 
 public class HelloWorld {
-	public int  get(){
-		int a=10;
-		if(a<10){
-			a++;
-			if(a==2)
-				return 2;
+	public int  get( int a ){
+		int b=0;
+		switch(a){
+		case 1:
+			b=1;
+		case 2:
+			b=2;
+			break;
+		case 3:
+			return b;
+		case 4:
+			b=4;
+		default:
+			b=5;	
 		}
-		else
-			return a>0?3:4;
-		return a;
-		
-		
-		
+		return b;
 		
 //		int a=2;
 //A:		if(a>2)

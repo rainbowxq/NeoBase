@@ -14,9 +14,11 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -24,17 +26,21 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 
 import analyse.Query;
 import relationship.Relation;
@@ -48,6 +54,9 @@ public class MethodVisitor extends ASTVisitor {
 	private List<NodeInfo> infos=new ArrayList<NodeInfo>();
 	private List<Relation> cfgR=new ArrayList<Relation>();
 	private static final String rtype="CFG";
+	
+	private List<ASTNode> bcNodes=new ArrayList<ASTNode>();
+	private List<ASTNode> pNodes=new ArrayList<ASTNode>();
 	
 	public boolean visit(MethodDeclaration node) {
 		String key=node.resolveBinding().getKey();
@@ -98,9 +107,9 @@ public class MethodVisitor extends ASTVisitor {
 				return this.addStmtNode(stmt);
 
 		case ASTNode.BREAK_STATEMENT:
-			break;
 		case ASTNode.CONTINUE_STATEMENT:
-			break;
+			return this.addStmtNode(stmt);
+			
 		case ASTNode.DO_STATEMENT:
 			SEInfo info=new SEInfo();
 			info.setStart(stmt);
@@ -119,21 +128,10 @@ public class MethodVisitor extends ASTVisitor {
 			this.infos.add(new NodeInfo(Query.expressionQuery(doexp)));
 			this.cfgR.add(new Relation(doexp,stmt,rtype,key));
 			
+			//check if the break or continue infomation is needed to add
+			this.checkBC(stmt, info, doexp, key);
 			
 			
-//			tmpinfo=expCfg(doexp,key);
-//			if(tmpinfo!=null){
-//				this.concatSE(dostmtinfo.getEnds(), tmpinfo.getStart(), key);
-//				info.addEnds(tmpinfo.getEnds());
-//				this.concatSE(tmpinfo.getEnds(), stmt, key);
-//			}
-//			else{
-//				this.concatSE(dostmtinfo.getEnds(), doexp, key);
-//				info.addEnd(doexp);
-//				this.cfgN.add(doexp);
-//				this.infos.add(new NodeInfo(Query.expressionQuery(doexp)));
-//				this.cfgR.add(new Relation(doexp,stmt,rtype,key));
-//			}
 			return info;
 			
 		case ASTNode.ENHANCED_FOR_STATEMENT:
@@ -147,6 +145,7 @@ public class MethodVisitor extends ASTVisitor {
 				return this.addStmtNode(stmt);
 
 		case ASTNode.FOR_STATEMENT:
+			
 		break;
 		case ASTNode.IF_STATEMENT:
 			SEInfo ifinfo=new SEInfo();
@@ -185,11 +184,51 @@ public class MethodVisitor extends ASTVisitor {
 			
 
 		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
-		break;
+			exps=new ArrayList<Expression>();
+			Expression micexp=((SuperConstructorInvocation)stmt).getExpression();
+			if(micexp!=null)
+				exps.add(micexp);
+			exps.addAll(((SuperConstructorInvocation)stmt).arguments());
+			tmpInfos=this.computeInfos(exps, key);
+			tmpinfo=this.tInfo(tmpInfos, key);
+			if(tmpinfo!=null)
+				return tmpinfo;
+			else
+				return this.addStmtNode(stmt);
+		
 		case ASTNode.SWITCH_CASE:
-		break;
+			return this.addStmtNode(stmt);
+
 		case ASTNode.SWITCH_STATEMENT:
-		break;
+			SEInfo swinfo=new SEInfo();
+			this.cfgN.add(stmt);
+			this.infos.add(new NodeInfo(Query.statementQuery(stmt)));
+			swinfo.setStart(stmt);
+			
+			List<Statement> swStmts=((SwitchStatement)stmt).statements();
+			tmpInfos=new ArrayList<SEInfo>();
+			for(int i=0;i<swStmts.size();i++){
+				if(swStmts.get(i).getNodeType()==ASTNode.SWITCH_CASE){
+					this.cfgR.add(new Relation(stmt,swStmts.get(i),rtype,key));
+				}
+				if(swStmts.get(i).getNodeType()==ASTNode.BREAK_STATEMENT){
+					this.cfgN.add(swStmts.get(i));
+					this.infos.add(new NodeInfo(Query.statementQuery(swStmts.get(i))));
+					
+					swinfo.addEnd(swStmts.get(i));
+					tmpinfo=this.tInfo(tmpInfos, key);
+					this.concatSE(tmpinfo.getEnds(), swStmts.get(i), key);
+					tmpInfos=new ArrayList<SEInfo>();
+				}
+				else{
+					tmpInfos.add(this.stmtCfg(swStmts.get(i), senode));
+				}
+			}
+			tmpinfo=this.tInfo(tmpInfos, key);
+			if(tmpinfo!=null)
+				swinfo.addEnds(tmpinfo.getEnds());
+			return swinfo;
+			
 		case ASTNode.SYNCHRONIZED_STATEMENT:
 		break;
 		case ASTNode.THROW_STATEMENT:
@@ -228,9 +267,76 @@ public class MethodVisitor extends ASTVisitor {
 			SEInfo wbodyinfo=stmtCfg(wbody,senode);
 			this.cfgR.add(new Relation(wexp,wbodyinfo.getStart(),rtype,key));
 			this.concatSE(wbodyinfo.getEnds(), winfo.getStart(), key);
+			
+			this.checkBC(stmt, winfo, wexp, key);
+			
 			return winfo;
 		}
 		return null;
+	}
+	
+	public void checkBC(ASTNode node,SEInfo info,ASTNode cnode,String key){
+		while(this.pNodes.contains(node)){
+			int index=this.pNodes.indexOf(node);
+			ASTNode bc=this.bcNodes.get(index);
+			if(bc instanceof BreakStatement){
+				info.addEnd(bc);
+			}
+			else if(bc instanceof ContinueStatement){
+				this.cfgR.add(new Relation(bc,cnode,rtype,key));
+			}
+			this.pNodes.remove(index);
+			this.bcNodes.remove(index);
+		}
+	}
+	/**
+	 * only for BreakStatement and ContinueStatement
+	 * @param node
+	 * @return
+	 */
+	public ASTNode getBCNode(ASTNode node){
+		SimpleName label=null;
+		if(node instanceof ContinueStatement){
+			label=((ContinueStatement) node).getLabel();
+		}
+		else if(node instanceof BreakStatement){
+			label=((BreakStatement) node).getLabel();
+		}
+		else
+			assert false:"the input node is not a of kind BreakStatement or ContinueStatement";
+		return this.findBCparent(node,label);
+		
+	}
+	
+	public ASTNode findBCparent(ASTNode node,SimpleName label){
+		if(label==null){
+			ASTNode parent=node.getParent();
+			while(parent!=null){
+				switch(parent.getNodeType()){
+				case ASTNode.ENHANCED_FOR_STATEMENT:
+				case ASTNode.DO_STATEMENT:
+				case ASTNode.FOR_STATEMENT:
+				case ASTNode.WHILE_STATEMENT:
+					return parent;
+				}
+				parent=parent.getParent();
+			}
+			assert parent!=null;
+		}
+		else{
+			ASTNode parent=node.getParent();
+			while (parent!=null){
+				if(parent.getNodeType()==ASTNode.LABELED_STATEMENT){
+					String name=((LabeledStatement)parent).getLabel().getFullyQualifiedName();
+					if(name.equals(label.getFullyQualifiedName()))
+						return parent;
+				}
+				parent=parent.getParent();
+			}
+			assert parent!=null;
+		}
+		return node;
+		
 	}
 	
 	/**
@@ -242,10 +348,17 @@ public class MethodVisitor extends ASTVisitor {
 		this.infos.add(new NodeInfo(Query.statementQuery(stmt)));
 		
 		info.setStart(stmt);
-		if(stmt.getNodeType()!=ASTNode.RETURN_STATEMENT)
-			info.addEnd(stmt);
-		else
-			info.setEnds(null);
+		switch(stmt.getNodeType()){
+			case ASTNode.BREAK_STATEMENT:
+			case ASTNode.CONTINUE_STATEMENT:
+				this.bcNodes.add(stmt);
+				this.pNodes.add(getBCNode(stmt));
+			case ASTNode.RETURN_STATEMENT:
+				info.setEnds(null);
+				break;
+			default:
+				info.addEnd(stmt);
+		}
 		return info;
 	}
 	
@@ -408,9 +521,10 @@ public class MethodVisitor extends ASTVisitor {
 	 * @param info2
 	 */
 	public void concatSE(List<ASTNode> ends,ASTNode nextnode,String key){
-		
-		for(int j=0;j<ends.size();j++){
-			this.cfgR.add(new Relation(ends.get(j),nextnode,rtype,key));
+		if(ends!=null){
+			for(int j=0;j<ends.size();j++){
+				this.cfgR.add(new Relation(ends.get(j),nextnode,rtype,key));
+			}
 		}
 	}
 	
@@ -451,6 +565,35 @@ public class MethodVisitor extends ASTVisitor {
 	class SEInfo{
 		ASTNode start;
 		List<ASTNode> ends=new ArrayList<ASTNode>();
+//		List<ASTNode> bcs=new ArrayList<ASTNode>();
+//		List<ASTNode> bcnode=new ArrayList<ASTNode>();
+//		
+//		
+//		
+//		public void addbcs(ASTNode bs){
+//			this.bcs.add(bs);
+//		}
+//		
+//		public void addbcss(List<ASTNode> bss){
+//			this.bcs.addAll(bss);
+//		}
+//		
+//		public List<ASTNode> getBs(){
+//			return this.bcs;
+//		}
+//		
+//		public void addBnode(ASTNode bcnode){
+//			this.bcnode.add(bcnode);
+//		}
+//		
+//		public void addBnodes(List<ASTNode> bcnodes){
+//			this.bcnode.addAll(bcnodes);
+//		}
+//		
+//		public List<ASTNode> getBCnode(){
+//			return this.bcnode;
+//		}
+		
 		
 		public void setStart(ASTNode start){
 			this.start=start;
@@ -493,6 +636,10 @@ public class MethodVisitor extends ASTVisitor {
 					break C;
 			}
 		}while (k-->0);
+//		{
+////			continue;
+////			break;
+//		}
 	}
 
 	public List<NodeInfo> getInfos() {
