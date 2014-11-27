@@ -1,7 +1,7 @@
 package test;
 
 import collector.JavaFiles;
-import analyse.Parser;
+import ast.Parser;
 
 public class TestDriver {
 	public static void eTest(String fileName,String filePath,String[] classPaths,String[] filePaths){

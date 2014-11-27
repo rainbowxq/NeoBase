@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -42,7 +43,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
-import analyse.Query;
+import ast.Query;
 import relationship.Relation;
 
 
@@ -101,8 +102,10 @@ public class MethodVisitor extends ASTVisitor {
 				tmpInfos.add(tmpinfo);
 			}
 			SEInfo tmpinfo2=this.tInfo(tmpInfos, key);
-			if(tmpinfo2!=null)
+			if(tmpinfo2!=null){
+				this.checkBC(stmt, tmpinfo2, null, null);
 				return tmpinfo2;
+			}
 			else
 				return this.addStmtNode(stmt);
 
@@ -145,8 +148,73 @@ public class MethodVisitor extends ASTVisitor {
 				return this.addStmtNode(stmt);
 
 		case ASTNode.FOR_STATEMENT:
+			SEInfo forinfo=new SEInfo();
+			List<ASTNode> startparts=new ArrayList<ASTNode>();
+			List<Expression> iniExps=((ForStatement)stmt).initializers();
+
 			
-		break;
+			Expression forexp=((ForStatement)stmt).getExpression();
+			startparts.addAll(iniExps);
+			if(forexp!=null)
+				startparts.add(forexp);
+			else
+				startparts.add(stmt);
+			
+			forinfo.setStart(startparts.get(0));
+			int spsize=startparts.size();
+			for(int i=0;i<spsize;i++){
+				ASTNode tmpNode=startparts.get(i);
+				this.cfgN.add(tmpNode);
+				if(tmpNode instanceof Statement)
+					this.infos.add(new NodeInfo(Query.statementQuery((Statement) tmpNode)));
+				else if(tmpNode instanceof Expression)
+					this.infos.add(new NodeInfo(Query.expressionQuery((Expression) tmpNode)));
+				else
+					assert false :"the node type can only be Statement or Expression";
+				if(i>0)
+					this.cfgR.add(new Relation(startparts.get(i-1),startparts.get(i),rtype,key));
+			}
+			
+				
+			/**/
+			Statement forbody=((ForStatement)stmt).getBody();
+			tmpinfo=this.stmtCfg(forbody, senode);
+			this.cfgR.add(new Relation(startparts.get(spsize-1),tmpinfo.getStart(),rtype,key));
+			
+			
+			
+			List<Expression> upExps=((ForStatement)stmt).updaters();
+			int usize=upExps.size();
+			for(int i=0;i<usize;i++){
+				this.cfgN.add(upExps.get(i));
+				this.infos.add(new NodeInfo(Query.expressionQuery(upExps.get(i))));
+				if(i>0)
+					this.cfgR.add(new Relation(upExps.get(i-1),upExps.get(i),rtype,key));
+			}
+			List<ASTNode> tmpends=new ArrayList<ASTNode>();
+			if(usize>0){
+				this.concatSE(tmpinfo.getEnds(), upExps.get(0), key);
+				tmpends.add(upExps.get(usize-1));
+			}
+			else
+				tmpends.addAll(tmpinfo.getEnds());
+			
+			if(forexp!=null){
+				this.concatSE(tmpends, forexp, key);
+				forinfo.addEnd(forexp);
+				if(usize>0)
+					this.checkBC(stmt, forinfo, upExps.get(0), key);
+				else
+					this.checkBC(stmt, forinfo, forexp, key);
+			}
+			else{
+				this.concatSE(tmpends, stmt, key);
+				this.checkBC(stmt, forinfo, stmt, key);
+//				forinfo.addEnd(stmt);
+			}
+			return forinfo;
+			
+			
 		case ASTNode.IF_STATEMENT:
 			SEInfo ifinfo=new SEInfo();
 			Expression ifexp=((IfStatement)stmt).getExpression();
@@ -168,7 +236,14 @@ public class MethodVisitor extends ASTVisitor {
 			else{
 				ifinfo.addEnd(ifexp);
 			}
+			this.checkBC(stmt, ifinfo, null, null);
 			return ifinfo;
+			
+		case ASTNode.LABELED_STATEMENT:
+			Statement lbody=((LabeledStatement)stmt).getBody();
+			return this.stmtCfg(lbody, senode);
+			
+			
 		case ASTNode.RETURN_STATEMENT:
 			Expression returnexp=((ReturnStatement)stmt).getExpression();
 			if(returnexp!=null){
@@ -329,7 +404,7 @@ public class MethodVisitor extends ASTVisitor {
 				if(parent.getNodeType()==ASTNode.LABELED_STATEMENT){
 					String name=((LabeledStatement)parent).getLabel().getFullyQualifiedName();
 					if(name.equals(label.getFullyQualifiedName()))
-						return parent;
+						return ((LabeledStatement)parent).getBody();
 				}
 				parent=parent.getParent();
 			}
@@ -622,24 +697,30 @@ public class MethodVisitor extends ASTVisitor {
 	public static void main(String[] args){
 		int k=3;
 		int a=11;
-	A:	do{
-		B:	for(int j=1;j<10;j+=3)
-		C: {
-			System.out.println(j);
-				if(a>10)
-					continue A;
-				else if(a>5)
-					break B;
-				else if (a>2)
-					continue B;
-				else
-					break C;
-			}
-		}while (k-->0);
-//		{
-////			continue;
-////			break;
-//		}
+	B:	if(a>10)
+	C:		break C;
+		else if(a>5)
+			break B;
+		else
+			a-=1;
+		
+		System.out.println(a);
+		
+		
+//	A:	do{
+//		B:	for(int j=1;j<10;j+=3)
+//		C: {
+//			System.out.println(j);
+//				if(a>10)
+//					continue A;
+//				else if(a>5)
+//					break B;
+//				else if (a>2)
+//					continue B;
+//				else
+//					break C;
+//			}
+//		}while (k-->0);
 	}
 
 	public List<NodeInfo> getInfos() {

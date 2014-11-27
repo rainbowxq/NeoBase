@@ -1,4 +1,4 @@
-package analyse;
+package ast;
 
 import java.util.List;
 

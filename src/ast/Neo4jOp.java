@@ -1,4 +1,4 @@
-package analyse;
+package ast;
 
 import javax.ws.rs.core.MediaType;
 

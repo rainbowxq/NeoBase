@@ -1,6 +1,6 @@
 package test;
 
-import analyse.Parser;
+import ast.Parser;
 
 public class TDtest {
 	public void eTest(String[] filePaths,String[] classPaths){

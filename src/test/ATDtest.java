@@ -5,7 +5,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.JavaCore;
 
 import collector.JavaFiles;
-import analyse.Parser;
+import ast.Parser;
 
 public class ATDtest {
 	public void eTest(String[] classPaths,String[] filePaths){
