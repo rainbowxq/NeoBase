@@ -1,7 +1,7 @@
 package relationship;
 
 
-public class RelationType {
+public class ASTProperty {
 	public static final String ANNOTATIONS="ANNOTATIONS";//__ --> annotation /annotation binding
 	public static final String ANONYMOUS_CLASS_DECLARATION="ANONYMOUS_CLASS_DECLARATION";
 	public static final String ARGUMENTS="ARGUMENTS"; // method invocation --> expression

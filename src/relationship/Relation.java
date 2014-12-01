@@ -12,13 +12,13 @@ public class Relation {
 	private  ASTNode from;
 	private ASTNode to;
 	private String relationType;
-	private String property=null;
+	private String property="null";
 	
-	public Relation(ASTNode from,ASTNode to,String type){
-		this.from=from;
-		this.to=to;
-		this.setRelationType(type);
-	}
+//	public Relation(ASTNode from,ASTNode to,String type){
+//		this.from=from;
+//		this.to=to;
+//		this.setRelationType(type);
+//	}
 	public Relation(ASTNode from,ASTNode to,String type,String prop){
 		this.from=from;
 		this.to=to;

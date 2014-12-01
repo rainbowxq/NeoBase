@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import collector.CUnit;
-import relationship.RelationType;
+import relationship.ASTProperty;
 
 public class NeoHello {
 	
@@ -86,7 +86,7 @@ public class NeoHello {
 			this.nodes.add(modifier);
 			NeoRelation relation=new NeoRelation(Node,
 								modifier,
-								RelationType.MODIFIERS);
+								ASTProperty.MODIFIERS);
 		}
 		/**
 		 * BODY_DECLARATIONS
@@ -97,7 +97,7 @@ public class NeoHello {
 			this.nodes.add(method);
 			this.relations.add(new NeoRelation(Node,
 					method,
-					RelationType.BODY_DECLARATIONS));
+					ASTProperty.BODY_DECLARATIONS));
 			this.analyze(method,(MethodDeclaration)method.getNode());
 		}
 //		node.getModifiers()
@@ -136,27 +136,27 @@ public class NeoHello {
 		for(int i=0;i<modifiers.size();i++){
 			NeoNode modifier=new NeoNode(modifiers.get(i));
 			this.nodes.add(modifier);
-			this.relations.add(new NeoRelation(Node,modifier,RelationType.MODIFIERS));
+			this.relations.add(new NeoRelation(Node,modifier,ASTProperty.MODIFIERS));
 		}
 		/**
 		 * return type
 		 */
 		NeoNode rType=new NeoNode((PrimitiveType) node.getReturnType2());
 		this.nodes.add(rType);
-		this.relations.add(new NeoRelation(Node,rType,RelationType.RETURN_TYPE));
+		this.relations.add(new NeoRelation(Node,rType,ASTProperty.RETURN_TYPE));
 		/**
 		 * PARAMETERS 
 		 */
 		NeoNode svd=new NeoNode((SingleVariableDeclaration) node.parameters().get(0));
 		this.nodes.add(svd);
-		this.relations.add(new NeoRelation(Node,svd,RelationType.PARAMETERS));
+		this.relations.add(new NeoRelation(Node,svd,ASTProperty.PARAMETERS));
 		this.analyze(svd,(SingleVariableDeclaration)svd.getNode());
 		/**
 		 * BODY
 		 */
 		NeoNode block=new NeoNode(node.getBody());
 		this.nodes.add(block);
-		this.relations.add(new NeoRelation(Node,block,RelationType.BODY));
+		this.relations.add(new NeoRelation(Node,block,ASTProperty.BODY));
 		this.analyze(block,(Block)block.getNode());
 	}
 	/**
@@ -183,7 +183,7 @@ public class NeoHello {
 	public void analyze(NeoNode Node,SingleVariableDeclaration node){
 		NeoNode aType=new NeoNode((ArrayType) node.getType());
 		this.nodes.add(aType);
-		this.relations.add(new NeoRelation(Node,aType,RelationType.TYPE));
+		this.relations.add(new NeoRelation(Node,aType,ASTProperty.TYPE));
 		this.analyze(aType,(ArrayType)aType.getNode());
 		
 		
@@ -208,7 +208,7 @@ public class NeoHello {
 //		System.out.println(statements.size());
 		NeoNode eStatement=new NeoNode((ExpressionStatement) statements.get(0));
 		this.nodes.add(eStatement);
-		this.relations.add(new NeoRelation(Node,eStatement,RelationType.STATEMENTS));
+		this.relations.add(new NeoRelation(Node,eStatement,ASTProperty.STATEMENTS));
 		this.analyze(eStatement,(ExpressionStatement)eStatement.getNode());
 	}
 	
@@ -226,7 +226,7 @@ public class NeoHello {
 	public void analyze(NeoNode Node,ExpressionStatement node){
 		NeoNode mInvoke=new NeoNode((MethodInvocation) node.getExpression());
 		this.nodes.add(mInvoke);
-		this.relations.add(new NeoRelation(Node,mInvoke,RelationType.EXPRESSION));
+		this.relations.add(new NeoRelation(Node,mInvoke,ASTProperty.EXPRESSION));
 		this.analyze(mInvoke,(MethodInvocation)mInvoke.getNode());
 	}
 	public String store(ExpressionStatement node){
@@ -243,7 +243,7 @@ public class NeoHello {
 	public void analyze(NeoNode Node,MethodInvocation node){
 		NeoNode string=new NeoNode((StringLiteral) node.arguments().get(0));
 		this.nodes.add(string);
-		this.relations.add(new NeoRelation(Node,string,RelationType.ARGUMENTS));
+		this.relations.add(new NeoRelation(Node,string,ASTProperty.ARGUMENTS));
 	}
 	
 	public String store(MethodInvocation node){
@@ -298,7 +298,7 @@ public class NeoHello {
 	public void analyze(NeoNode Node,ArrayType node){
 		NeoNode sType=new NeoNode((SimpleType) node.getComponentType());
 		this.nodes.add(sType);
-		this.relations.add(new NeoRelation(Node,sType,RelationType.COMPONENT_TYPE));
+		this.relations.add(new NeoRelation(Node,sType,ASTProperty.COMPONENT_TYPE));
 	}
 	
 	public String store(ArrayType  node){

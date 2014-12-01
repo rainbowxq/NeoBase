@@ -1,7 +1,8 @@
-package ast;
+package neo4j;
 
 import javax.ws.rs.core.MediaType;
 
+import relationship.Relation;
 import net.sf.json.JSONObject;
 
 import com.sun.jersey.api.client.Client;
@@ -44,17 +45,26 @@ public class Neo4jOp {
 			
 		}
 		
-		public static void addRelation(long id1,long id2,String type,String key){
+		public static void addRelation(long id1,long id2,String type,String prop){
 			JSONObject query=new JSONObject();
-			String content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:"+type+
-					"{M_KEY:{key}}]->(t) return r";
+			JSONObject params=new JSONObject();
+			String content=null;
+			switch(type){
+			case "AST":
+				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:AST {NAME:{prop}}]->(t) return r";
+				break;
+			case "CFG":
+				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:CFG {M_KEY:{prop}}]->(t) return r";
+				break;
+			default:
+				assert false: "relation type error!!!";
+			}
 			query.put("query", content);
 			
-			JSONObject params=new JSONObject();
+			
 			params.put("from",id1 );
 			params.put("to", id2);
-			params.put("key", key);
-			
+			params.put("prop", prop);
 			query.put("params",params);
 			
 			System.out.println(query.toString());

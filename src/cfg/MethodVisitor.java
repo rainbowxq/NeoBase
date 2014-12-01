@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import node.NodeInfo;
+import node.SENode;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -16,6 +17,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ContinueStatement;
@@ -42,6 +44,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
 
 import ast.Query;
 import relationship.Relation;
@@ -109,9 +112,13 @@ public class MethodVisitor extends ASTVisitor {
 			else
 				return this.addStmtNode(stmt);
 
-		case ASTNode.BREAK_STATEMENT:
-		case ASTNode.CONTINUE_STATEMENT:
-			return this.addStmtNode(stmt);
+//		case ASTNode.BREAK_STATEMENT:
+//		case ASTNode.CONTINUE_STATEMENT:
+//		case ASTNode.SWITCH_CASE:
+//		case ASTNode.SYNCHRONIZED_STATEMENT:
+//		case ASTNode.THROW_STATEMENT:
+//		case ASTNode.TYPE_DECLARATION_STATEMENT:
+//			return this.addStmtNode(stmt);
 			
 		case ASTNode.DO_STATEMENT:
 			SEInfo info=new SEInfo();
@@ -271,9 +278,7 @@ public class MethodVisitor extends ASTVisitor {
 			else
 				return this.addStmtNode(stmt);
 		
-		case ASTNode.SWITCH_CASE:
-			return this.addStmtNode(stmt);
-
+		
 		case ASTNode.SWITCH_STATEMENT:
 			SEInfo swinfo=new SEInfo();
 			this.cfgN.add(stmt);
@@ -303,15 +308,40 @@ public class MethodVisitor extends ASTVisitor {
 			if(tmpinfo!=null)
 				swinfo.addEnds(tmpinfo.getEnds());
 			return swinfo;
-			
-		case ASTNode.SYNCHRONIZED_STATEMENT:
-		break;
-		case ASTNode.THROW_STATEMENT:
-		break;
+		
 		case ASTNode.TRY_STATEMENT:
-		break;
-		case ASTNode.TYPE_DECLARATION_STATEMENT:
-			return this.addStmtNode(stmt);
+			SEInfo tryinfo=new SEInfo();
+			tryinfo.setStart(stmt);
+			this.cfgN.add(stmt);
+			this.infos.add(new NodeInfo(Query.statementQuery(stmt)));
+			List<Block> bls=new ArrayList<Block>();
+			bls.add(((TryStatement)stmt).getBody());
+			
+			List<CatchClause> ccs=((TryStatement)stmt).catchClauses();
+			for(int i=0;i<ccs.size();i++){
+				bls.add(ccs.get(i).getBody());
+			}
+			SEInfo tmpinfo3=null;
+			if(((TryStatement)stmt).getFinally()!=null){
+				tmpinfo3=this.stmtCfg(((TryStatement)stmt).getFinally(), senode);
+			}
+			
+			for(int j=0;j<bls.size();j++){
+				tmpinfo=this.stmtCfg(bls.get(j), senode);
+				this.cfgR.add(new Relation(stmt,tmpinfo.getStart(),rtype,key));
+				if(tmpinfo3!=null){
+					this.concatSE(tmpinfo.getEnds(),tmpinfo3.getStart() , key);
+				}
+				else{
+					tryinfo.addEnds(tmpinfo.getEnds());
+				}
+			}
+			
+			if(tmpinfo3!=null){
+				tryinfo.addEnds(tmpinfo3.getEnds());
+			}
+			
+			return tryinfo;		
 
 		case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 			exps=new ArrayList<Expression>();
@@ -347,7 +377,7 @@ public class MethodVisitor extends ASTVisitor {
 			
 			return winfo;
 		}
-		return null;
+		return this.addStmtNode(stmt);
 	}
 	
 	public void checkBC(ASTNode node,SEInfo info,ASTNode cnode,String key){
@@ -694,34 +724,34 @@ public class MethodVisitor extends ASTVisitor {
 		}
 	}
 	
-	public static void main(String[] args){
-		int k=3;
-		int a=11;
-	B:	if(a>10)
-	C:		break C;
-		else if(a>5)
-			break B;
-		else
-			a-=1;
-		
-		System.out.println(a);
-		
-		
-//	A:	do{
-//		B:	for(int j=1;j<10;j+=3)
-//		C: {
-//			System.out.println(j);
-//				if(a>10)
-//					continue A;
-//				else if(a>5)
-//					break B;
-//				else if (a>2)
-//					continue B;
-//				else
-//					break C;
-//			}
-//		}while (k-->0);
-	}
+//	public static void main(String[] args){
+//		int k=3;
+//		int a=11;
+//	B:	if(a>10)
+//	C:		break C;
+//		else if(a>5)
+//			break B;
+//		else
+//			a-=1;
+//		
+//		System.out.println(a);
+//		
+//		
+////	A:	do{
+////		B:	for(int j=1;j<10;j+=3)
+////		C: {
+////			System.out.println(j);
+////				if(a>10)
+////					continue A;
+////				else if(a>5)
+////					break B;
+////				else if (a>2)
+////					continue B;
+////				else
+////					break C;
+////			}
+////		}while (k-->0);
+//	}
 
 	public List<NodeInfo> getInfos() {
 		return infos;

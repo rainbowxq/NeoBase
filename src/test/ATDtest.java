@@ -9,7 +9,7 @@ import ast.Parser;
 
 public class ATDtest {
 	public void eTest(String[] classPaths,String[] filePaths){
-		Parser parser=new Parser("","ClassPreamble.java","./src/testcases/ClassPreamble.java");
+		Parser parser=new Parser("ClassPreamble.java","./src/testcases/ClassPreamble.java");
 		parser.ececute(classPaths,filePaths);
 	}
 	

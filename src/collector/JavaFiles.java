@@ -7,9 +7,10 @@ import java.util.List;
 
 public class JavaFiles {
 	/*[store the java files' absolute paths under a project ]*/
-	ArrayList<String> filepaths=new ArrayList<String>();
-	ArrayList<String> names=new ArrayList<String>();
-	ArrayList<String> classpaths=new ArrayList<String>();
+	private ArrayList<String> filepaths=new ArrayList<String>();
+	private ArrayList<String> names=new ArrayList<String>();
+	
+	
 	/**
 	 * 读取文件夹下所有子目录下的txt文件，并将其保存到list集合中。
 	 * 
@@ -33,17 +34,6 @@ public class JavaFiles {
 				} else {
 					if (files[i].getName().endsWith(".java")) {
 						filepaths.add(files[i].getAbsolutePath());
-						
-						String classpath=files[i].getAbsolutePath().replaceFirst("/src/", "/bin/");
-						String[] parts=classpath.split("java");
-						classpath=parts[0];
-						for(int j=1;j<parts.length;j++){
-							classpath+=parts[i];
-							classpath+="java";
-						}
-						classpath+="class";
-						classpaths.add(classpath);
-						
 						this.names.add(files[i].getName());
 					}
 				}
@@ -58,19 +48,14 @@ public class JavaFiles {
 		return this.filepaths;
 	}
 	
-	public ArrayList<String> getclasspaths(){
-		return this.classpaths;
-	}
-	
 	public ArrayList<String> getNames(){
 		return this.names;
 	}
 	public static void main(String[] args){
 		JavaFiles files=new JavaFiles();
-		files.readFolder("/home/xiaoq_zhu/workspace/NeoBase");
+		files.readFolder("/home/xiaoq_zhu/workspace/LRP");
 		for(int i=0;i<files.filepaths.size();i++){
 			System.out.println(files.filepaths.get(i));
-			System.out.println(files.classpaths.get(i));
 			System.out.println(files.names.get(i));
 		}
 	}

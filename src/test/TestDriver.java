@@ -1,13 +1,15 @@
 package test;
 
-import collector.JavaFiles;
 import ast.Parser;
 
 public class TestDriver {
 	public static void eTest(String fileName,String filePath,String[] classPaths,String[] filePaths){
-		Parser parser=new Parser("",fileName,filePath);
+		Parser parser=new Parser(fileName,filePath);
 		parser.ececute(classPaths,filePaths);
 	}
+	
+	
+	
 	
 	public static void main(String[] args){
 //		TestDriver.eTest("TestAnnotation.java","./src/testcases/TestAnnotation.java");//pass
@@ -51,6 +53,9 @@ public class TestDriver {
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("ThrowTest.java","./src/testcases/ThrowTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
+		
+		
+		
 		
 		TestDriver.eTest("HelloWorld.java","./src/testcases/HelloWorld.java",
 				new String[]{"./target/classes"},new String[]{"./src"});

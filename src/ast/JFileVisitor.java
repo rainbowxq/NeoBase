@@ -97,7 +97,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 import relationship.Relation;
-import relationship.RelationType;
+import relationship.ASTProperty;
 import node.NodeInfo;;
 /**
  * methods of visiting different kinds of nodes
@@ -109,7 +109,7 @@ public class JFileVisitor extends ASTVisitor{
 	private List<ASTNode> nodes=new ArrayList<ASTNode>();
 	private List<NodeInfo> infos=new ArrayList<NodeInfo>();
 	private List<Relation> relations=new ArrayList<Relation>();
-	
+	private static final String rtype="AST";
 
 	public JFileVisitor(String name){
 		this.fileName=name;
@@ -177,11 +177,11 @@ public class JFileVisitor extends ASTVisitor{
 		}
 		/*Type*/
 		Type type=node.getType();
-		this.addType(node, type, RelationType.TYPE);
+		this.addType(node, type, ASTProperty.TYPE);
 		/*Default*/
 		Expression defau=node.getDefault();
 		if(defau!=null)
-			this.addExpression(node, defau, RelationType.DEFAULT);
+			this.addExpression(node, defau,ASTProperty.DEFAULT);
 		return true;
 	}
 
@@ -218,8 +218,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ArrayAccess node) {
-		this.addExpression(node, node.getArray(),RelationType.ARRAY); 
-		this.addExpression(node, node.getIndex(), RelationType.INDEX);
+		this.addExpression(node, node.getArray(),ASTProperty.ARRAY); 
+		this.addExpression(node, node.getIndex(), ASTProperty.INDEX);
 		return true;
 	}
 
@@ -237,17 +237,17 @@ public class JFileVisitor extends ASTVisitor{
 	 */
 	public boolean visit(ArrayCreation node) {
 		/*type*/
-		this.addType(node, node.getType(), RelationType.TYPE);
+		this.addType(node, node.getType(), ASTProperty.TYPE);
 		/*dimensions*/
 		@SuppressWarnings("unchecked")
 		List<Expression> dimensions=node.dimensions();
 		for(int i=0;i<dimensions.size();i++){
-			this.addExpression(node, dimensions.get(i), RelationType.DIMENSIONS);
+			this.addExpression(node, dimensions.get(i), ASTProperty.DIMENSIONS);
 		}
 		/*initializer*/
 		ArrayInitializer ini=node.getInitializer();
 		if(ini!=null){
-			this.addExpression(node, ini, RelationType.INITIALIZER);
+			this.addExpression(node, ini, ASTProperty.INITIALIZER);
 		}
 		return true;
 	}
@@ -268,7 +268,7 @@ public class JFileVisitor extends ASTVisitor{
 		@SuppressWarnings("unchecked")
 		List<Expression> expressions=node.expressions();
 		for(int i=0;i<expressions.size();i++){
-			this.addExpression(node, expressions.get(i), RelationType.EXPRESSIONS);
+			this.addExpression(node, expressions.get(i), ASTProperty.EXPRESSIONS);
 		}
 		return true;
 	}
@@ -302,8 +302,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(AssertStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
-		this.addExpression(node, node.getMessage(), RelationType.MESSAGE);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
+		this.addExpression(node, node.getMessage(), ASTProperty.MESSAGE);
 		return true;
 	}
 
@@ -320,8 +320,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(Assignment node) {
-		this.addExpression(node, node.getLeftHandSide(), RelationType.LEFT_HAND_SIDE);
-		this.addExpression(node, node.getRightHandSide(), RelationType.RIGHT_HAND_SIDE);
+		this.addExpression(node, node.getLeftHandSide(), ASTProperty.LEFT_HAND_SIDE);
+		this.addExpression(node, node.getRightHandSide(), ASTProperty.RIGHT_HAND_SIDE);
 		return true;
 	}
 
@@ -341,7 +341,7 @@ public class JFileVisitor extends ASTVisitor{
 		@SuppressWarnings("unchecked")
 		List<Statement> statements=node.statements();
 		for(int i=0;i<statements.size();i++)
-			this.addStatement(node, statements.get(i), RelationType.STATEMENTS);
+			this.addStatement(node, statements.get(i), ASTProperty.STATEMENTS);
 		return true;
 	}
 
@@ -413,8 +413,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(CastExpression node) {
-		this.addType(node, node.getType(), RelationType.TYPE);
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addType(node, node.getType(), ASTProperty.TYPE);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -431,8 +431,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(CatchClause node) {
-		this.addSingleVariableDeclaration(node, node.getException(), RelationType.EXCEPTION);
-		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addSingleVariableDeclaration(node, node.getException(), ASTProperty.EXCEPTION);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
 		return true;
 	}
 
@@ -468,23 +468,23 @@ public class JFileVisitor extends ASTVisitor{
 		/*Expression*/
 		Expression exp=node.getExpression();
 		if(exp!=null)
-			this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+			this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		/*TYPE ARGUMENTS*/
 		@SuppressWarnings("unchecked")
 		List<Type> tas=node.typeArguments();
 		for(int i=0;i<tas.size();i++){
-			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+			this.addType(node, tas.get(i), ASTProperty.TYPE_ARGUMENTS);
 		}
 		
 		/*Type*/
 		Type type=node.getType();
-		this.addType(node, type, RelationType.TYPE);
+		this.addType(node, type, ASTProperty.TYPE);
 		
 		/*Arguments*/
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments=node.arguments();
 		for(int i=0;i<arguments.size();i++)
-			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+			this.addExpression(node, arguments.get(i), ASTProperty.ARGUMENTS);
 		
 		/*ANONYMOUS CLASS DECLARATION*/
 		AnonymousClassDeclaration acd=node.getAnonymousClassDeclaration();
@@ -522,7 +522,7 @@ public class JFileVisitor extends ASTVisitor{
 		query=Query.pdQuery(packageNode);
 		this.nodes.add(packageNode);
 		this.infos.add(new NodeInfo(query));
-		this.relations.add(new Relation(node,packageNode,RelationType.PACKAGE));
+		this.relations.add(new Relation(node,packageNode,rtype,ASTProperty.PACKAGE));
 		
 		/*ImportDeclaration*/
 		@SuppressWarnings("unchecked")
@@ -533,7 +533,7 @@ public class JFileVisitor extends ASTVisitor{
 				query=Query.idQuery(importNode);
 				this.nodes.add(importNode);
 				this.infos.add(new NodeInfo(query));
-				this.relations.add(new Relation(node,importNode,RelationType.IMPORTS));
+				this.relations.add(new Relation(node,importNode,rtype,ASTProperty.IMPORTS));
 			}
 		}
 		
@@ -556,7 +556,7 @@ public class JFileVisitor extends ASTVisitor{
 				}
 				this.nodes.add(types.get(i));
 				this.infos.add(new NodeInfo(query));
-				this.relations.add(new Relation(node,types.get(i),RelationType.TYPES));
+				this.relations.add(new Relation(node,types.get(i),rtype,ASTProperty.TYPES));
 			}
 		}
 		
@@ -567,7 +567,7 @@ public class JFileVisitor extends ASTVisitor{
 //				Javadoc javadoc=(Javadoc) comments.get(i);
 //				this.nodes.add(javadoc);
 //				this.infos.add(new NodeInfo(Query.javadocQuery(javadoc)));
-//				this.relations.add(new Relation(node,javadoc,RelationType.COMMENTS));
+//				this.relations.add(new Relation(node,javadoc,ASTProperty.COMMENTS));
 //				this.visit(javadoc);
 //			}
 //		}
@@ -588,10 +588,10 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ConditionalExpression node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
-		this.addExpression(node, node.getThenExpression(), RelationType.THEN_EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
+		this.addExpression(node, node.getThenExpression(), ASTProperty.THEN_EXPRESSION);
 		if(node.getElseExpression()!=null)
-			this.addExpression(node, node.getElseExpression(), RelationType.ELSE_EXPRESSION);
+			this.addExpression(node, node.getElseExpression(), ASTProperty.ELSE_EXPRESSION);
 		return true;
 	}
 
@@ -612,13 +612,13 @@ public class JFileVisitor extends ASTVisitor{
 		@SuppressWarnings("unchecked")
 		List<Type> tas=node.typeArguments();
 		for(int i=0;i<tas.size();i++){
-			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+			this.addType(node, tas.get(i), ASTProperty.TYPE_ARGUMENTS);
 		}
 		/*arguments*/
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments=node.arguments();
 		for(int i=0;i<arguments.size();i++){
-			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+			this.addExpression(node, arguments.get(i), ASTProperty.ARGUMENTS);
 		}
 		return true;
 	}
@@ -652,8 +652,8 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(DoStatement node) {
-		this.addStatement(node, node.getBody(), RelationType.BODY);
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -687,9 +687,9 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.1
 	 */
 	public boolean visit(EnhancedForStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
-		this.addStatement(node, node.getBody(), RelationType.BODY);
-		this.addSingleVariableDeclaration(node, node.getParameter(), RelationType.PARAMETER);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
+		this.addSingleVariableDeclaration(node, node.getParameter(), ASTProperty.PARAMETER);
 		return true;
 	}
 
@@ -723,7 +723,7 @@ public class JFileVisitor extends ASTVisitor{
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments=node.arguments();
 		for(int i=0;i<arguments.size();i++){
-			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+			this.addExpression(node, arguments.get(i), ASTProperty.ARGUMENTS);
 		}
 		/*ANONYMOUS_CLASS_DECLARATION*/
 		AnonymousClassDeclaration acd=node.getAnonymousClassDeclaration();
@@ -735,7 +735,7 @@ public class JFileVisitor extends ASTVisitor{
 public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration acd){
 	this.nodes.add(acd);
 	this.infos.add(new NodeInfo(Query.anonymousClassDeclarationQuery(acd)));
-	this.relations.add(new Relation(node,acd,RelationType.ANONYMOUS_CLASS_DECLARATION));
+	this.relations.add(new Relation(node,acd,rtype,ASTProperty.ANONYMOUS_CLASS_DECLARATION));
 }
 	/**
 	 * Visits the given type-specific AST node.
@@ -767,7 +767,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<Type> sInterfaces=node.superInterfaceTypes();
 		for(int i=0;i<sInterfaces.size();i++){
-			this.addType(node, sInterfaces.get(i), RelationType.SUPER_INTERFACE_TYPES);
+			this.addType(node, sInterfaces.get(i), ASTProperty.SUPER_INTERFACE_TYPES);
 		}
 		/*ENUM CONSTANTS*/
 		@SuppressWarnings("unchecked")
@@ -775,7 +775,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		for(int i=0;i<ecds.size();i++){
 			this.nodes.add(ecds.get(i));
 			this.infos.add(new NodeInfo(Query.enumConstantDeclarationQuery(ecds.get(i))));
-			this.relations.add(new Relation(node,ecds.get(i),RelationType.ENUM_CONSTANTS));
+			this.relations.add(new Relation(node,ecds.get(i),rtype,ASTProperty.ENUM_CONSTANTS));
 		}
 		/*BODY DECLARATIONS*/
 		@SuppressWarnings("unchecked")
@@ -797,7 +797,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(ExpressionStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -814,7 +814,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(FieldAccess node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -845,21 +845,21 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		}
 		/*Type*/
 		Type type=node.getType();
-		this.addType(node, type, RelationType.TYPE);
+		this.addType(node, type, ASTProperty.TYPE);
 		/*VariableDeclarationFragment*/
 		@SuppressWarnings("unchecked")
 		List<VariableDeclarationFragment> fragments=node.fragments();
 		for(int i=0;i<fragments.size();i++){
-			this.addVariableDeclarationFragment(node, fragments.get(i), RelationType.FRAGMENTS);
+			this.addVariableDeclarationFragment(node, fragments.get(i), ASTProperty.FRAGMENTS);
 		}
 		
 		return true;
 	}
 	
-	public void addVariableDeclarationFragment(ASTNode node,VariableDeclarationFragment vf,String rtype){
+	public void addVariableDeclarationFragment(ASTNode node,VariableDeclarationFragment vf,String prop){
 		this.nodes.add(vf);
 		this.infos.add(new NodeInfo(Query.variableDeclarationFragmentQuery(vf)));
-		this.relations.add(new Relation(node,vf,rtype));
+		this.relations.add(new Relation(node,vf,rtype,prop));
 	}
 
 	/**
@@ -879,16 +879,16 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<Expression> initializers=node.initializers();
 		for(int i=0;i<initializers.size();i++)
-			this.addExpression(node, initializers.get(i), RelationType.INITIALIZERS);
+			this.addExpression(node, initializers.get(i), ASTProperty.INITIALIZERS);
 		/*EXPRESSION*/
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		/*UPDATERS*/
 		@SuppressWarnings("unchecked")
 		List<Expression> updates=node.updaters();
 		for(int i=0;i<updates.size();i++)
-			this.addExpression(node, updates.get(i), RelationType.UPDATES);
+			this.addExpression(node, updates.get(i), ASTProperty.UPDATES);
 		/*body*/
-		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
 		return true;
 	}
 
@@ -905,9 +905,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(IfStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
-		this.addStatement(node, node.getThenStatement(),RelationType.THEN_STATEMENT);
-		this.addStatement(node, node.getElseStatement(), RelationType.ELSE_STATEMENT);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
+		this.addStatement(node, node.getThenStatement(),ASTProperty.THEN_STATEMENT);
+		this.addStatement(node, node.getElseStatement(), ASTProperty.ELSE_STATEMENT);
 		return true;
 	}
 
@@ -940,12 +940,12 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(InfixExpression node) {
-		this.addExpression(node, node.getLeftOperand(), RelationType.LEFT_OPERAND);
-		this.addExpression(node, node.getRightOperand(), RelationType.RIGHT_OPERAND);
+		this.addExpression(node, node.getLeftOperand(), ASTProperty.LEFT_OPERAND);
+		this.addExpression(node, node.getRightOperand(), ASTProperty.RIGHT_OPERAND);
 		@SuppressWarnings("unchecked")
 		List<Expression> edos=node.extendedOperands();
 		for(int i=0;i<edos.size();i++)
-			this.addExpression(node, edos.get(i), RelationType.EXTENDED_OPERANDS);
+			this.addExpression(node, edos.get(i), ASTProperty.EXTENDED_OPERANDS);
 		return true;
 	}
 
@@ -962,8 +962,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(InstanceofExpression node) {
-		this.addExpression(node, node.getLeftOperand(),RelationType.LEFT_OPERAND);
-		this.addType(node, node.getRightOperand(), RelationType.RIGHT_OPERAND);
+		this.addExpression(node, node.getLeftOperand(),ASTProperty.LEFT_OPERAND);
+		this.addType(node, node.getRightOperand(), ASTProperty.RIGHT_OPERAND);
 		return true;
 	}
 
@@ -994,15 +994,15 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		}
 		/*Block*/
 		Block block=node.getBody();
-		this.addStatement(node, block, RelationType.BODY);
+		this.addStatement(node, block, ASTProperty.BODY);
 		return true;
 	}
 	
-	public void addStatement(ASTNode node,Statement statement,String rtype){
+	public void addStatement(ASTNode node,Statement statement,String prop){
 		if(statement!=null){
 			this.nodes.add(statement);
 			this.infos.add(new NodeInfo(Query.statementQuery(statement)));
-			this.relations.add(new Relation(node,statement,rtype));
+			this.relations.add(new Relation(node,statement,rtype,prop));
 		}
 	}
 
@@ -1030,7 +1030,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 //			TagElement tag=tags.get(i);
 //			String query=Query.tagElementQuery(tag);
 //			this.nodes.put(tag, new NodeInfo(query));
-//			this.relations.add(new Relation(node,tag,RelationType.TAGS));
+//			this.relations.add(new Relation(node,tag,ASTProperty.TAGS));
 //		}
 		return true;
 	}
@@ -1049,7 +1049,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 */
 	public boolean visit(LabeledStatement node) {
 		/*body*/
-		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
 		return true;
 	}
 
@@ -1202,22 +1202,22 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		/*return type*/
 		Type rtype=node.getReturnType2();
 		if(rtype!=null)
-			this.addType(node, rtype, RelationType.RETURN_TYPE);
+			this.addType(node, rtype, ASTProperty.RETURN_TYPE);
 		/*PARAMETERS*/
 		@SuppressWarnings("unchecked")
 		List<SingleVariableDeclaration> svds=node.parameters();
 		for(int i=0;i<svds.size();i++)
-			this.addSingleVariableDeclaration(node, svds.get(i), RelationType.PARAMETERS);
+			this.addSingleVariableDeclaration(node, svds.get(i), ASTProperty.PARAMETERS);
 		/*THROWN EXCEPTIONS*/
 		@SuppressWarnings("unchecked")
 		List<Name> t_exceptions=node.thrownExceptions();
 		for(int i=0;i<t_exceptions.size();i++){
-			this.addExpression(node, t_exceptions.get(i), RelationType.THROWN_EXCEPTIONS);
+			this.addExpression(node, t_exceptions.get(i), ASTProperty.THROWN_EXCEPTIONS);
 		}
 		/*BODY*/
 		Block block=node.getBody();
 		if(block!=null){
-			this.addStatement(node, block, RelationType.BODY);
+			this.addStatement(node, block, ASTProperty.BODY);
 		}
 		return true;
 	}
@@ -1235,18 +1235,18 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(MethodInvocation node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		/*TYPE ARGUMENTS*/
 		@SuppressWarnings("unchecked")
 		List<Type> tas=node.typeArguments();
 		for(int i=0;i<tas.size();i++){
-			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+			this.addType(node, tas.get(i), ASTProperty.TYPE_ARGUMENTS);
 		}
 		/*arguments*/
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments=node.arguments();
 		for(int i=0;i<arguments.size();i++){
-			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+			this.addExpression(node, arguments.get(i), ASTProperty.ARGUMENTS);
 		}
 		return true;
 	}
@@ -1270,7 +1270,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			MemberValuePair mvPair=mvPairs.get(i);
 			this.nodes.add(mvPair);
 			this.infos.add(new NodeInfo(Query.MemberValuePairQuery(mvPair)));
-			this.relations.add(new Relation(node,mvPair,RelationType.VALUES));
+			this.relations.add(new Relation(node,mvPair,rtype,ASTProperty.VALUES));
 		}
 		return true;
 	}
@@ -1285,7 +1285,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			query=Query.javadocQuery(javadoc);
 			this.nodes.add(javadoc);
 			this.infos.add(new NodeInfo(query));
-			this.relations.add(new Relation(node,javadoc,RelationType.JAVA_DOC));
+			this.relations.add(new Relation(node,javadoc,rtype,ASTProperty.JAVA_DOC));
 		}
 		
 		
@@ -1296,7 +1296,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		List<Annotation> annotations=node.annotations();
 		for(int i=0;i<annotations.size();i++){
 			Annotation annotation=annotations.get(i);
-			this.addAnnotation(node, annotation,RelationType.ANNOTATIONS);
+			this.addAnnotation(node, annotation,ASTProperty.ANNOTATIONS);
 		}
 		
 		return true;
@@ -1306,10 +1306,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @param node
 	 * @param annotation
 	 */
-	public void addAnnotation(ASTNode node, Annotation annotation,String rtype){
+	public void addAnnotation(ASTNode node, Annotation annotation,String prop){
 		this.nodes.add(annotation);
 		this.infos.add(new NodeInfo(Query.AnnotationQuery(annotation)));
-		this.relations.add(new Relation(node,annotation,rtype));
+		this.relations.add(new Relation(node,annotation,rtype,prop));
 	}
 
 
@@ -1330,9 +1330,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<Type> types=node.typeArguments();
 		for(int i=0;i<types.size();i++){
-			this.addType(node, types.get(i), RelationType.TYPE_ARGUMENTS);
+			this.addType(node, types.get(i), ASTProperty.TYPE_ARGUMENTS);
 		}
-		this.addType(node, node.getType(), RelationType.TYPE);
+		this.addType(node, node.getType(), ASTProperty.TYPE);
 		return true;
 	}
 
@@ -1349,7 +1349,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(ParenthesizedExpression node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -1366,7 +1366,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(PostfixExpression node) {
-		this.addExpression(node, node.getOperand(), RelationType.OPERAND);
+		this.addExpression(node, node.getOperand(), ASTProperty.OPERAND);
 		return true;
 	}
 
@@ -1383,7 +1383,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(PrefixExpression node) {
-		this.addExpression(node, node.getOperand(), RelationType.OPERAND);
+		this.addExpression(node, node.getOperand(), ASTProperty.OPERAND);
 		return true;
 	}
 
@@ -1433,7 +1433,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.1
 	 */
 	public boolean visit(QualifiedType node) {
-		this.addType(node, node.getQualifier(), RelationType.QUALIFIER);
+		this.addType(node, node.getQualifier(), ASTProperty.QUALIFIER);
 		return true;
 	}
 
@@ -1450,7 +1450,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(ReturnStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -1527,18 +1527,18 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		}
 		/*type*/
 		Type type=node.getType();
-		this.addType(node, type, RelationType.TYPE);
+		this.addType(node, type, ASTProperty.TYPE);
 		/*INITILIZER*/
 		Expression initializer=node.getInitializer();
 		if(initializer!=null)
-			this.addExpression(node, initializer, RelationType.INITIALIZER);
+			this.addExpression(node, initializer, ASTProperty.INITIALIZER);
 		return true;
 	}
 
-	public void addSingleVariableDeclaration(ASTNode node,SingleVariableDeclaration svd,String rtype){
+	public void addSingleVariableDeclaration(ASTNode node,SingleVariableDeclaration svd,String prop){
 		this.nodes.add(svd);
 		this.infos.add(new NodeInfo(Query.singleVariableDeclarationQuery(svd)));
-		this.relations.add(new Relation(node,svd,rtype));
+		this.relations.add(new Relation(node,svd,rtype,prop));
 	}
 	/**
 	 * Visits the given type-specific AST node.
@@ -1569,18 +1569,18 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(SuperConstructorInvocation node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		/*TYPE ARGUMENTS*/
 		@SuppressWarnings("unchecked")
 		List<Type> tas=node.typeArguments();
 		for(int i=0;i<tas.size();i++){
-			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+			this.addType(node, tas.get(i), ASTProperty.TYPE_ARGUMENTS);
 		}
 		/*arguments*/
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments=node.arguments();
 		for(int i=0;i<arguments.size();i++){
-			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+			this.addExpression(node, arguments.get(i), ASTProperty.ARGUMENTS);
 		}
 		return true;
 	}
@@ -1619,13 +1619,13 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<Type> tas=node.typeArguments();
 		for(int i=0;i<tas.size();i++){
-			this.addType(node, tas.get(i), RelationType.TYPE_ARGUMENTS);
+			this.addType(node, tas.get(i), ASTProperty.TYPE_ARGUMENTS);
 		}
 		/*arguments*/
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments=node.arguments();
 		for(int i=0;i<arguments.size();i++){
-			this.addExpression(node, arguments.get(i), RelationType.ARGUMENTS);
+			this.addExpression(node, arguments.get(i), ASTProperty.ARGUMENTS);
 		}
 		return true;
 	}
@@ -1643,7 +1643,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(SwitchCase node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -1660,11 +1660,11 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(SwitchStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		@SuppressWarnings("unchecked")
 		List<Statement> statements=node.statements();
 		for(int i=0;i<statements.size();i++)
-			this.addStatement(node, statements.get(i), RelationType.STATEMENTS);
+			this.addStatement(node, statements.get(i), ASTProperty.STATEMENTS);
 		return true;
 	}
 
@@ -1681,8 +1681,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(SynchronizedStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
-		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
 		return true;
 	}
 
@@ -1767,7 +1767,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(ThrowStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
 		return true;
 	}
 
@@ -1790,20 +1790,20 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		for(int i=0;i<vdes.size();i++){
 			this.nodes.add(vdes.get(i));
 			this.infos.add(new NodeInfo(Query.expressionQuery(vdes.get(i))));
-			this.relations.add(new Relation(node,vdes.get(i),RelationType.RESOURCES));
+			this.relations.add(new Relation(node,vdes.get(i),rtype,ASTProperty.RESOURCES));
 		}
 		/*Body*/
-		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
 		/*CATCH CLAUSES*/
 		@SuppressWarnings("unchecked")
 		List<CatchClause> clauses=node.catchClauses();
 		for(int i=0;i<clauses.size();i++){
 			this.nodes.add(clauses.get(i));
 			this.infos.add(new NodeInfo(Query.catchClauseQuery(clauses.get(i))));
-			this.relations.add(new Relation(node,clauses.get(i),RelationType.CATCH_CLAUSES));
+			this.relations.add(new Relation(node,clauses.get(i),rtype,ASTProperty.CATCH_CLAUSES));
 		}
 		/*FINALLY*/
-		this.addStatement(node, node.getFinally(), RelationType.FINALLY);
+		this.addStatement(node, node.getFinally(), ASTProperty.FINALLY);
 		return true;
 	}
 	/**
@@ -1840,14 +1840,14 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		}
 		/*SUPERCLASS TYPE*/
 		if(node.getSuperclassType()!=null){
-			this.addType(node, node.getSuperclassType(), RelationType.SUPERCLASS_TYPE);
+			this.addType(node, node.getSuperclassType(), ASTProperty.SUPERCLASS_TYPE);
 		}
 		
 		/*SUPER INTERFACE TYPES*/
 		@SuppressWarnings("unchecked")
 		List<Type> sInterfaces=node.superInterfaceTypes();
 		for(int i=0;i<sInterfaces.size();i++){
-			this.addType(node, sInterfaces.get(i), RelationType.SUPER_INTERFACE_TYPES);
+			this.addType(node, sInterfaces.get(i), ASTProperty.SUPER_INTERFACE_TYPES);
 		}
 		
 		/*BODY DECLARATIONS*/
@@ -1894,7 +1894,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 					this.infos.add(new NodeInfo(Query.enumConstantDeclarationQuery((EnumConstantDeclaration) bd)));
 					break;
 			}
-			this.relations.add(new Relation(node,bd,RelationType.BODY_DECLARATIONS));
+			this.relations.add(new Relation(node,bd,rtype,ASTProperty.BODY_DECLARATIONS));
 		}
 	}
 	
@@ -1906,7 +1906,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addTypeParameter(ASTNode node,TypeParameter tpara){
 		this.nodes.add(tpara);
 		this.infos.add(new NodeInfo(Query.typeParameterQuery(tpara)));
-		this.relations.add(new Relation(node,tpara,RelationType.TYPE_PARAMETERS));
+		this.relations.add(new Relation(node,tpara,rtype,ASTProperty.TYPE_PARAMETERS));
 	}
 	/**
 	 * add javadoc to <nodes> and the relation <node,JAVA_DOC,javadoc> to <relations>
@@ -1917,7 +1917,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		String query=Query.javadocQuery(javadoc);
 		this.nodes.add(javadoc);
 		this.infos.add(new NodeInfo(query));
-		this.relations.add(new Relation(node,javadoc,RelationType.JAVA_DOC));
+		this.relations.add(new Relation(node,javadoc,rtype,ASTProperty.JAVA_DOC));
 	}
 	
 	/**
@@ -1929,7 +1929,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		String query=Query.iExtendedModifier(modifier);
 		this.nodes.add((ASTNode) modifier);
 		this.infos.add( new NodeInfo(query));
-		this.relations.add(new Relation(node,(ASTNode) modifier,RelationType.MODIFIERS));
+		this.relations.add(new Relation(node,(ASTNode) modifier,rtype,ASTProperty.MODIFIERS));
 	}
 
 	/**
@@ -1958,7 +1958,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			this.infos.add(new NodeInfo(Query.adQuery((AnnotationTypeDeclaration) atd)));
 			break;
 		}
-		this.relations.add(new Relation(node,atd,RelationType.DECLARATION));
+		this.relations.add(new Relation(node,atd,rtype,ASTProperty.DECLARATION));
 		return true;
 	}
 
@@ -1975,7 +1975,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(TypeLiteral node) {
-		this.addType(node, node.getType(), RelationType.TYPE);
+		this.addType(node, node.getType(),ASTProperty.TYPE);
 		return true;
 	}
 
@@ -1996,7 +1996,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<Type> types=node.typeBounds();
 		for(int i=0;i<types.size();i++){
-			this.addType(node, types.get(i),RelationType.TYPE_BOUNDS);
+			this.addType(node, types.get(i),ASTProperty.TYPE_BOUNDS);
 		}
 		return true;
 	}
@@ -2005,10 +2005,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @param node
 	 * @param type
 	 */
-	public void addType(ASTNode node,Type type,String rtype){
+	public void addType(ASTNode node,Type type,String prop){
 		this.nodes.add(type);
 		this.infos.add(new NodeInfo(Query.typeQuery(type)));
-		this.relations.add(new Relation(node,type,rtype));
+		this.relations.add(new Relation(node,type,rtype,prop));
 	}
 
 	/**
@@ -2028,7 +2028,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		List<Type> types=node.types();
 		for(int i=0;i<types.size();i++){
-			this.addType(node, types.get(i), RelationType.TYPES);
+			this.addType(node, types.get(i), ASTProperty.TYPES);
 		}
 		
 		return true;
@@ -2047,11 +2047,11 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
-		this.addType(node, node.getType(), RelationType.TYPE);
+		this.addType(node, node.getType(), ASTProperty.TYPE);
 		@SuppressWarnings("unchecked")
 		List<VariableDeclarationFragment> fragments=node.fragments();
 		for(int i=0;i<fragments.size();i++)
-			this.addVariableDeclarationFragment(node, fragments.get(i), RelationType.FRAGMENTS);
+			this.addVariableDeclarationFragment(node, fragments.get(i), ASTProperty.FRAGMENTS);
 		return true;
 	}
 
@@ -2076,12 +2076,12 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			this.addModifier(node, modifier);
 		}
 		/*type*/
-		this.addType(node, node.getType(), RelationType.TYPE);
+		this.addType(node, node.getType(), ASTProperty.TYPE);
 		/*fragments*/
 		@SuppressWarnings("unchecked")
 		List<VariableDeclarationFragment> vdfs=node.fragments();
 		for(int i=0;i<vdfs.size();i++){
-			this.addVariableDeclarationFragment(node, vdfs.get(i), RelationType.FRAGMENTS);
+			this.addVariableDeclarationFragment(node, vdfs.get(i), ASTProperty.FRAGMENTS);
 		}
 		return true;
 	}
@@ -2099,16 +2099,16 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
-		this.addExpression(node, node.getInitializer(), RelationType.INITIALIZER);
+		this.addExpression(node, node.getInitializer(),ASTProperty.INITIALIZER);
 		return true;
 	}
 	
-	public void addExpression(ASTNode node,Expression expression,String rtype){
+	public void addExpression(ASTNode node,Expression expression,String prop){
 		if(expression!=null){
 			String query=Query.expressionQuery(expression);
 			this.nodes.add(expression);
 			this.infos.add(new NodeInfo(query));
-			this.relations.add(new Relation(node,expression,rtype));
+			this.relations.add(new Relation(node,expression,rtype,prop));
 		}
 	}
 
@@ -2125,8 +2125,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(WhileStatement node) {
-		this.addExpression(node, node.getExpression(), RelationType.EXPRESSION);
-		this.addStatement(node, node.getBody(), RelationType.BODY);
+		this.addExpression(node, node.getExpression(), ASTProperty.EXPRESSION);
+		this.addStatement(node, node.getBody(), ASTProperty.BODY);
 		return true;
 	}
 
@@ -2145,7 +2145,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 */
 	public boolean visit(WildcardType node) {
 		if(node.getBound()!=null){
-			this.addType(node, node.getBound(), RelationType.BOUND);
+			this.addType(node, node.getBound(), ASTProperty.BOUND);
 		}
 		return true;
 	}

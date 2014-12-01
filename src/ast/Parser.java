@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import neo4j.Neo4jOp;
 import node.NodeInfo;
+import node.SENode;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -17,14 +19,15 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.osgi.internal.debug.Debug;
 
 import cfg.MethodVisitor;
-import cfg.SENode;
 import relationship.Relation;
 import collector.CUnit;
 
 public class Parser {
-	private String projectName;// assume projects don't have the same names 
+//	private String projectName;// assume projects don't have the same names 
 	private String fileName;
 	private String filePath;
+	
+	private Long cid;
 //	private String[] filePaths;
 //	private String[] classPaths;
 	private List<ASTNode> nodes=new ArrayList<ASTNode>();
@@ -32,8 +35,7 @@ public class Parser {
 	private List<Relation> relations=new ArrayList<Relation>();
 	private List<SENode> senodes=new ArrayList<SENode>();
 	
-	public Parser(String pName,String fName,String fPath){
-		this.setProjectName(pName);
+	public Parser(String fName,String fPath){
 		this.setFileName(fName);
 		this.setFilePath(fPath);
 	}
@@ -53,17 +55,22 @@ public class Parser {
 		parser.setSource(unit.getProgram().toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;
+		
 //		parser.createASTs(null, null, null, null);
-//		JFileVisitor visitor=new JFileVisitor(this.fileName);
-		MethodVisitor visitor=new MethodVisitor();
-		javaUnit.accept(visitor);
-//		this.setNodes(visitor.getNodes());
-//		this.setInfos(visitor.getInfos());
-//		this.setRelations(visitor.getRelations());
-		this.setNodes(visitor.getCfgN());
-		this.setInfos(visitor.getInfos());
-		this.setRelations(visitor.getCfgR());
-		this.setSenodes(visitor.getSeNodes());
+		JFileVisitor astVisitor=new JFileVisitor(this.fileName);
+		
+		javaUnit.accept(astVisitor);
+		this.setNodes(astVisitor.getNodes());
+		this.setInfos(astVisitor.getInfos());
+		this.addRelations(astVisitor.getRelations());
+		
+		int cindex=this.nodes.indexOf(javaUnit);
+		this.setCid(this.infos.get(cindex).getId());
+		
+		MethodVisitor cfgVisitor=new MethodVisitor();
+		javaUnit.accept(cfgVisitor);
+		this.addRelations(cfgVisitor.getCfgR());
+		this.setSenodes(cfgVisitor.getSeNodes());
 		
 		
 		
@@ -77,13 +84,13 @@ public class Parser {
 	
 	
 
-	public String getProjectName() {
-		return projectName;
-	}
-
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
-	}
+//	public String getProjectName() {
+//		return projectName;
+//	}
+//
+//	public void setProjectName(String projectName) {
+//		this.projectName = projectName;
+//	}
 
 	public String getFileName() {
 		return fileName;
@@ -106,8 +113,8 @@ public class Parser {
 		return relations;
 	}
 
-	public void setRelations(List<Relation> relations) {
-		this.relations = relations;
+	public void addRelations(List<Relation> relations) {
+		this.relations.addAll(relations);
 	}
 	
 
@@ -199,5 +206,14 @@ public class Parser {
 
 	public void setSenodes(List<SENode> senodes) {
 		this.senodes = senodes;
+	}
+
+
+	public Long getCid() {
+		return cid;
+	}
+
+	public void setCid(Long cid) {
+		this.cid = cid;
 	}
 }
