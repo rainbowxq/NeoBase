@@ -22,7 +22,12 @@ public class Driver {
 		this.location=location;
 		this.classPaths=classPaths;
 		this.filePaths=filePaths;
-		this.store();
+	}
+	
+	public Driver(String name,String[] classPaths,String[] filePaths){
+		this.name=name;
+		this.classPaths=classPaths;
+		this.filePaths=filePaths;
 	}
 	/**
 	 * store the project node into the database and record its id in the database
@@ -30,7 +35,7 @@ public class Driver {
 	public void store(){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: Project { 	NAME : {pname},LOCATION:{loc}}) RETURN id(n)");
+				"CREATE (n: Project { NAME : {pname},LOCATION:{loc}}) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pname", this.getName());
@@ -66,9 +71,12 @@ public class Driver {
 		ArrayList<String> names=files.getNames();
 		assert(filepaths.size()==names.size()):"size doesn't match!!\n";
 		for(int i=0;i<names.size();i++){
+			System.out.println(names.get(i));
 			this.parseFile(names.get(i), filepaths.get(i));
+			
 		}
 		
+		this.store();
 		for(int j=0;j<this.units.size();j++){
 			Neo4jOp.addRelation(this.id, this.units.get(j), "AST", "FILES");
 		}
@@ -107,6 +115,17 @@ public class Driver {
 		this.location = location;
 	}
 	
+	
+	public static void main(String[] args){
+		Driver driver=new Driver("LRP",
+				new String[]{"/home/xiaoq_zhu/workspace/LRP/bin",
+					"/home/xiaoq_zhu/workspace/LRP/lib/jcommon-1.0.22.jar",
+					"/home/xiaoq_zhu/workspace/LRP/lib/jfreechart-1.0.18.jar",
+					"/home/xiaoq_zhu/workspace/LRP/lib/servlet.jar"},
+				new String[]{"/home/xiaoq_zhu/workspace/LRP/src"});
+		driver.parseProject("/home/xiaoq_zhu/workspace/LRP/");
+		System.out.println("finished!!");
+	}
 	
 	
 }

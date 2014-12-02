@@ -74,7 +74,7 @@ public class Query {
 	public static String pdQuery(PackageDeclaration node) {
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: PackageDeclaration { 	NAME : {pkgName},P_KEY:{Key} }) RETURN id(n)");
+				"MERGE (n: PackageDeclaration { NAME : {pkgName},P_KEY:{Key} }) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pkgName", node.getName().getFullyQualifiedName());
@@ -614,7 +614,10 @@ public class Query {
 				query.put("query",
 						"CREATE (n: ClassInstanceCreation {M_KEY:{mkey},"
 						+ common+"}) RETURN id(n)");
-				params.put("mkey",((ClassInstanceCreation)node).resolveConstructorBinding().getKey());
+				if(((ClassInstanceCreation)node).resolveConstructorBinding()!=null)
+					params.put("mkey",((ClassInstanceCreation)node).resolveConstructorBinding().getKey());
+				else
+					params.put("mkey", "null");
 				break;
 			case ASTNode.CONDITIONAL_EXPRESSION:
 				query.put("query",
@@ -650,7 +653,10 @@ public class Query {
 				query.put("query",
 						"CREATE (n: MethodInvocation {M_KEY:{mkey},NAME:{name},"
 						+ common+"}) RETURN id(n)");
-				params.put("mkey", ((MethodInvocation)node).resolveMethodBinding().getKey());
+				if(((MethodInvocation)node).resolveMethodBinding()!=null)
+					params.put("mkey", ((MethodInvocation)node).resolveMethodBinding().getKey());
+				else
+					params.put("mkey", "null");
 				params.put("name",((MethodInvocation)node).getName().getFullyQualifiedName());
 				break;
 			case ASTNode.QUALIFIED_NAME:
@@ -686,7 +692,7 @@ public class Query {
 					}
 				}
 				else{
-					Debug.println("the binding is null");
+					params.put("epkey", "null");
 				}
 				query.put("query",
 						"CREATE (n: Name {NAME:{name},"

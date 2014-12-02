@@ -89,11 +89,12 @@ public class MethodVisitor extends ASTVisitor {
 //			if(msg!=null)
 //				exps.add(msg);
 //			tmpInfos=this.computeInfos(exps, key);
-			tmpinfo=this.expCfg(msg, key);
-			if(tmpinfo!=null)
-				return tmpinfo;
-			else
-				return this.addStmtNode(stmt);
+			if(msg!=null){
+				tmpinfo=this.expCfg(msg, key);
+				if(tmpinfo!=null)
+					return tmpinfo;
+			}
+			return this.addStmtNode(stmt);
 			
 		case ASTNode.BLOCK:
 			List<Statement> stmts=((Block)stmt).statements();
