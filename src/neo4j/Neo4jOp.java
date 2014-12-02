@@ -2,7 +2,7 @@ package neo4j;
 
 import javax.ws.rs.core.MediaType;
 
-import relationship.Relation;
+import log.Log;
 import net.sf.json.JSONObject;
 
 import com.sun.jersey.api.client.Client;
@@ -19,7 +19,7 @@ public class Neo4jOp {
 			        .resource( SERVER_ROOT_URI );
 			ClientResponse response = resource.get( ClientResponse.class );
 
-			System.out.println( String.format( "GET on [%s], status code [%d]",
+			Log.debugLoger( String.format( "GET on [%s], status code [%d]",
 			        SERVER_ROOT_URI, response.getStatus() ) );
 			response.close();
 		}
@@ -37,7 +37,7 @@ public class Neo4jOp {
 			        .post( ClientResponse.class );
 
 			String r_s=response.getEntity(String.class);
-			System.out.println( String.format( "[%s],the query is [%s], status code [%d],\n returned data is [%s]",
+			Log.debugLoger( String.format( "[%s],the query is [%s], status code [%d],\n returned data is [%s]",
 					txUri,query, response.getStatus(),r_s) ) ;
 			
 			return r_s;
@@ -67,9 +67,9 @@ public class Neo4jOp {
 			params.put("prop", prop);
 			query.put("params",params);
 			
-			System.out.println(query.toString());
+			Log.debugLoger(query.toString());
 			Neo4jOp.executeQuery(query.toString());
-//			System.out.println(json.toString());
+//			Log.debugLoger(json.toString());
 			
 		}
 		

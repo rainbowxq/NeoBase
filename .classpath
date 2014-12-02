@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="/home/xiaoq_zhu/Software/eclipse/plugins/org.eclipse.equinox.preferences_3.5.200.v20140224-1527.jar"/>
 	<classpathentry kind="lib" path="/home/xiaoq_zhu/Software/eclipse/plugins/org.eclipse.osgi_3.10.0.v20140606-1445.jar"/>
 	<classpathentry kind="lib" path="/home/xiaoq_zhu/Software/eclipse/plugins/org.eclipse.jdt.core_3.9.2.v20140114-1555.jar"/>
+	<classpathentry kind="lib" path="/home/xiaoq_zhu/Software/eclipse/plugins/org.apache.log4j_1.2.15.v201012070815.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

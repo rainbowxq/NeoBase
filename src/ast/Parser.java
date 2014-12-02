@@ -129,7 +129,7 @@ public class Parser {
 //				System.out.println(b[j]+" "+j);
 //			}
 			this.setNodeId(i,Long.parseLong(b[12]));
-			System.out.println(this.infos.get(i).getId());
+//			System.out.println(this.infos.get(i).getId());
 		}
 		
 		for(int i=0;i<this.relations.size();i++){

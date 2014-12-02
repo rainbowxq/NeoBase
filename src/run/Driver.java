@@ -3,6 +3,7 @@ package run;
 import java.util.ArrayList;
 import java.util.List;
 
+import log.Log;
 import neo4j.Neo4jOp;
 import net.sf.json.JSONObject;
 import collector.JavaFiles;
@@ -41,7 +42,7 @@ public class Driver {
 		params.put("pname", this.getName());
 		params.put("loc", this.getLocation());
 		query.put("params", params);
-		System.out.println(query.toString());
+		Log.debugLoger(query.toString());
 		
 		String a=Neo4jOp.executeQuery(query.toString());
 		String b[]=a.split(" ");
@@ -65,18 +66,19 @@ public class Driver {
 	}
 	
 	public void parseProject(String proPath){
+		this.store();
+		
 		JavaFiles files=new JavaFiles();
 		files.readFolder(proPath);
 		ArrayList<String> filepaths=files.getfilePaths();
 		ArrayList<String> names=files.getNames();
 		assert(filepaths.size()==names.size()):"size doesn't match!!\n";
 		for(int i=0;i<names.size();i++){
-			System.out.println(names.get(i));
+			System.out.println("parse: "+names.get(i));
 			this.parseFile(names.get(i), filepaths.get(i));
 			
 		}
 		
-		this.store();
 		for(int j=0;j<this.units.size();j++){
 			Neo4jOp.addRelation(this.id, this.units.get(j), "AST", "FILES");
 		}

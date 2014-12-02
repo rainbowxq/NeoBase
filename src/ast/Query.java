@@ -2,6 +2,7 @@ package ast;
 
 import java.util.List;
 
+import log.Log;
 import net.sf.json.JSONObject;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -66,7 +67,6 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
-import org.eclipse.osgi.internal.debug.Debug;
 
 public class Query {
 
@@ -85,7 +85,7 @@ public class Query {
 		// params.put("pkgKey", node.resolveBinding().getKey());
 
 		query.put("params", params);
-		System.out.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -107,7 +107,7 @@ public class Query {
 			params.put("Key", "null");
 
 		query.put("params", params);
-		System.out.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -131,7 +131,7 @@ public class Query {
 			params.put("Key", "null");
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 
 	}
@@ -153,7 +153,7 @@ public class Query {
 			params.put("Key", "null");
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -172,7 +172,7 @@ public class Query {
 			params.put("Key", "null");
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -196,7 +196,7 @@ public class Query {
 			params.put("vkey", "null");
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -210,7 +210,7 @@ public class Query {
 		params.put("fileName", fileName);
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -224,7 +224,7 @@ public class Query {
 		params.put("key", node.getKeyword().toString());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 
 	}
@@ -245,9 +245,9 @@ public class Query {
 		params.put("doc", content);
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -320,7 +320,7 @@ public class Query {
 		params.put("tagName", node.getTagName());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 
 	}
@@ -338,7 +338,7 @@ public class Query {
 		else
 			params.put("key", "null");
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -448,7 +448,7 @@ public class Query {
 			params.put("ub", ((WildcardType) node).isUpperBound());
 			query.put("params", params);
 		}
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -484,7 +484,7 @@ public class Query {
 		else
 			params.put("cev", "not exist");
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -508,7 +508,7 @@ public class Query {
 		params.put("value", node.getValue().toString());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*FieldDeclaration*/
@@ -521,7 +521,7 @@ public class Query {
 		params.put("content", node.toString());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*VariableDeclarationFragment*/
@@ -541,7 +541,7 @@ public class Query {
 		params.put("ed", node.getExtraDimensions());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*Expression*/
@@ -557,7 +557,7 @@ public class Query {
 			params.put("cev", node.resolveConstantExpressionValue());
 		else
 			params.put("cev","not exist");
-//		Debug.println("hahahhahah   "+node.resolveConstantExpressionValue()+"    hahhahahh");
+//		Log.debugLoger("hahahhahah   "+node.resolveConstantExpressionValue()+"    hahhahahh");
 		switch(node.getNodeType()){
 			case ASTNode.MARKER_ANNOTATION:
 			case ASTNode.NORMAL_ANNOTATION:
@@ -786,7 +786,7 @@ public class Query {
 				break;
 		}
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -905,7 +905,7 @@ public class Query {
 					
 		}
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*Initializer*/
@@ -913,7 +913,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put("query",
 				"CREATE (n: Initializer) RETURN id(n)");
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -934,7 +934,7 @@ public class Query {
 		params.put("ed", node.getExtraDimensions());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*MethodDeclaration*/
@@ -954,7 +954,7 @@ public class Query {
 		params.put("ed", node.getExtraDimensions());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -968,7 +968,7 @@ public class Query {
 		params.put("key",node.resolveBinding().getKey());
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*AnnotationTypeMemberDeclaration*/
@@ -985,7 +985,7 @@ public class Query {
 			params.put("key", "null");
 
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*CatchClause*/
@@ -994,7 +994,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: CatchClause) RETURN id(n)");
 
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -1006,7 +1006,7 @@ public class Query {
 				"CREATE (n: Start {M_KEY:{key}}) RETURN id(n)");
 		params.put("key", key);
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -1018,7 +1018,7 @@ public class Query {
 				"CREATE (n: End {M_KEY:{key}}) RETURN id(n)");
 		params.put("key", key);
 		query.put("params", params);
-		Debug.println(query.toString());
+		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
