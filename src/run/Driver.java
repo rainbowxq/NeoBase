@@ -7,6 +7,7 @@ import log.Log;
 import neo4j.Neo4jOp;
 import net.sf.json.JSONObject;
 import collector.JavaFiles;
+import collector.Stopwatch;
 import ast.Parser;
 
 
@@ -119,6 +120,8 @@ public class Driver {
 	
 	
 	public static void main(String[] args){
+		Stopwatch timer=new Stopwatch();
+		timer.start();
 		Driver driver=new Driver("LRP",
 				new String[]{"/home/xiaoq_zhu/workspace/LRP/bin",
 					"/home/xiaoq_zhu/workspace/LRP/lib/jcommon-1.0.22.jar",
@@ -127,6 +130,8 @@ public class Driver {
 				new String[]{"/home/xiaoq_zhu/workspace/LRP/src"});
 		driver.parseProject("/home/xiaoq_zhu/workspace/LRP/");
 		System.out.println("finished!!");
+		timer.stop();
+		System.out.println("time consumed: "+timer.timeInNanoseconds());
 	}
 	
 	
