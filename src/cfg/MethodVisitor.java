@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 
 import ast.Query;
 import relationship.Relation;
@@ -89,11 +90,11 @@ public class MethodVisitor extends ASTVisitor {
 //			if(msg!=null)
 //				exps.add(msg);
 //			tmpInfos=this.computeInfos(exps, key);
-			if(msg!=null){
-				tmpinfo=this.expCfg(msg, key);
-				if(tmpinfo!=null)
-					return tmpinfo;
-			}
+//			if(msg!=null){
+//				tmpinfo=this.expCfg(msg, key);
+//				if(tmpinfo!=null)
+//					return tmpinfo;
+//			}
 			return this.addStmtNode(stmt);
 			
 		case ASTNode.BLOCK:
@@ -146,13 +147,27 @@ public class MethodVisitor extends ASTVisitor {
 			return info;
 			
 		case ASTNode.ENHANCED_FOR_STATEMENT:
-		break;
+			SEInfo efinfo=new SEInfo();
+			Expression efexp=((EnhancedForStatement)stmt).getExpression();
+			this.cfgN.add(efexp);
+			this.infos.add(new NodeInfo(Query.expressionQuery(efexp)));
+			efinfo.setStart(efexp);
+			
+			Statement efbody=((EnhancedForStatement)stmt).getBody();
+			SEInfo efbodyinfo=this.addStmtNode(efbody);
+			this.cfgR.add(new Relation(efexp,efbodyinfo.getStart(),rtype,key));
+			this.concatSE(efbodyinfo.getEnds(), efexp, key);
+			
+			efinfo.addEnd(efexp);
+			
+			
+		
 		case ASTNode.EXPRESSION_STATEMENT:
-			Expression esexp=((ExpressionStatement)stmt).getExpression();
-			tmpinfo=this.expCfg(esexp, key);
-			if(tmpinfo!=null)
-				return tmpinfo;
-			else
+//			Expression esexp=((ExpressionStatement)stmt).getExpression();
+//			tmpinfo=this.expCfg(esexp, key);
+//			if(tmpinfo!=null)
+//				return tmpinfo;
+//			else
 				return this.addStmtNode(stmt);
 
 		case ASTNode.FOR_STATEMENT:
@@ -253,30 +268,30 @@ public class MethodVisitor extends ASTVisitor {
 			
 			
 		case ASTNode.RETURN_STATEMENT:
-			Expression returnexp=((ReturnStatement)stmt).getExpression();
-			if(returnexp!=null){
-				tmpinfo=this.expCfg(returnexp, key);
-				if(tmpinfo!=null){
-					senode.addEnds_from(tmpinfo.getEnds());
-					tmpinfo.setEnds(null);
-					return tmpinfo;
-				}
-			}
-			senode.addEnd_from(stmt);
+//			Expression returnexp=((ReturnStatement)stmt).getExpression();
+//			if(returnexp!=null){
+//				tmpinfo=this.expCfg(returnexp, key);
+//				if(tmpinfo!=null){
+//					senode.addEnds_from(tmpinfo.getEnds());
+//					tmpinfo.setEnds(null);
+//					return tmpinfo;
+//				}
+//			}
+//			senode.addEnd_from(stmt);
 			return this.addStmtNode(stmt);
 			
 
 		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
-			exps=new ArrayList<Expression>();
-			Expression micexp=((SuperConstructorInvocation)stmt).getExpression();
-			if(micexp!=null)
-				exps.add(micexp);
-			exps.addAll(((SuperConstructorInvocation)stmt).arguments());
-			tmpInfos=this.computeInfos(exps, key);
-			tmpinfo=this.tInfo(tmpInfos, key);
-			if(tmpinfo!=null)
-				return tmpinfo;
-			else
+//			exps=new ArrayList<Expression>();
+//			Expression micexp=((SuperConstructorInvocation)stmt).getExpression();
+//			if(micexp!=null)
+//				exps.add(micexp);
+//			exps.addAll(((SuperConstructorInvocation)stmt).arguments());
+//			tmpInfos=this.computeInfos(exps, key);
+//			tmpinfo=this.tInfo(tmpInfos, key);
+//			if(tmpinfo!=null)
+//				return tmpinfo;
+//			else
 				return this.addStmtNode(stmt);
 		
 		
@@ -345,19 +360,19 @@ public class MethodVisitor extends ASTVisitor {
 			return tryinfo;		
 
 		case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-			exps=new ArrayList<Expression>();
-			List<VariableDeclarationFragment>fragments=((VariableDeclarationStatement)stmt).fragments();
-			for(int i=0;i<fragments.size();i++){
-				Expression iniexp=fragments.get(i).getInitializer();
-				if(iniexp!=null){
-					exps.add(iniexp);
-				}
-			}
-			tmpInfos=this.computeInfos(exps, key);
-			tmpinfo=this.tInfo(tmpInfos, key);
-			if(tmpinfo!=null)
-				return tmpinfo;
-			else
+//			exps=new ArrayList<Expression>();
+//			List<VariableDeclarationFragment>fragments=((VariableDeclarationStatement)stmt).fragments();
+//			for(int i=0;i<fragments.size();i++){
+//				Expression iniexp=fragments.get(i).getInitializer();
+//				if(iniexp!=null){
+//					exps.add(iniexp);
+//				}
+//			}
+//			tmpInfos=this.computeInfos(exps, key);
+//			tmpinfo=this.tInfo(tmpInfos, key);
+//			if(tmpinfo!=null)
+//				return tmpinfo;
+//			else
 				return this.addStmtNode(stmt);
 			
 		case ASTNode.WHILE_STATEMENT:
@@ -469,158 +484,161 @@ public class MethodVisitor extends ASTVisitor {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SEInfo expCfg(Expression exp,String key){
-		
-		List<SEInfo> tmpInfos;
-		List<Expression> exps;
-		switch(exp.getNodeType()){
-		case ASTNode.ARRAY_ACCESS:
-			exps=new ArrayList<Expression>();
-			exps.add(((ArrayAccess)exp).getArray());
-			exps.add(((ArrayAccess)exp).getIndex());
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-
-		case ASTNode.ARRAY_INITIALIZER:
-			exps=((ArrayInitializer)exp).expressions();
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-			
-		case ASTNode.ARRAY_CREATION:
-			exps=((ArrayCreation)exp).dimensions();
-			ArrayInitializer ini=((ArrayCreation)exp).getInitializer();
-			if (ini!=null)
-				exps.add(ini);
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-		
-
-		case ASTNode.ASSIGNMENT:
-			exps=new ArrayList<Expression>();
-			exps.add(((Assignment)exp).getLeftHandSide());
-			exps.add(((Assignment)exp).getRightHandSide());
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-
-			
-		case ASTNode.CAST_EXPRESSION:
-			Expression cexp=((CastExpression)exp).getExpression();
-			return expCfg(cexp,key);
-		
-		case ASTNode.CLASS_INSTANCE_CREATION:
-			exps=new ArrayList<Expression>();
-			Expression cicexp=((ClassInstanceCreation)exp).getExpression();
-			if(cicexp!=null)
-				exps.add(cicexp);
-			exps.addAll(((ClassInstanceCreation)exp).arguments());
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-
-		case ASTNode.CONDITIONAL_EXPRESSION:
-			SEInfo info=new SEInfo();
-			Expression conexp=((ConditionalExpression)exp).getExpression();
-//			SEInfo coninfo=expCfg(conexp, key);
-//			List<ASTNode> endnodes=new ArrayList<ASTNode>();
-//			if(coninfo!=null){
-//				info.setStart(coninfo.getStart());
-//				endnodes.addAll(coninfo.getEnds());
+//	public SEInfo expCfg(Expression exp,String key){
+//		
+//		List<SEInfo> tmpInfos=null;
+//		List<Expression> exps=null;
+//		switch(exp.getNodeType()){
+//		case ASTNode.ARRAY_ACCESS:
+//			exps=new ArrayList<Expression>();
+//			exps.add(((ArrayAccess)exp).getArray());
+//			exps.add(((ArrayAccess)exp).getIndex());
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//
+//		case ASTNode.ARRAY_INITIALIZER:
+//			exps=((ArrayInitializer)exp).expressions();
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//			
+//		case ASTNode.ARRAY_CREATION:
+//			exps=((ArrayCreation)exp).dimensions();
+//			ArrayInitializer ini=((ArrayCreation)exp).getInitializer();
+//			if (ini!=null){
+//				if(exps==null)
+//					exps=new ArrayList<Expression>();
+//				exps.add(ini);
+//			}
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//		
+//
+//		case ASTNode.ASSIGNMENT:
+//			exps=new ArrayList<Expression>();
+//			exps.add(((Assignment)exp).getLeftHandSide());
+//			exps.add(((Assignment)exp).getRightHandSide());
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//
+//			
+//		case ASTNode.CAST_EXPRESSION:
+//			Expression cexp=((CastExpression)exp).getExpression();
+//			return expCfg(cexp,key);
+//		
+//		case ASTNode.CLASS_INSTANCE_CREATION:
+//			exps=new ArrayList<Expression>();
+//			Expression cicexp=((ClassInstanceCreation)exp).getExpression();
+//			if(cicexp!=null)
+//				exps.add(cicexp);
+//			exps.addAll(((ClassInstanceCreation)exp).arguments());
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//
+//		case ASTNode.CONDITIONAL_EXPRESSION:
+//			SEInfo info=new SEInfo();
+//			Expression conexp=((ConditionalExpression)exp).getExpression();
+////			SEInfo coninfo=expCfg(conexp, key);
+////			List<ASTNode> endnodes=new ArrayList<ASTNode>();
+////			if(coninfo!=null){
+////				info.setStart(coninfo.getStart());
+////				endnodes.addAll(coninfo.getEnds());
+////			}
+////			else{
+//			this.cfgN.add(conexp);
+//			this.infos.add(new NodeInfo(Query.expressionQuery(conexp)));
+//				
+//			info.setStart(conexp);
+////			endnodes.add(conexp);
+////			}
+//			//
+//			Expression thenExp=((ConditionalExpression)exp).getThenExpression();
+//			SEInfo theninfo=expCfg(thenExp,key);
+//			if(theninfo!=null){
+//				this.cfgR.add(new Relation(conexp, theninfo.getStart(),rtype, key));
+//				info.addEnds(theninfo.getEnds());
 //			}
 //			else{
-			this.cfgN.add(conexp);
-			this.infos.add(new NodeInfo(Query.expressionQuery(conexp)));
-				
-			info.setStart(conexp);
-//			endnodes.add(conexp);
+//				this.cfgR.add(new Relation(conexp, thenExp,rtype, key));
+//				this.cfgN.add(thenExp);
+//				this.infos.add(new NodeInfo(Query.expressionQuery(thenExp)));
+//				info.addEnd(thenExp);
 //			}
-			//
-			Expression thenExp=((ConditionalExpression)exp).getThenExpression();
-			SEInfo theninfo=expCfg(thenExp,key);
-			if(theninfo!=null){
-				this.cfgR.add(new Relation(conexp, theninfo.getStart(),rtype, key));
-				info.addEnds(theninfo.getEnds());
-			}
-			else{
-				this.cfgR.add(new Relation(conexp, thenExp,rtype, key));
-				this.cfgN.add(thenExp);
-				this.infos.add(new NodeInfo(Query.expressionQuery(thenExp)));
-				info.addEnd(thenExp);
-			}
-			//
-			Expression elseExp=((ConditionalExpression)exp).getElseExpression();
-			SEInfo elseinfo=expCfg(elseExp,key);
-			if(elseinfo!=null){
-				this.cfgR.add(new Relation(conexp, elseinfo.getStart(), rtype,key));
-				info.addEnds(elseinfo.getEnds());
-			}
-			else{
-				this.cfgR.add(new Relation(conexp, elseExp,rtype, key));
-				this.cfgN.add(elseExp);
-				this.infos.add(new NodeInfo(Query.expressionQuery(elseExp)));
-				info.addEnd(elseExp);
-			}
-			return info;
-			
-		case ASTNode.FIELD_ACCESS:
-			Expression faexp=((FieldAccess)exp).getExpression();
-			return expCfg(faexp,key);
-			
-		case ASTNode.INFIX_EXPRESSION:
-			exps=new ArrayList<Expression>();
-			Expression lop=((InfixExpression)exp).getLeftOperand();
-			Expression rop=((InfixExpression)exp).getRightOperand();
-			exps.add(lop);
-			exps.add(rop);
-			exps.addAll(((InfixExpression)exp).extendedOperands());
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-
-		case ASTNode.INSTANCEOF_EXPRESSION:
-			Expression insofexp=((InstanceofExpression)exp).getLeftOperand();
-			return expCfg(insofexp,key);
-
-		case ASTNode.METHOD_INVOCATION:
-			exps=new ArrayList<Expression>();
-			Expression micexp=((MethodInvocation)exp).getExpression();
-			if(micexp!=null)
-				exps.add(micexp);
-			exps.addAll(((MethodInvocation)exp).arguments());
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-
-		case ASTNode.PARENTHESIZED_EXPRESSION:
-			Expression pexp=((ParenthesizedExpression)exp).getExpression();
-			return expCfg(pexp,key);
-
-		case ASTNode.POSTFIX_EXPRESSION:
-			Expression postexp=((PostfixExpression)exp).getOperand();
-			return expCfg(postexp,key);
-			
-		case ASTNode.PREFIX_EXPRESSION:
-			Expression preexp=((PrefixExpression)exp).getOperand();
-			return expCfg(preexp,key);
-
-		case ASTNode.SUPER_METHOD_INVOCATION:
-			exps=((SuperMethodInvocation)exp).arguments();
-			tmpInfos=this.computeInfos(exps, key);
-			return this.tInfo(tmpInfos, key);
-		}
-		return null;
-	}
+//			//
+//			Expression elseExp=((ConditionalExpression)exp).getElseExpression();
+//			SEInfo elseinfo=expCfg(elseExp,key);
+//			if(elseinfo!=null){
+//				this.cfgR.add(new Relation(conexp, elseinfo.getStart(), rtype,key));
+//				info.addEnds(elseinfo.getEnds());
+//			}
+//			else{
+//				this.cfgR.add(new Relation(conexp, elseExp,rtype, key));
+//				this.cfgN.add(elseExp);
+//				this.infos.add(new NodeInfo(Query.expressionQuery(elseExp)));
+//				info.addEnd(elseExp);
+//			}
+//			return info;
+//			
+//		case ASTNode.FIELD_ACCESS:
+//			Expression faexp=((FieldAccess)exp).getExpression();
+//			return expCfg(faexp,key);
+//			
+//		case ASTNode.INFIX_EXPRESSION:
+//			exps=new ArrayList<Expression>();
+//			Expression lop=((InfixExpression)exp).getLeftOperand();
+//			Expression rop=((InfixExpression)exp).getRightOperand();
+//			exps.add(lop);
+//			exps.add(rop);
+//			exps.addAll(((InfixExpression)exp).extendedOperands());
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//
+//		case ASTNode.INSTANCEOF_EXPRESSION:
+//			Expression insofexp=((InstanceofExpression)exp).getLeftOperand();
+//			return expCfg(insofexp,key);
+//
+//		case ASTNode.METHOD_INVOCATION:
+//			exps=new ArrayList<Expression>();
+//			Expression micexp=((MethodInvocation)exp).getExpression();
+//			if(micexp!=null)
+//				exps.add(micexp);
+//			exps.addAll(((MethodInvocation)exp).arguments());
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//
+//		case ASTNode.PARENTHESIZED_EXPRESSION:
+//			Expression pexp=((ParenthesizedExpression)exp).getExpression();
+//			return expCfg(pexp,key);
+//
+//		case ASTNode.POSTFIX_EXPRESSION:
+//			Expression postexp=((PostfixExpression)exp).getOperand();
+//			return expCfg(postexp,key);
+//			
+//		case ASTNode.PREFIX_EXPRESSION:
+//			Expression preexp=((PrefixExpression)exp).getOperand();
+//			return expCfg(preexp,key);
+//
+//		case ASTNode.SUPER_METHOD_INVOCATION:
+//			exps=((SuperMethodInvocation)exp).arguments();
+//			tmpInfos=this.computeInfos(exps, key);
+//			return this.tInfo(tmpInfos, key);
+//		}
+//		return null;
+//	}
 	
-	public List<SEInfo> computeInfos(List<Expression> exps,String key){
-		List<SEInfo> infos=new ArrayList<SEInfo>();
-		if(exps.size()>0){
-			for(int i=0;i<exps.size();i++){
-				SEInfo tmpInfo=expCfg(exps.get(i),key);
-				if(tmpInfo!=null)
-				infos.add(tmpInfo);
-			}
-		}
-		if(infos.size()>0)
-			return infos;
-		else
-			return null;
-	}
+//	public List<SEInfo> computeInfos(List<Expression> exps,String key){
+//		List<SEInfo> infos=new ArrayList<SEInfo>();
+//		if(exps.size()>0){
+//			for(int i=0;i<exps.size();i++){
+//				SEInfo tmpInfo=expCfg(exps.get(i),key);
+//				if(tmpInfo!=null)
+//				infos.add(tmpInfo);
+//			}
+//		}
+//		if(infos.size()>0)
+//			return infos;
+//		else
+//			return null;
+//	}
 	/**
 	 * connect the ends of info1 to the start of info2
 	 * @param info1
@@ -753,7 +771,8 @@ public class MethodVisitor extends ASTVisitor {
 ////			}
 ////		}while (k-->0);
 //	}
-
+	
+	
 	public List<NodeInfo> getInfos() {
 		return infos;
 	}
@@ -770,6 +789,10 @@ public class MethodVisitor extends ASTVisitor {
 	}
 	public List<SENode> getSeNodes(){
 		return this.seNodes;
+	}
+	
+	public int getPNodeSize(){
+		return this.pNodes.size();
 	}
 	
 }

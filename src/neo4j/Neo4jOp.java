@@ -82,7 +82,12 @@ public class Neo4jOp {
 //			for(int j=0;j<b.length;j++){
 //				System.out.println(b[j]+" "+j);
 //			}
-			int pid=Integer.parseInt(b[12]);
+			int pid;
+			try{
+				pid=Integer.parseInt(b[12]);
+			}catch(NumberFormatException e){
+				pid=0;
+			}
 			return pid;
 		}
 		

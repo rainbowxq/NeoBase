@@ -70,8 +70,10 @@ public class Parser {
 		
 		MethodVisitor cfgVisitor=new MethodVisitor();
 		javaUnit.accept(cfgVisitor);
+		assert(cfgVisitor.getPNodeSize()==0);
 		this.addRelations(cfgVisitor.getCfgR());
 		this.setSenodes(cfgVisitor.getSeNodes());
+		
 		
 		
 		

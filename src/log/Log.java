@@ -23,6 +23,7 @@ public class Log {
 	 public static void debugLoger(String dlog)
 	 {
 		 Log.log.loger.debug(dlog);
+//		 System.out.println(dlog);
 	  
 	 }
 	 

@@ -15,16 +15,16 @@ public class Driver {
 	private List<Long> units=new ArrayList<Long>();
 	private Long id;
 	private String name=null;
-	private String location="null";// the location where the project stores 
+	private String version="";// the location where the project stores 
 	private List<String> srcPaths;
 	private List<String> targetPaths;
 	private String proPath;
 	
 	
-	public Driver(String name,String propath,String location){
+	public Driver(String name,String propath,String version){
 		this.name=name;
 		this.proPath=propath;
-		this.location=location;
+		this.setVersion(version);
 	}
 	/**
 	 * store the project node into the database and record its id in the database
@@ -32,11 +32,11 @@ public class Driver {
 	public void store(int pid){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: Project { NAME : {pname},LOCATION:{loc},P_ID:{pid}}) RETURN id(n)");
+				"CREATE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pname", this.getName());
-		params.put("loc", this.getLocation());
+		params.put("version", this.getVersion());
 		params.put("pid", pid);
 		query.put("params", params);
 		Log.debugLoger(query.toString());
@@ -115,23 +115,21 @@ public class Driver {
 		this.name = name;
 	}
 
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-	
 	
 	public static void main(String[] args){
 		Stopwatch timer=new Stopwatch();
 		timer.start();
-		Driver driver=new Driver("HelloWorld.java","/home/xiaoq_zhu/zxq/workspace/HelloWorld","");
+		Driver driver=new Driver("org.eclipse.swt","/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt","2.1");
 		driver.parseProject();
 		System.out.println("finished!!");
 		timer.stop();
 		System.out.println("time consumed: "+timer.timeInNanoseconds()/60000000);
+	}
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
 	}
 	
 	
