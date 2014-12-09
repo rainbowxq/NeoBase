@@ -2174,4 +2174,6 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		return this.relations;
 	}
 
+
+
 }

@@ -235,13 +235,8 @@ public class Query {
 
 	/* Javadoc */
 	public static String javadocQuery(Javadoc node) {
-		String content = "";
-		@SuppressWarnings("unchecked")
-		List<TagElement> tagelements = node.tags();
-		for (int i = 0; i < tagelements.size(); i++) {
-			TagElement tagelement = tagelements.get(i);
-			content += tagelement.toString() + "\n";
-		}
+		String content = node.toString();
+		
 		JSONObject query = new JSONObject();
 		query.put("query", "CREATE (n: Javadoc {DOC : {doc} "+setPid);
 

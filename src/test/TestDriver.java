@@ -4,7 +4,7 @@ import ast.Parser;
 
 public class TestDriver {
 	public static void eTest(String fileName,String filePath,String[] classPaths,String[] filePaths){
-		Parser parser=new Parser(fileName,filePath);
+		Parser parser=new Parser(fileName,filePath,4);
 		parser.ececute(classPaths,filePaths);
 	}
 	

@@ -29,14 +29,15 @@ public class Driver {
 	/**
 	 * store the project node into the database and record its id in the database
 	 */
-	public void store(){
+	public void store(int pid){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: Project { NAME : {pname},LOCATION:{loc}}) RETURN id(n)");
+				"CREATE (n: Project { NAME : {pname},LOCATION:{loc},P_ID:{pid}}) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pname", this.getName());
 		params.put("loc", this.getLocation());
+		params.put("pid", pid);
 		query.put("params", params);
 		Log.debugLoger(query.toString());
 		
@@ -55,8 +56,8 @@ public class Driver {
 	 * @param classPaths
 	 * @param filePaths
 	 */
-	public void parseFile(String fileName,String filePath){
-		Parser parser=new Parser(fileName,filePath);
+	public void parseFile(String fileName,String filePath,int pid){
+		Parser parser=new Parser(fileName,filePath,pid);
 		String[] tarpaths=(String[]) this.targetPaths.toArray(new String[this.targetPaths.size()]);
 		String[] srcpaths=(String[]) this.srcPaths.toArray(new String[this.srcPaths.size()]);
 		parser.ececute(tarpaths,srcpaths);
@@ -64,7 +65,11 @@ public class Driver {
 	}
 	
 	public void parseProject(){
-//		this.store();
+		int pid=Neo4jOp.getPid()+1;
+		System.out.println("the pid is:"+pid);
+		if(pid<0)
+			return;
+		this.store(pid);
 		
 		JavaFiles files=new JavaFiles();
 		files.readFolder(proPath);
@@ -75,7 +80,7 @@ public class Driver {
 		assert(javapaths.size()==names.size()):"size doesn't match!!\n";
 		for(int i=0;i<names.size();i++){
 			System.out.println("parse: "+javapaths.get(i));
-			this.parseFile(names.get(i), javapaths.get(i));
+			this.parseFile(names.get(i), javapaths.get(i),pid);
 			
 		}
 		
@@ -84,6 +89,7 @@ public class Driver {
 		}
 		
 	}
+	
 
 	public List<Long> getUnits() {
 		return units;
@@ -121,7 +127,7 @@ public class Driver {
 	public static void main(String[] args){
 		Stopwatch timer=new Stopwatch();
 		timer.start();
-		Driver driver=new Driver("eclipse2.0","/home/xiaoq_zhu/zxq/workspace/eclipse2.0","");
+		Driver driver=new Driver("HelloWorld.java","/home/xiaoq_zhu/zxq/workspace/HelloWorld","");
 		driver.parseProject();
 		System.out.println("finished!!");
 		timer.stop();

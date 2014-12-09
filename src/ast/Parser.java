@@ -35,9 +35,10 @@ public class Parser {
 	private List<Relation> relations=new ArrayList<Relation>();
 	private List<SENode> senodes=new ArrayList<SENode>();
 	
-	public Parser(String fName,String fPath){
+	public Parser(String fName,String fPath,int pid){
 		this.setFileName(fName);
 		this.setFilePath(fPath);
+		Query.setPid(pid);
 	}
 	
 	public void analyse(String[]classPaths,String[]filePaths){
@@ -216,4 +217,5 @@ public class Parser {
 	public void setCid(Long cid) {
 		this.cid = cid;
 	}
+
 }

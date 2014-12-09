@@ -4,6 +4,7 @@ import javax.ws.rs.core.MediaType;
 
 import log.Log;
 import net.sf.json.JSONObject;
+import ast.Query;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -71,6 +72,18 @@ public class Neo4jOp {
 			Neo4jOp.executeQuery(query.toString());
 //			Log.debugLoger(json.toString());
 			
+		}
+		
+		public static int getPid(){
+			JSONObject query=new JSONObject();
+			query.put("query", "match (n:Project) return max(n.P_ID)");
+			String a=Neo4jOp.executeQuery(query.toString());
+			String b[]=a.split(" ");
+//			for(int j=0;j<b.length;j++){
+//				System.out.println(b[j]+" "+j);
+//			}
+			int pid=Integer.parseInt(b[12]);
+			return pid;
 		}
 		
 		public static void main(String[]args){

@@ -37,11 +37,13 @@ public class JavaFiles {
 			for (int i = 0; i < files.length; i++) {
 				// 判断是否是文件夹，如果是文件夹则继续读取文件夹下的子目录或文件
 				if (files[i].isDirectory()) {
-					if(files[i].getName().trim().equals("src"))
-						this.sources.add(files[i].getAbsolutePath());
-//					else if(files[i].getName().trim().equals("bin"))
-//						this.targets.add(files[i].getAbsolutePath());
-					this.readFolder(files[i].getPath());
+					if(files[i].getName().trim().equals("bin"))
+						this.targets.add(files[i].getAbsolutePath());
+					else{
+						if(files[i].getName().startsWith("src"))
+							this.sources.add(files[i].getAbsolutePath());
+						this.readFolder(files[i].getPath());
+					}
 				} else {
 					if (files[i].getName().endsWith(".java")) {
 						filepaths.add(files[i].getAbsolutePath());
@@ -67,7 +69,7 @@ public class JavaFiles {
 	}
 	public static void main(String[] args){
 		JavaFiles files=new JavaFiles();
-		files.readFolder("/home/xiaoq_zhu/zxq/workspace/eclipse2.0");
+		files.readFolder("/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt");
 		for(int i=0;i<files.filepaths.size();i++){
 			System.out.println(files.filepaths.get(i));
 			System.out.println(files.names.get(i));
