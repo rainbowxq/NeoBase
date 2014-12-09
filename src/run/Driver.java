@@ -16,20 +16,15 @@ public class Driver {
 	private Long id;
 	private String name=null;
 	private String location="null";// the location where the project stores 
-	private String[] classPaths;
-	private String[] filePaths;
+	private List<String> srcPaths;
+	private List<String> targetPaths;
+	private String proPath;
 	
-	public Driver(String name,String location,String[] classPaths,String[] filePaths){
+	
+	public Driver(String name,String propath,String location){
 		this.name=name;
+		this.proPath=propath;
 		this.location=location;
-		this.classPaths=classPaths;
-		this.filePaths=filePaths;
-	}
-	
-	public Driver(String name,String[] classPaths,String[] filePaths){
-		this.name=name;
-		this.classPaths=classPaths;
-		this.filePaths=filePaths;
 	}
 	/**
 	 * store the project node into the database and record its id in the database
@@ -62,21 +57,25 @@ public class Driver {
 	 */
 	public void parseFile(String fileName,String filePath){
 		Parser parser=new Parser(fileName,filePath);
-		parser.ececute(classPaths,filePaths);
+		String[] tarpaths=(String[]) this.targetPaths.toArray(new String[this.targetPaths.size()]);
+		String[] srcpaths=(String[]) this.srcPaths.toArray(new String[this.srcPaths.size()]);
+		parser.ececute(tarpaths,srcpaths);
 		this.units.add(parser.getCid());
 	}
 	
-	public void parseProject(String proPath){
-		this.store();
+	public void parseProject(){
+//		this.store();
 		
 		JavaFiles files=new JavaFiles();
 		files.readFolder(proPath);
-		ArrayList<String> filepaths=files.getfilePaths();
-		ArrayList<String> names=files.getNames();
-		assert(filepaths.size()==names.size()):"size doesn't match!!\n";
+		List<String> javapaths=files.getfilePaths();
+		List<String> names=files.getNames();
+		this.srcPaths=files.getSources();
+		this.targetPaths=files.getTargets();
+		assert(javapaths.size()==names.size()):"size doesn't match!!\n";
 		for(int i=0;i<names.size();i++){
-			System.out.println("parse: "+names.get(i));
-			this.parseFile(names.get(i), filepaths.get(i));
+			System.out.println("parse: "+javapaths.get(i));
+			this.parseFile(names.get(i), javapaths.get(i));
 			
 		}
 		
@@ -122,16 +121,11 @@ public class Driver {
 	public static void main(String[] args){
 		Stopwatch timer=new Stopwatch();
 		timer.start();
-		Driver driver=new Driver("LRP",
-				new String[]{"/home/xiaoq_zhu/workspace/LRP/bin",
-					"/home/xiaoq_zhu/workspace/LRP/lib/jcommon-1.0.22.jar",
-					"/home/xiaoq_zhu/workspace/LRP/lib/jfreechart-1.0.18.jar",
-					"/home/xiaoq_zhu/workspace/LRP/lib/servlet.jar"},
-				new String[]{"/home/xiaoq_zhu/workspace/LRP/src"});
-		driver.parseProject("/home/xiaoq_zhu/workspace/LRP/");
+		Driver driver=new Driver("eclipse2.0","/home/xiaoq_zhu/zxq/workspace/eclipse2.0","");
+		driver.parseProject();
 		System.out.println("finished!!");
 		timer.stop();
-		System.out.println("time consumed: "+timer.timeInNanoseconds());
+		System.out.println("time consumed: "+timer.timeInNanoseconds()/60000000);
 	}
 	
 	

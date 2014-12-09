@@ -51,7 +51,7 @@ public class Parser {
 		parser.setResolveBindings(true);
 
 		parser.setUnitName(this.fileName);
-		parser.setEnvironment(classPaths,filePaths,new String[] { "UTF-8" }, true);
+		parser.setEnvironment(classPaths,filePaths,null, true);
 		parser.setSource(unit.getProgram().toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;

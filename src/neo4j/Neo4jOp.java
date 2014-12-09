@@ -51,10 +51,10 @@ public class Neo4jOp {
 			String content=null;
 			switch(type){
 			case "AST":
-				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:AST {NAME:{prop}}]->(t) return r";
+				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:AST {NAME:{prop}}]->(t) ";
 				break;
 			case "CFG":
-				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:CFG {M_KEY:{prop}}]->(t) return r";
+				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:CFG {M_KEY:{prop}}]->(t) ";
 				break;
 			default:
 				assert false: "relation type error!!!";

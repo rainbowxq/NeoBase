@@ -55,12 +55,12 @@ public class TestDriver {
 //				new String[]{"./target/classes"},new String[]{"./src"});
 		
 		
-		
+		System.out.println("beginning.....");
 		
 		TestDriver.eTest("HelloWorld.java","./src/testcases/HelloWorld.java",
 				new String[]{"./target/classes"},new String[]{"./src"});
 		
-		
+		System.out.println("finished!!");
 //		TestDriver.eTest("hello.java",
 //				"/home/xiaoq_zhu/zxq/workspace/HelloWorld/src/test/HelloWorld.java",
 //				new String[]{"/home/xiaoq_zhu/zxq/workspace/HelloWorld/bin"},
