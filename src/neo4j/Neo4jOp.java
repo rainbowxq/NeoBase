@@ -69,7 +69,9 @@ public class Neo4jOp {
 			query.put("params",params);
 			
 			Log.debugLoger(query.toString());
+			/********************************/
 			Neo4jOp.executeQuery(query.toString());
+			/********************************/
 //			Log.debugLoger(json.toString());
 			
 		}
@@ -92,7 +94,7 @@ public class Neo4jOp {
 		}
 		
 		public static void main(String[]args){
-			Neo4jOp.linkTest();
+			Neo4jOp.executeQuery("{\"query\":\"CREATE (n: ArrayInitializer {T_KEY:{key},CONTENT:{content},P_ID:{proid} }) RETURN id(n)\",\"params\":{\"key\":\"[I\",\"content\":\"null\",\"proid\":4}}");
 		}
 		
 		

@@ -57,7 +57,8 @@ public class Parser {
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;
 		
-//		parser.createASTs(null, null, null, null);
+		/**********************************************************/
+		//when testing cfg, comment lines in this area
 		JFileVisitor astVisitor=new JFileVisitor(this.fileName);
 		
 		javaUnit.accept(astVisitor);
@@ -67,12 +68,18 @@ public class Parser {
 		
 		int cindex=this.nodes.indexOf(javaUnit);
 		this.setCid(this.infos.get(cindex).getId());
+		/***********************************************************/
 		
 		MethodVisitor cfgVisitor=new MethodVisitor();
 		javaUnit.accept(cfgVisitor);
 		assert(cfgVisitor.getPNodeSize()==0);
 		this.addRelations(cfgVisitor.getCfgR());
 		this.setSenodes(cfgVisitor.getSeNodes());
+		/***************************************************/
+		//when testing cfg, uncomment lines in this area
+//		this.setNodes(cfgVisitor.getCfgN());
+//		this.setInfos(cfgVisitor.getInfos());
+		/***************************************************/
 		
 		
 		
@@ -134,7 +141,6 @@ public class Parser {
 			this.setNodeId(i,Long.parseLong(b[12]));
 //			System.out.println(this.infos.get(i).getId());
 		}
-		
 		for(int i=0;i<this.relations.size();i++){
 			Relation r=this.relations.get(i);
 			int fromIndex=this.nodes.indexOf(r.getFrom());
@@ -143,7 +149,7 @@ public class Parser {
 			}
 			int toIndex=this.nodes.indexOf(r.getTo());
 			assert fromIndex!=-1 : "the from node doesn't exist";
-			assert toIndex!=-1 : "the to node doesn't exist";
+			assert toIndex!=-1 : "the to node doesn't exist"+r.getTo().toString();
 			
 			long fromId=this.infos.get(fromIndex).getId();
 			

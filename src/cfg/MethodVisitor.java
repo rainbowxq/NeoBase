@@ -64,13 +64,15 @@ public class MethodVisitor extends ASTVisitor {
 	private List<ASTNode> pNodes=new ArrayList<ASTNode>();
 	
 	public boolean visit(MethodDeclaration node) {
-		String key=node.resolveBinding().getKey();
-		SENode start_end=new SENode(key);
 		Block block=node.getBody();
-		SEInfo info=stmtCfg(block,start_end);
-		start_end.setStart_to(info.getStart());
-		start_end.addEnds_from(info.getEnds());
-		this.seNodes.add(start_end);
+		if(block!=null){
+			String key=node.resolveBinding().getKey();
+			SENode start_end=new SENode(key);
+			SEInfo info=stmtCfg(block,start_end);
+			start_end.setStart_to(info.getStart());
+			start_end.addEnds_from(info.getEnds());
+			this.seNodes.add(start_end);
+		}
 		return false;
 	}
 	
@@ -159,7 +161,8 @@ public class MethodVisitor extends ASTVisitor {
 			this.concatSE(efbodyinfo.getEnds(), efexp, key);
 			
 			efinfo.addEnd(efexp);
-			
+			this.checkBC(stmt, efbodyinfo, efexp, key);
+			return efinfo;
 			
 		
 		case ASTNode.EXPRESSION_STATEMENT:
@@ -232,7 +235,7 @@ public class MethodVisitor extends ASTVisitor {
 			}
 			else{
 				this.concatSE(tmpends, stmt, key);
-				this.checkBC(stmt, forinfo, stmt, key);
+				this.checkBC(stmt, forinfo,stmt, key);
 //				forinfo.addEnd(stmt);
 			}
 			return forinfo;
@@ -307,22 +310,21 @@ public class MethodVisitor extends ASTVisitor {
 				if(swStmts.get(i).getNodeType()==ASTNode.SWITCH_CASE){
 					this.cfgR.add(new Relation(stmt,swStmts.get(i),rtype,key));
 				}
-				if(swStmts.get(i).getNodeType()==ASTNode.BREAK_STATEMENT){
-					this.cfgN.add(swStmts.get(i));
-					this.infos.add(new NodeInfo(Query.statementQuery(swStmts.get(i))));
-					
-					swinfo.addEnd(swStmts.get(i));
-					tmpinfo=this.tInfo(tmpInfos, key);
-					this.concatSE(tmpinfo.getEnds(), swStmts.get(i), key);
-					tmpInfos=new ArrayList<SEInfo>();
-				}
-				else{
-					tmpInfos.add(this.stmtCfg(swStmts.get(i), senode));
-				}
+//				if(swStmts.get(i).getNodeType()==ASTNode.BREAK_STATEMENT){
+//					this.cfgN.add(swStmts.get(i));
+//					this.infos.add(new NodeInfo(Query.statementQuery(swStmts.get(i))));
+//					
+//					swinfo.addEnd(swStmts.get(i));
+//					tmpinfo=this.tInfo(tmpInfos, key);
+//					this.concatSE(tmpinfo.getEnds(), swStmts.get(i), key);
+//					tmpInfos=new ArrayList<SEInfo>();
+//				}
+				tmpInfos.add(this.stmtCfg(swStmts.get(i), senode));
 			}
 			tmpinfo=this.tInfo(tmpInfos, key);
 			if(tmpinfo!=null)
 				swinfo.addEnds(tmpinfo.getEnds());
+			this.checkBC(stmt, swinfo, null, null);
 			return swinfo;
 		
 		case ASTNode.TRY_STATEMENT:
@@ -432,6 +434,7 @@ public class MethodVisitor extends ASTVisitor {
 	public ASTNode findBCparent(ASTNode node,SimpleName label){
 		if(label==null){
 			ASTNode parent=node.getParent();
+			assert parent!=null;
 			while(parent!=null){
 				switch(parent.getNodeType()){
 				case ASTNode.ENHANCED_FOR_STATEMENT:
@@ -439,13 +442,16 @@ public class MethodVisitor extends ASTVisitor {
 				case ASTNode.FOR_STATEMENT:
 				case ASTNode.WHILE_STATEMENT:
 					return parent;
+				case ASTNode.SWITCH_STATEMENT:
+					if(node instanceof BreakStatement)
+						return parent;
 				}
 				parent=parent.getParent();
 			}
-			assert parent!=null;
 		}
 		else{
 			ASTNode parent=node.getParent();
+			assert parent!=null;
 			while (parent!=null){
 				if(parent.getNodeType()==ASTNode.LABELED_STATEMENT){
 					String name=((LabeledStatement)parent).getLabel().getFullyQualifiedName();
@@ -454,7 +460,6 @@ public class MethodVisitor extends ASTVisitor {
 				}
 				parent=parent.getParent();
 			}
-			assert parent!=null;
 		}
 		return node;
 		
@@ -743,34 +748,24 @@ public class MethodVisitor extends ASTVisitor {
 		}
 	}
 	
-//	public static void main(String[] args){
-//		int k=3;
-//		int a=11;
-//	B:	if(a>10)
-//	C:		break C;
-//		else if(a>5)
-//			break B;
-//		else
-//			a-=1;
-//		
-//		System.out.println(a);
-//		
-//		
-////	A:	do{
-////		B:	for(int j=1;j<10;j+=3)
-////		C: {
-////			System.out.println(j);
-////				if(a>10)
-////					continue A;
-////				else if(a>5)
-////					break B;
-////				else if (a>2)
-////					continue B;
-////				else
-////					break C;
-////			}
-////		}while (k-->0);
-//	}
+	public static void main(String[] args){
+		int k=3;
+		int a=11;
+		switch(a){
+			case 11:
+			{
+				k=5;
+				break;
+			}
+			default:
+				k=-5;
+				break;
+		}
+		
+		System.out.println(k);
+		
+		
+	}
 	
 	
 	public List<NodeInfo> getInfos() {

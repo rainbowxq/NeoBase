@@ -559,12 +559,15 @@ public class Query {
 	public static String expressionQuery(Expression node){
 		JSONObject query = new JSONObject();
 		JSONObject params = new JSONObject();
-		String common="T_KEY:{key},CONTENT:{content}"+Query.setPid;
+		String common="T_KEY:{key}"+Query.setPid;
 		if(node.resolveTypeBinding()!=null)
 			params.put("key", node.resolveTypeBinding().getKey());
 		else
 			params.put("key", "null");
-		params.put("content", node.toString());
+//		if(node.toString()!=null)
+//			params.put("content", node.toString());
+//		else
+//			params.put("content", "null");
 //		Log.debugLoger("hahahhahah   "+node.resolveConstantExpressionValue()+"    hahhahahh");
 		switch(node.getNodeType()){
 			case ASTNode.MARKER_ANNOTATION:
@@ -573,24 +576,23 @@ public class Query {
 				return Query.AnnotationQuery((Annotation) node);
 			case ASTNode.ARRAY_ACCESS:
 				query.put("query",
-						"CREATE (n: ArrayAccess {"
+						"CREATE (n: ArrayAccess :Expression{"
 						+ common);
 				
 				break;
 			case ASTNode.ARRAY_CREATION:
 				query.put("query",
-						"CREATE (n: ArrayCreation {"
+						"CREATE (n: ArrayCreation :Expression{"
 						+ common);
 				break;
 			case ASTNode.ARRAY_INITIALIZER:
 				query.put("query",
-						"CREATE (n: ArrayInitializer {"
+						"CREATE (n: ArrayInitializer:Expression {"
 						+ common);
-				params.put("content", node.toString());
 				break;
 			case ASTNode.ASSIGNMENT:
 				query.put("query",
-						"CREATE (n: Assignment {OPERATOR:{operator},"
+						"CREATE (n: Assignment :Expression{OPERATOR:{operator},"
 						+ common);
 				params.put("operator", ((Assignment)node).getOperator().toString());
 				
@@ -598,7 +600,7 @@ public class Query {
 				
 			case ASTNode.BOOLEAN_LITERAL:
 				query.put("query",
-						"CREATE (n: BooleanLiteral {BOOLEAN_VALUE:{value},"
+						"CREATE (n: BooleanLiteral :Expression{BOOLEAN_VALUE:{value},"
 						+ common);
 				params.put("value", ((BooleanLiteral)node).booleanValue());
 
@@ -606,13 +608,13 @@ public class Query {
 				
 			case ASTNode.CAST_EXPRESSION:
 				query.put("query",
-						"CREATE (n: CastExpression {"
+						"CREATE (n: CastExpression :Expression{"
 						+ common);
 				break;
 				
 			case ASTNode.CHARACTER_LITERAL:
 				query.put("query",
-						"CREATE (n: CharacterLiteral {ESCAPED_VALUE:{value},"
+						"CREATE (n: CharacterLiteral :Expression{ESCAPED_VALUE:{value},"
 						+ common);
 				params.put("value", ((CharacterLiteral)node).getEscapedValue());
 				
@@ -620,7 +622,7 @@ public class Query {
 				
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				query.put("query",
-						"CREATE (n: ClassInstanceCreation {M_KEY:{mkey},"
+						"CREATE (n: ClassInstanceCreation :Expression{M_KEY:{mkey},"
 						+ common);
 				if(((ClassInstanceCreation)node).resolveConstructorBinding()!=null)
 					params.put("mkey",((ClassInstanceCreation)node).resolveConstructorBinding().getKey());
@@ -629,12 +631,12 @@ public class Query {
 				break;
 			case ASTNode.CONDITIONAL_EXPRESSION:
 				query.put("query",
-						"CREATE (n: ConditionalExpression {"
+						"CREATE (n: ConditionalExpression:Expression {"
 						+ common);
 				break;
 			case ASTNode.FIELD_ACCESS:
 				query.put("query",
-						"CREATE (n: FieldAccess {NAME:{name},V_KEY:{vkey},"
+						"CREATE (n: FieldAccess:Expression {NAME:{name},V_KEY:{vkey},"
 						+ common);
 				params.put("name", ((FieldAccess)node).getName().getFullyQualifiedName());
 				if(((FieldAccess)node).resolveFieldBinding()!=null){
@@ -646,20 +648,20 @@ public class Query {
 				break;
 			case ASTNode.INFIX_EXPRESSION:
 				query.put("query",
-						"CREATE (n: InfixExpression {OPERATOR:{operator},"
+						"CREATE (n: InfixExpression :Expression{OPERATOR:{operator},"
 						+ common);
 				params.put("operator", ((InfixExpression)node).getOperator().toString());
 				
 				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				query.put("query",
-						"CREATE (n: InstanceofExpression {"
+						"CREATE (n: InstanceofExpression:Expression {"
 						+ common);
 				break;
 				
 			case ASTNode.METHOD_INVOCATION:
 				query.put("query",
-						"CREATE (n: MethodInvocation {M_KEY:{mkey},NAME:{name},"
+						"CREATE (n: MethodInvocation:Expression {M_KEY:{mkey},NAME:{name},"
 						+ common);
 				if(((MethodInvocation)node).resolveMethodBinding()!=null)
 					params.put("mkey", ((MethodInvocation)node).resolveMethodBinding().getKey());
@@ -703,29 +705,28 @@ public class Query {
 					params.put("epkey", "null");
 				}
 				query.put("query",
-						"CREATE (n: Name {NAME:{name}"
+						"CREATE (n: Name:Expression {NAME:{name}"
 						+ extra+common);
 				break;
 			case ASTNode.NULL_LITERAL:
 				query.put("query",
-						"CREATE (n: NullLiteral {"
-						+ common);
+						"CREATE (n: NullLiteral:Expression) return id(n)");
 				break;
 			case ASTNode.NUMBER_LITERAL:
 				query.put("query",
-						"CREATE (n: NumberLiteral {TOKEN:{token},"
+						"CREATE (n: NumberLiteral:Expression {TOKEN:{token},"
 						+ common);
 				params.put("token", ((NumberLiteral)node).getToken());
 				
 				break;
 			case ASTNode.PARENTHESIZED_EXPRESSION:
 				query.put("query",
-						"CREATE (n: ParenthesizedExpression {"
+						"CREATE (n: ParenthesizedExpression:Expression {"
 						+ common);
 				break;
 			case ASTNode.POSTFIX_EXPRESSION:
 				query.put("query",
-						"CREATE (n: PostfixExpression {OPERATOR:{operator},"
+						"CREATE (n: PostfixExpression:Expression {OPERATOR:{operator},"
 						+ common);
 				params.put("operator", ((PostfixExpression)node).getOperator().toString());
 				
@@ -733,14 +734,14 @@ public class Query {
 				
 			case ASTNode.PREFIX_EXPRESSION:
 				query.put("query",
-						"CREATE (n: PrefixExpression {OPERATOR:{operator},"
+						"CREATE (n: PrefixExpression:Expression {OPERATOR:{operator},"
 						+ common);
 				params.put("operator", ((PrefixExpression)node).getOperator().toString());
 				
 				break;
 			case ASTNode.STRING_LITERAL:
 				query.put("query",
-						"CREATE (n: StringLiteral {ESCAPED_VALUE:{value},"
+						"CREATE (n: StringLiteral:Expression {ESCAPED_VALUE:{value},"
 						+ common);
 				params.put("value", ((StringLiteral)node).getEscapedValue());
 				
@@ -748,7 +749,7 @@ public class Query {
 				
 			case ASTNode.SUPER_FIELD_ACCESS:
 				query.put("query",
-						"CREATE (n: SuperFieldAccess {QUALIFIER:{qualifier},NAME:{name},"
+						"CREATE (n: SuperFieldAccess:Expression {QUALIFIER:{qualifier},NAME:{name},"
 						+ common);
 				if(((SuperFieldAccess)node).getQualifier()!=null)
 					params.put("qualifier", ((SuperFieldAccess)node).getQualifier().getFullyQualifiedName());
@@ -759,7 +760,7 @@ public class Query {
 				break;
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				query.put("query",
-						"CREATE (n: SuperMethodInvocation {QUALIFIER:{qualifier},NAME:{name},M_KEY:{mkey},"
+						"CREATE (n: SuperMethodInvocation:Expression {QUALIFIER:{qualifier},NAME:{name},M_KEY:{mkey},"
 						+ common);
 				if(((SuperMethodInvocation)node).getQualifier()!=null)
 					params.put("qualifier", ((SuperMethodInvocation)node).getQualifier().getFullyQualifiedName());
@@ -774,7 +775,7 @@ public class Query {
 				break;
 			case ASTNode.THIS_EXPRESSION:
 				query.put("query",
-						"CREATE (n: ThisExpression {QUALIFIER:{qualifier},"
+						"CREATE (n: ThisExpression:Expression {QUALIFIER:{qualifier},"
 						+ common);
 				if(((ThisExpression)node).getQualifier()!=null)
 					params.put("qualifier", ((ThisExpression)node).getQualifier().getFullyQualifiedName());
@@ -784,12 +785,12 @@ public class Query {
 				break;
 			case ASTNode.TYPE_LITERAL:
 				query.put("query",
-						"CREATE (n: TypeLiteral {"
+						"CREATE (n: TypeLiteral:Expression {"
 						+ common);
 				break;
 			case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
 				query.put("query",
-						"CREATE (n: VariableDeclarationExpression {"
+						"CREATE (n: VariableDeclarationExpression:Expression {"
 						+ common);
 				break;
 		}
@@ -806,15 +807,15 @@ public class Query {
 		switch(node.getNodeType()){
 			case ASTNode.ASSERT_STATEMENT:
 				query.put("query",
-						"CREATE (n: AssertStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: AssertStatement:Statement {P_ID:{proid},CONTENT:{content}}) RETURN id(n)");
 				break;
 			case ASTNode.BLOCK:
 				query.put("query",
-						"CREATE (n: Block {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: Block:Statement {P_ID:{proid},CONTENT:{content}}) RETURN id(n)");
 				break;
 			case ASTNode.BREAK_STATEMENT:
 				query.put("query",
-						"CREATE (n: BreakStatement {LABEL:{label}"+setPid);
+						"CREATE (n: BreakStatement :Statement{LABEL:{label},CONTENT:{content}"+setPid);
 				if(((BreakStatement)node).getLabel()!=null)
 					params.put("label", ((BreakStatement)node).getLabel().getFullyQualifiedName());
 				else
@@ -822,7 +823,7 @@ public class Query {
 				break;
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				query.put("query",
-						"CREATE (n: ConstructorInvocation {M_KEY:{mkey}"+setPid);
+						"CREATE (n: ConstructorInvocation:Statement {M_KEY:{mkey},CONTENT:{content}"+setPid);
 				if(((ConstructorInvocation)node).resolveConstructorBinding()!=null)
 					params.put("mkey", ((ConstructorInvocation)node).resolveConstructorBinding().getKey());
 				else
@@ -830,7 +831,7 @@ public class Query {
 				break;
 			case ASTNode.CONTINUE_STATEMENT:
 				query.put("query",
-						"CREATE (n: ContinueStatement {LABEL:{label}"+setPid);
+						"CREATE (n: ContinueStatement:Statement {LABEL:{label},CONTENT:{content}"+setPid);
 				if(((ContinueStatement)node).getLabel()!=null)
 					params.put("label", ((ContinueStatement)node).getLabel().getFullyQualifiedName());
 				else
@@ -838,41 +839,41 @@ public class Query {
 				break;
 			case ASTNode.DO_STATEMENT:
 				query.put("query",
-						"CREATE (n: DoStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: DoStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.EMPTY_STATEMENT:
 				query.put("query",
-						"CREATE (n: EmptyStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: EmptyStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.ENHANCED_FOR_STATEMENT:
 				query.put("query",
-						"CREATE (n: EnhancedForStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: EnhancedForStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.EXPRESSION_STATEMENT:
 				query.put("query",
-						"CREATE (n: ExpressionStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: ExpressionStatement:Statement {P_ID:{proid},CONTENT:{content}}) RETURN id(n)");
 				break;
 			case ASTNode.FOR_STATEMENT:
 				query.put("query",
-						"CREATE (n: ForStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: ForStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.IF_STATEMENT:
 				query.put("query",
-						"CREATE (n: IfStatement {CONDITION:{cond}"+setPid);
+						"CREATE (n: IfStatement:Statement {CONDITION:{cond}"+setPid);
 				params.put("cond", ((IfStatement)node).getExpression().toString() );
 				break;
 			case ASTNode.LABELED_STATEMENT:
 				query.put("query",
-						"CREATE (n: LabeledStatement {LABEL:{label}"+setPid);
+						"CREATE (n: LabeledStatement:Statement {LABEL:{label},CONTENT:{content}"+setPid);
 				params.put("label", ((LabeledStatement)node).getLabel().getFullyQualifiedName());
 				break;
 			case ASTNode.RETURN_STATEMENT:
 				query.put("query",
-						"CREATE (n: ReturnStatement) RETURN id(n)");
+						"CREATE (n: ReturnStatement:Statement{P_ID:{proid},CONTENT:{content}}) RETURN id(n)");
 				break;
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				query.put("query",
-						"CREATE (n: SuperConstructorInvocation {M_KEY:{mkey}"+setPid);
+						"CREATE (n: SuperConstructorInvocation:Statement {M_KEY:{mkey},CONTENT:{content}"+setPid);
 				if(((SuperConstructorInvocation)node).resolveConstructorBinding()!=null)
 					params.put("mkey", ((SuperConstructorInvocation)node).resolveConstructorBinding().getKey());
 				else
@@ -881,39 +882,40 @@ public class Query {
 				break;
 			case ASTNode.SWITCH_CASE:
 				query.put("query",
-						"CREATE (n: SwitchCase {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: SwitchCase:Statement {P_ID:{proid},CONTENT:{content}}) RETURN id(n)");
 				break;
 			case ASTNode.SWITCH_STATEMENT:
 				query.put("query",
-						"CREATE (n: SwitchStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: SwitchStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.SYNCHRONIZED_STATEMENT:
 				query.put("query",
-						"CREATE (n: SynchronizedStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: SynchronizedStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.THROW_STATEMENT:
 				query.put("query",
-						"CREATE (n: ThrowStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: ThrowStatement:Statement {P_ID:{proid},CONTENT:{content}}) RETURN id(n)");
 				break;
 			case ASTNode.TRY_STATEMENT:
 				query.put("query",
-						"CREATE (n: TryStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: TryStatement:Statement {P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.TYPE_DECLARATION_STATEMENT:
 				query.put("query",
-						"CREATE (n: TypeDeclarationStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: TypeDeclarationStatement :Statement{P_ID:{proid}}) RETURN id(n)");
 				break;
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 				query.put("query",
-						"CREATE (n: VariableDeclarationStatement {P_ID:{proid}} ) RETURN id(n)");
+						"CREATE (n: VariableDeclarationStatement :Statement{P_ID:{proid},CONTENT:{content}} ) RETURN id(n)");
 				break;
 			case ASTNode.WHILE_STATEMENT:
 				query.put("query",
-						"CREATE (n: WhileStatement {P_ID:{proid}}) RETURN id(n)");
+						"CREATE (n: WhileStatement :Statement{P_ID:{proid}}) RETURN id(n)");
 				break;
 					
 		}
 		params.put("proid", pid);
+		params.put("content", node.toString());
 		query.put("params", params);
 		Log.debugLoger(query.toString());
 		return query.toString();
