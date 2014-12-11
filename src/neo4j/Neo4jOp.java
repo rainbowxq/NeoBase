@@ -52,10 +52,10 @@ public class Neo4jOp {
 			String content=null;
 			switch(type){
 			case "AST":
-				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:AST {NAME:{prop}}]->(t) ";
+				content="match (f) match (t) where id(f)={from} and id(t)={to} merge (f)-[r:AST {NAME:{prop}}]->(t) ";
 				break;
 			case "CFG":
-				content="match (f) match (t) where id(f)={from} and id(t)={to} create (f)-[r:CFG {M_KEY:{prop}}]->(t) ";
+				content="match (f) match (t) where id(f)={from} and id(t)={to} merge (f)-[r:CFG {M_KEY:{prop}}]->(t) ";
 				break;
 			default:
 				assert false: "relation type error!!!";
@@ -94,7 +94,7 @@ public class Neo4jOp {
 		}
 		
 		public static void main(String[]args){
-			Neo4jOp.executeQuery("{\"query\":\"CREATE (n: ArrayInitializer {T_KEY:{key},CONTENT:{content},P_ID:{proid} }) RETURN id(n)\",\"params\":{\"key\":\"[I\",\"content\":\"null\",\"proid\":4}}");
+//			Neo4jOp.executeQuery("{\"query\":\"merge (n: ArrayInitializer {T_KEY:{key},CONTENT:{content},P_ID:{proid} }) RETURN id(n)\",\"params\":{\"key\":\"[I\",\"content\":\"null\",\"proid\":4}}");
 		}
 		
 		

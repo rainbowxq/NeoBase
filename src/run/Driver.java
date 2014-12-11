@@ -32,7 +32,7 @@ public class Driver {
 	public void store(int pid){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN id(n)");
+				"MERGE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN id(n)");
 
 		JSONObject params = new JSONObject();
 		params.put("pname", this.getName());
