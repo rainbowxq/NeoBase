@@ -62,6 +62,7 @@ public class Driver {
 		String[] srcpaths=(String[]) this.srcPaths.toArray(new String[this.srcPaths.size()]);
 		parser.ececute(tarpaths,srcpaths);
 		this.units.add(parser.getCid());
+		System.out.println(parser.getCid());
 	}
 	
 	public void parseProject(){
@@ -86,6 +87,7 @@ public class Driver {
 		
 		for(int j=0;j<this.units.size();j++){
 			Neo4jOp.addRelation(this.id, this.units.get(j), "AST", "FILES");
+			System.out.println(this.id+","+this.units.get(j));
 		}
 		
 	}
@@ -119,7 +121,8 @@ public class Driver {
 	public static void main(String[] args){
 		Stopwatch timer=new Stopwatch();
 		timer.start();
-		Driver driver=new Driver("org.eclipse.swt","/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt","2.1");
+//		Driver driver=new Driver("org.eclipse.swt","/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt","2.1");
+		Driver driver=new Driver("helloword","/home/xiaoq_zhu/zxq/workspace/HelloWorld","0.0");
 		driver.parseProject();
 		System.out.println("finished!!");
 		timer.stop();

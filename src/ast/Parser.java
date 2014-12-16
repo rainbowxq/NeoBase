@@ -26,6 +26,7 @@ public class Parser {
 //	private String projectName;// assume projects don't have the same names 
 	private String fileName;
 	private String filePath;
+	CompilationUnit javaUnit;
 	
 	private Long cid;
 //	private String[] filePaths;
@@ -56,7 +57,7 @@ public class Parser {
 		parser.setSource(unit.getProgram().toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		CompilationUnit javaUnit = (CompilationUnit)parser.createAST(null) ;
-		
+		this.javaUnit=javaUnit;
 		/**********************************************************/
 		//when testing cfg, comment lines in this area
 		JFileVisitor astVisitor=new JFileVisitor(this.fileName);
@@ -66,8 +67,7 @@ public class Parser {
 		this.setInfos(astVisitor.getInfos());
 		this.addRelations(astVisitor.getRelations());
 		
-		int cindex=this.nodes.indexOf(javaUnit);
-		this.setCid(this.infos.get(cindex).getId());
+		
 		/***********************************************************/
 		
 		MethodVisitor cfgVisitor=new MethodVisitor();
@@ -141,6 +141,11 @@ public class Parser {
 			this.setNodeId(i,Long.parseLong(b[12]));
 //			System.out.println(this.infos.get(i).getId());
 		}
+		
+		int cindex=this.nodes.indexOf(javaUnit);
+		this.setCid(this.infos.get(cindex).getId());
+		System.out.println(this.infos.get(cindex).getId());
+		
 		for(int i=0;i<this.relations.size();i++){
 			Relation r=this.relations.get(i);
 			int fromIndex=this.nodes.indexOf(r.getFrom());
