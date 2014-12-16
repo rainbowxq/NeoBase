@@ -120,7 +120,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: TypeDeclaration { NAME : {typeName},INTERFACE : {isInterface},"
+				"MERGE (n: TypeDeclaration:AbstractTypeDeclaration:BodyDeclaration { NAME : {typeName},INTERFACE : {isInterface},"
 						+ "T_KEY:{Key} "+setPid);
 
 		JSONObject params = new JSONObject();
@@ -145,7 +145,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		query.put(
 				"query",
-				"MERGE (n: AnnotationTypeDeclaration { NAME : {atypeName},T_KEY:{Key} "+setPid);
+				"MERGE (n: AnnotationTypeDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {atypeName},T_KEY:{Key} "+setPid);
 
 		JSONObject params = new JSONObject();
 		params.put("atypeName", node.getName().getFullyQualifiedName());
@@ -164,7 +164,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: EnumDeclaration { NAME : {etypeName},T_KEY:{Key} "+setPid);
+				"MERGE (n: EnumDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {etypeName},T_KEY:{Key} "+setPid);
 
 		JSONObject params = new JSONObject();
 		params.put("etypeName", node.getName().getFullyQualifiedName());
@@ -183,7 +183,7 @@ public class Query {
 
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: EnumConstantDeclaration { NAME : {etypeName},M_KEY:{mKey},"
+				"MERGE (n: EnumConstantDeclaration:BodyDeclaration { NAME : {etypeName},M_KEY:{mKey},"
 				+ "V_Key:{vkey}"+setPid);
 
 		JSONObject params = new JSONObject();
@@ -353,7 +353,7 @@ public class Query {
 		if (node instanceof PrimitiveType) {
 
 			query.put("query",
-					"MERGE (n: PrimitiveType { PRIMITIVE_TYPE_CODE : {code},"
+					"MERGE (n: PrimitiveType :Type{ PRIMITIVE_TYPE_CODE : {code},"
 							+ "T_KEY : {key}"+setPid);
 			params.put("code", ((PrimitiveType) node).getPrimitiveTypeCode()
 					.toString());
@@ -370,7 +370,7 @@ public class Query {
 
 		} else if (node instanceof SimpleType) {
 
-			query.put("query", "MERGE (n: SimpleType { NAME : {name},"
+			query.put("query", "MERGE (n: SimpleType:Type { NAME : {name},"
 					+ "T_KEY : {key},IS_FROMSOURCE:{isFS}"+setPid);
 			params.put("name", ((SimpleType) node).getName()
 					.getFullyQualifiedName());
@@ -389,7 +389,7 @@ public class Query {
 
 			query.put(
 					"query",
-					"MERGE (n: ArrayType { ELEMENT_TYPE : {ename},"
+					"MERGE (n: ArrayType:Type { ELEMENT_TYPE : {ename},"
 							+ "ELEMENT_T_KEY : {key},DIMENTIONS:{dimentions}"+setPid);
 
 			if(node.resolveBinding()!=null){
@@ -407,7 +407,7 @@ public class Query {
 
 		} else if (node instanceof UnionType) {
 
-			query.put("query", "MERGE (n: UnionType { NAME : {name},"
+			query.put("query", "MERGE (n: UnionType:Type { NAME : {name},"
 					+ "T_KEY : {key}"+setPid);
 			if(node.resolveBinding()!=null){
 				params.put("name", node.resolveBinding().getName());
@@ -422,7 +422,7 @@ public class Query {
 
 		} else if (node instanceof QualifiedType) {
 
-			query.put("query", "MERGE (n: QualifiedType { NAME : {name},"
+			query.put("query", "MERGE (n: QualifiedType:Type { NAME : {name},"
 					+ "T_KEY : {key}"+setPid);
 			params.put("name", ((QualifiedType) node).getName()
 					.getFullyQualifiedName());
@@ -435,7 +435,7 @@ public class Query {
 
 		} else if (node instanceof ParameterizedType) {
 
-			query.put("query", "MERGE (n: ParameterizedType { NAME : {name},"
+			query.put("query", "MERGE (n: ParameterizedType:Type { NAME : {name},"
 					+ "T_KEY : {key}"+setPid);
 			params.put("name", node.resolveBinding().getName());
 			if(node.resolveBinding()!=null)
@@ -447,7 +447,7 @@ public class Query {
 
 		} else if (node instanceof WildcardType) {
 
-			query.put("query", "MERGE (n: WildcardType { NAME : {name},"
+			query.put("query", "MERGE (n: WildcardType:Type { NAME : {name},"
 					+ "T_KEY : {key},UPPER_BOUND:{ub}"+setPid);
 			params.put("name", node.resolveBinding().getName());
 			if(node.resolveBinding()!=null)
@@ -468,15 +468,15 @@ public class Query {
 		JSONObject params = new JSONObject();
 		if (node instanceof NormalAnnotation) {
 			//the key recorded here is type binding 
-			query.put("query", "MERGE (n: NormalAnnotation { TYPE_NAME : {tname},"
+			query.put("query", "MERGE (n: NormalAnnotation:Annotation { TYPE_NAME : {tname},"
 					+ "T_KEY:{key},A_KEY:{akey}"+setPid);
 			
 		} else if (node instanceof MarkerAnnotation) {
-			query.put("query", "MERGE (n: MarkerAnnotation { TYPE_NAME : {tname},"
+			query.put("query", "MERGE (n: MarkerAnnotation:Annotation { TYPE_NAME : {tname},"
 					+ "T_KEY:{key},A_KEY:{akey}"+setPid);
 			
 		} else if (node instanceof SingleMemberAnnotation) {// SingleMemberAnnotation
-			query.put("query", "MERGE (n: SingleMemberAnnotation { TYPE_NAME : {tname},VALUE : {value},T_KEY:{key},A_KEY:{akey}"+setPid);
+			query.put("query", "MERGE (n: SingleMemberAnnotation :Annotation{ TYPE_NAME : {tname},VALUE : {value},T_KEY:{key},A_KEY:{akey}"+setPid);
 			params.put("value", ((SingleMemberAnnotation) node).getValue().toString());
 		}
 		params.put("tname", node.getTypeName().getFullyQualifiedName());
@@ -526,7 +526,7 @@ public class Query {
 	public static String fieldDeclarationQuery(FieldDeclaration node){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: FieldDeclaration {CONTENT : {content} "+setPid);
+				"MERGE (n: FieldDeclaration:BodyDeclaration {CONTENT : {content} "+setPid);
 
 		JSONObject params = new JSONObject();
 		params.put("content", node.toString());
@@ -539,7 +539,7 @@ public class Query {
 	public static String variableDeclarationFragmentQuery(VariableDeclarationFragment node){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: VariableDeclarationFragment "
+				"MERGE (n: VariableDeclarationFragment:VariableDeclaration "
 				+ "{NAME : {name},V_KEY :{key},EXTRA_DIMENSIONS:{ed}"+setPid);
 
 		JSONObject params = new JSONObject();
@@ -925,7 +925,7 @@ public class Query {
 		JSONObject query = new JSONObject();
 		JSONObject params = new JSONObject();
 		query.put("query",
-				"MERGE (n: Initializer {P_ID:{proid}"+setPid);
+				"MERGE (n: Initializer :BodyDeclaration{P_ID:{proid}"+setPid);
 		params.put("proid", pid);
 		query.put("params", params);
 		Log.debugLoger(query.toString());
@@ -936,7 +936,7 @@ public class Query {
 	public static String singleVariableDeclarationQuery(SingleVariableDeclaration node){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: SingleVariableDeclaration "
+				"MERGE (n: SingleVariableDeclaration:VariableDeclaration "
 				+ "{NAME : {name},V_KEY :{key},VARARGS:{varargs},EXTRA_DIMENSIONS:{ed}"+setPid);
 
 		JSONObject params = new JSONObject();
@@ -956,7 +956,7 @@ public class Query {
 	public static String methodDeclarationQuery(MethodDeclaration node){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: MethodDeclaration "
+				"MERGE (n: MethodDeclaration :BodyDeclaration"
 				+ "{NAME : {name},M_KEY :{key},CONSTRUCTOR:{constructor},EXTRA_DIMENSIONS:{ed}"+setPid);
 
 		JSONObject params = new JSONObject();
@@ -990,7 +990,7 @@ public class Query {
 	public static String annotationTypeMemberDeclarationQuery(AnnotationTypeMemberDeclaration node){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"MERGE (n: AnnotationTypeMemberDeclaration {NAME:{name},T_KEY :{key}"+setPid);
+				"MERGE (n: AnnotationTypeMemberDeclaration :BodyDeclaration{NAME:{name},T_KEY :{key}"+setPid);
 
 		JSONObject params = new JSONObject();
 		params.put("name", node.getName().getFullyQualifiedName());
