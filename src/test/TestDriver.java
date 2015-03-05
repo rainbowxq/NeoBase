@@ -69,8 +69,9 @@ public class TestDriver {
 //		targetPaths=files.getTargets();
 		
 		
-		TestDriver.eTest("HelloWorld.java","./src/testcases/HelloWorld.java",
-				new String[]{"./target/classes"},new String[]{"./src"});
+		TestDriver.eTest("IvyDeliver.java","/home/xiaoq_zhu/Documents/experiment/apache-ivy/src_java/org/apache/ivy/ant/IvyDeliver.java",
+				new String[]{"/home/xiaoq_zhu/Documents/experiment/apache-ivy/ivy-2.4.0.jar",
+				"/home/xiaoq_zhu/Documents/experiment/apache-ivy/ant.jar"},new String[]{"/home/xiaoq_zhu/Documents/experiment/apache-ivy/src_java"});
 
 		
 		//		String filepath="/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt/Eclipse SWT/src_common/org/eclipse/swt/internal/image/PNGFileFormat.java";

@@ -122,7 +122,7 @@ public class Driver {
 		Stopwatch timer=new Stopwatch();
 		timer.start();
 //		Driver driver=new Driver("org.eclipse.swt","/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt","2.1");
-		Driver driver=new Driver("helloword","/home/xiaoq_zhu/zxq/workspace/HelloWorld","0.0");
+		Driver driver=new Driver("apache-ivy","/home/xiaoq_zhu/Documents/experiment/apache-ivy","2.4.0");
 		driver.parseProject();
 		System.out.println("finished!!");
 		timer.stop();

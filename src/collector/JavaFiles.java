@@ -69,7 +69,7 @@ public class JavaFiles {
 	}
 	public static void main(String[] args){
 		JavaFiles files=new JavaFiles();
-		files.readFolder("/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt");
+		files.readFolder("/home/xiaoq_zhu/Documents/experiment/apache-ivy");
 		for(int i=0;i<files.filepaths.size();i++){
 			System.out.println(files.filepaths.get(i));
 			System.out.println(files.names.get(i));

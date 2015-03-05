@@ -66,7 +66,13 @@ public class MethodVisitor extends ASTVisitor {
 	public boolean visit(MethodDeclaration node) {
 		Block block=node.getBody();
 		if(block!=null){
+			System.out.println(node.getName().getFullyQualifiedName());
+			if(node.resolveBinding()==null)
+				System.out.println("true");
 			String key=node.resolveBinding().getKey();
+			/*****************************/
+			System.out.println(key);
+			/******************************/
 			SENode start_end=new SENode(key);
 			SEInfo info=stmtCfg(block,start_end);
 			start_end.setStart_to(info.getStart());

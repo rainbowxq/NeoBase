@@ -70,15 +70,15 @@ public class Parser {
 		
 		/***********************************************************/
 		
-		MethodVisitor cfgVisitor=new MethodVisitor();
+		/*MethodVisitor cfgVisitor=new MethodVisitor();
 		javaUnit.accept(cfgVisitor);
 		assert(cfgVisitor.getPNodeSize()==0);
 		this.addRelations(cfgVisitor.getCfgR());
-		this.setSenodes(cfgVisitor.getSeNodes());
+		this.setSenodes(cfgVisitor.getSeNodes());*/
 		/***************************************************/
 		//when testing cfg, uncomment lines in this area
-//		this.setNodes(cfgVisitor.getCfgN());
-//		this.setInfos(cfgVisitor.getInfos());
+		//this.setNodes(cfgVisitor.getCfgN());
+		//this.setInfos(cfgVisitor.getInfos());
 		/***************************************************/
 		
 		
@@ -163,7 +163,7 @@ public class Parser {
 			Neo4jOp.addRelation(fromId, toId, r.getRelationType(),r.getProperty());
 		}
 		////for cfg, add start and end node
-		List<Long> startids=new ArrayList<Long>();
+	/*	List<Long> startids=new ArrayList<Long>();
 		List<Long> endids=new ArrayList<Long>();
 		for(int i=0;i<this.senodes.size();i++){
 			String key=senodes.get(i).getM_key();
@@ -189,7 +189,7 @@ public class Parser {
 				long efid=this.infos.get(efindex).getId();
 				Neo4jOp.addRelation(efid, eid, "CFG",key);
 			}
-		}
+		}*/
 		
 	}
 
