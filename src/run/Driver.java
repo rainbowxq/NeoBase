@@ -2,7 +2,6 @@ package run;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import log.Log;
 import neo4j.Neo4jOp;
 import net.sf.json.JSONObject;

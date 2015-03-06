@@ -69,9 +69,12 @@ public class TestDriver {
 //		targetPaths=files.getTargets();
 		
 		
-		TestDriver.eTest("IvyDeliver.java","/home/xiaoq_zhu/Documents/experiment/apache-ivy/src_java/org/apache/ivy/ant/IvyDeliver.java",
+		TestDriver.eTest("IvyDeliver.java","/home/xiaoq_zhu/Documents/experiment/apache-ivy/src_java/org/apache/ivy/plugins/signer/bouncycastle/OpenPGPSignatureGenerator.java",
 				new String[]{"/home/xiaoq_zhu/Documents/experiment/apache-ivy/ivy-2.4.0.jar",
-				"/home/xiaoq_zhu/Documents/experiment/apache-ivy/ant.jar"},new String[]{"/home/xiaoq_zhu/Documents/experiment/apache-ivy/src_java"});
+				"/home/xiaoq_zhu/Documents/experiment/apache-ivy/ant.jar",
+				"/home/xiaoq_zhu/Documents/experiment/apache-ivy/bcpg-jdk15-1.45.jar",
+				"/home/xiaoq_zhu/Documents/experiment/apache-ivy/bcprov-jdk15-1.45.jar"
+				},new String[]{"/home/xiaoq_zhu/Documents/experiment/apache-ivy/src_java"});
 
 		
 		//		String filepath="/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt/Eclipse SWT/src_common/org/eclipse/swt/internal/image/PNGFileFormat.java";
@@ -84,11 +87,13 @@ public class TestDriver {
 		
 		
 		
-		System.out.println("finished!!");
+	
 //		TestDriver.eTest("hello.java",
 //				"/home/xiaoq_zhu/zxq/workspace/HelloWorld/src/test/HelloWorld.java",
 //				new String[]{"/home/xiaoq_zhu/zxq/workspace/HelloWorld/bin"},
 //				new String[]{"/home/xiaoq_zhu/zxq/workspace/HelloWorld"});
+		System.out.println("finished!!");
+		
 	}
 
 
