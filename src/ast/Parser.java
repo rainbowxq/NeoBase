@@ -131,6 +131,7 @@ public class Parser {
 
 	
 	public void ececute(String[]classPaths,String[]filePaths){
+		System.out.println("begin storage process........");
 		this.analyse(classPaths,filePaths);
 		for(int i=0;i<this.infos.size();i++){
 			String a=Neo4jOp.executeQuery(this.infos.get(i).getCypherSentence());
@@ -150,7 +151,9 @@ public class Parser {
 			Relation r=this.relations.get(i);
 			int fromIndex=this.nodes.indexOf(r.getFrom());
 			if(fromIndex==-1){
-				Debug.println("hahahah...."+r.getFrom().toString());
+				Debug.println("hahahah...."+r.getFrom().toString()+"  "+r.getFrom().getParent().getClass().toString());
+				Debug.println("hahahah...."+r.getFrom().toString()+"  "+r.getFrom().getClass().toString());
+				Debug.println("hahahah...."+r.getTo().toString()+"  "+r.getTo().getClass().toString());
 			}
 			int toIndex=this.nodes.indexOf(r.getTo());
 			assert fromIndex!=-1 : "the from node doesn't exist";
@@ -190,6 +193,7 @@ public class Parser {
 				Neo4jOp.addRelation(efid, eid, "CFG",key);
 			}
 		}*/
+		System.out.println("finish storage process........");
 		
 	}
 

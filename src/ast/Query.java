@@ -126,7 +126,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: TypeDeclaration:AbstractTypeDeclaration:BodyDeclaration { NAME : {typeName},INTERFACE : {isInterface},P_ID:{proid}}) "
 				+ "MERGE (m:Tkey {VALUE:{Key},P_ID:{proid}}) "
-				+ "CREATE (n)-[:KEY]->(m) "
+				+ "MERGE (n)-[:KEY]->(m) "
 				+ "RETURN id(n)" );
 
 		JSONObject params = new JSONObject();
@@ -153,7 +153,7 @@ public class Query {
 				"query",
 				"CREATE (n: AnnotationTypeDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {atypeName},P_ID:{proid}}) "
 						+ "MERGE (m:Tkey {VALUE:{Key},P_ID:{proid}}) "
-						+ "CREATE (n)-[:KEY]->(m) "
+						+ "MERGE (n)-[:KEY]->(m) "
 						+ "RETURN id(n)" );
 
 		JSONObject params = new JSONObject();
@@ -175,7 +175,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: EnumDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {etypeName},P_ID:{proid}}) "
 						+ "MERGE (m:Tkey {VALUE:{Key},P_ID:{proid}}) "
-						+ "CREATE (n)-[:KEY]->(m) "
+						+ "MERGE (n)-[:KEY]->(m) "
 						+ "RETURN id(n)" );
 
 		JSONObject params = new JSONObject();
@@ -197,9 +197,9 @@ public class Query {
 		query.put("query",
 				"CREATE (n: EnumConstantDeclaration:BodyDeclaration { NAME : {etypeName},P_ID:{proid}}) "
 						+ "MERGE (m:Mkey {VALUE:{mKey},P_ID:{proid}}) "
-						+ "CREATE (n)-[:KEY]->(m) "
+						+ "MERGE (n)-[:KEY]->(m) "
 						+ "MERGE (h:Vkey {VALUE:{vkey},P_ID:{proid}}) "
-						+ "CREATE (n)-[:KEY]->(h) "
+						+ "MERGE (n)-[:KEY]->(h) "
 						+ "RETURN id(n)" );
 
 		JSONObject params = new JSONObject();
@@ -348,7 +348,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: TypeParameter { NAME : {name},P_ID:{proid}}) "
 						+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-						+ "CREATE (n)-[:KEY]->(m) "
+						+ "MERGE (n)-[:KEY]->(m) "
 						+ "RETURN id(n)" );
 		
 		JSONObject params = new JSONObject();
@@ -374,7 +374,7 @@ public class Query {
 			query.put("query",
 					"MERGE (n: PrimitiveType :Type{ PRIMITIVE_TYPE_CODE : {code},P_ID:{proid}}) "
 							+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-							+ "CREATE (n)-[:KEY]->(m) "
+							+ "MERGE (n)-[:KEY]->(m) "
 							+ "RETURN id(n)" );
 			params.put("code", ((PrimitiveType) node).getPrimitiveTypeCode()
 					.toString());
@@ -383,6 +383,7 @@ public class Query {
 				
 			}
 			else{
+				System.out.println("key is null");
 				params.put("key", "null");
 				
 			}
@@ -393,7 +394,7 @@ public class Query {
 
 			query.put("query", "MERGE (n: SimpleType:Type { NAME : {name},IS_FROMSOURCE:{isFS},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			params.put("name", ((SimpleType) node).getName()
 					.getFullyQualifiedName());
@@ -412,13 +413,15 @@ public class Query {
 
 			query.put(
 					"query",
-					"MERGE (n: ArrayType:Type { ELEMENT_TYPE : {ename},DIMENTIONS:{dimentions},P_ID:{proid}}) "
+					"MERGE (n: ArrayType:Type { NAME : {name},DIMENTIONS:{dimentions},P_ID:{proid}}) "
 							+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-							+ "CREATE (n)-[:KEY]->(m) "
+							+ "MERGE (n)-[:KEY]->(m) "
 							+ "RETURN id(n)" );
+			
 			if(node.resolveBinding()!=null){
-				params.put("ename", node.resolveBinding().getElementType()
-						.getName());
+				params.put("name", ((ArrayType) node).resolveBinding().getName());
+//				params.put("ename", node.resolveBinding().getElementType()
+//						.getName());
 				params.put("key", node.resolveBinding().getKey());
 			}
 			else{
@@ -433,7 +436,7 @@ public class Query {
 
 			query.put("query", "MERGE (n: UnionType:Type { NAME : {name},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			if(node.resolveBinding()!=null){
 				params.put("name", node.resolveBinding().getName());
@@ -450,7 +453,7 @@ public class Query {
 
 			query.put("query", "MERGE (n: QualifiedType:Type { NAME : {name},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			params.put("name", ((QualifiedType) node).getName()
 					.getFullyQualifiedName());
@@ -465,7 +468,7 @@ public class Query {
 
 			query.put("query", "MERGE (n: ParameterizedType:Type { NAME : {name},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			params.put("name", node.resolveBinding().getName());
 			if(node.resolveBinding()!=null)
@@ -479,7 +482,7 @@ public class Query {
 
 			query.put("query", "MERGE (n: WildcardType:Type { NAME : {name},UPPER_BOUND:{ub},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			params.put("name", node.resolveBinding().getName());
 			if(node.resolveBinding()!=null)
@@ -502,25 +505,25 @@ public class Query {
 			//the key recorded here is type binding 
 			query.put("query", "MERGE (n: NormalAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "MERGE (h:Akey {VALUE:{akey},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(h) "
+					+ "MERGE (n)-[:KEY]->(h) "
 					+ "RETURN id(n)" );
 			
 		} else if (node instanceof MarkerAnnotation) {
 			query.put("query", "MERGE (n: MarkerAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "MERGE (h:Akey {VALUE:{akey},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(h) "
+					+ "MERGE (n)-[:KEY]->(h) "
 					+ "RETURN id(n)" );
 			
 		} else if (node instanceof SingleMemberAnnotation) {// SingleMemberAnnotation
 			query.put("query", "MERGE (n: SingleMemberAnnotation :Annotation{ TYPE_NAME : {tname},VALUE : {value},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey {VALUE:{key},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(m) "
+					+ "MERGE (n)-[:KEY]->(m) "
 					+ "MERGE (h:Akey {VALUE:{akey},P_ID:{proid}}) "
-					+ "CREATE (n)-[:KEY]->(h) "
+					+ "MERGE (n)-[:KEY]->(h) "
 					+ "RETURN id(n)" );
 			params.put("value", ((SingleMemberAnnotation) node).getValue().toString());
 		}
@@ -571,10 +574,10 @@ public class Query {
 	public static String fieldDeclarationQuery(FieldDeclaration node){
 		JSONObject query = new JSONObject();
 		query.put("query",
-				"CREATE (n: FieldDeclaration:BodyDeclaration {CONTENT : {content} "+setPid);
+				"CREATE (n: FieldDeclaration:BodyDeclaration {SP : {content} "+setPid);
 
 		JSONObject params = new JSONObject();
-		params.put("content", node.toString());
+		params.put("content", node.getStartPosition());
 		params.put("proid", pid);
 		query.put("params", params);
 		Log.debugLoger(query.toString());
@@ -587,7 +590,7 @@ public class Query {
 				"CREATE (n: VariableDeclarationFragment:VariableDeclaration "
 				+ "{NAME : {name},EXTRA_DIMENSIONS:{ed},P_ID:{proid}}) "
 				+ "MERGE (m:Vkey {VALUE:{key},P_ID:{proid}}) "
-				+ "CREATE (n)-[:KEY]->(m) "
+				+ "MERGE (n)-[:KEY]->(m) "
 				+ "RETURN id(n)" );
 
 		JSONObject params = new JSONObject();
@@ -673,7 +676,7 @@ public class Query {
 				squery=
 						"CREATE (n: ClassInstanceCreation :Expression{P_ID:{proid} }) "
 						+ "MERGE (h : Mkey{VALUE:{mkey},P_ID:{proid} }) "
-						+ "CREATE (n)-[:KEY]->(h) ";
+						+ "MERGE (n)-[:KEY]->(h) ";
 				if(((ClassInstanceCreation)node).resolveConstructorBinding()!=null)
 					params.put("mkey",((ClassInstanceCreation)node).resolveConstructorBinding().getKey());
 				else
@@ -688,7 +691,7 @@ public class Query {
 				squery=
 						"CREATE (n: FieldAccess:Expression {NAME:{name},P_ID:{proid}}) "
 								+ "MERGE (h : Vkey{VALUE:{vkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 				params.put("name", ((FieldAccess)node).getName().getFullyQualifiedName());
 				if(((FieldAccess)node).resolveFieldBinding()!=null){
 					params.put("vkey", ((FieldAccess)node).resolveFieldBinding().getKey());
@@ -714,7 +717,7 @@ public class Query {
 				squery=
 						"CREATE (n: MethodInvocation:Expression {NAME:{name},P_ID:{proid}}) "
 								+ "MERGE (h : Mkey{VALUE:{mkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 				if(((MethodInvocation)node).resolveMethodBinding()!=null)
 					params.put("mkey", ((MethodInvocation)node).resolveMethodBinding().getKey());
 				else
@@ -724,37 +727,36 @@ public class Query {
 			case ASTNode.QUALIFIED_NAME:
 			case ASTNode.SIMPLE_NAME:
 				String extra="";
-				params.put("name", ((Name)node).getFullyQualifiedName());
 				if(((Name)node).resolveBinding()!=null){
 					switch(((Name)node).resolveBinding().getKind()){
 					case IBinding.ANNOTATION:
 						extra="MERGE (h : Akey{VALUE:{eakey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 						params.put("eakey", ((Name)node).resolveBinding().getKey());
 						break;
 					case IBinding.MEMBER_VALUE_PAIR:
 						extra="MERGE (h : MVPkey{VALUE:{emvpkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 						params.put("emvpkey", ((Name)node).resolveBinding().getKey());
 						break;
 					case IBinding.VARIABLE:
 						extra="MERGE (h : Vkey{VALUE:{evkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 						params.put("evkey", ((Name)node).resolveBinding().getKey());
 						break;
 					case IBinding.METHOD:
 						extra="MERGE (h : Mkey{VALUE:{emkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 						params.put("emkey", ((Name)node).resolveBinding().getKey());
 						break;
 					case IBinding.TYPE:
 						extra="MERGE (h : Tkey{VALUE:{etkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 						params.put("etkey", ((Name)node).resolveBinding().getKey());
 						break;
 					case IBinding.PACKAGE:
 						extra="MERGE (h : Pkey{VALUE:{epkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 						params.put("epkey", ((Name)node).resolveBinding().getKey());
 						break;
 					}
@@ -762,10 +764,12 @@ public class Query {
 				else{
 					extra="";
 				}
-				query.put("query",
-						"CREATE (n: Name:Expression {NAME:{name}"
-						+ common+extra);
+				squery=
+						"CREATE (n: Name:Expression {NAME:{name},"
+						+ common+extra;
+				params.put("name", ((Name)node).getFullyQualifiedName());
 				break;
+
 			case ASTNode.NULL_LITERAL:
 				squery=
 						"MERGE (n: NullLiteral:Expression{P_ID:{proid}}) return id(n)";
@@ -823,7 +827,7 @@ public class Query {
 				squery=
 						"CREATE (n: SuperMethodInvocation:Expression {QUALIFIER:{qualifier},NAME:{name},P_ID:{proid}})"
 								+ "MERGE (h : Mkey{VALUE:{mkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) ";
+								+ "MERGE (n)-[:KEY]->(h) ";
 				if(((SuperMethodInvocation)node).getQualifier()!=null)
 					params.put("qualifier", ((SuperMethodInvocation)node).getQualifier().getFullyQualifiedName());
 				else
@@ -945,7 +949,7 @@ public class Query {
 				query.put("query",
 						"CREATE (n: SuperConstructorInvocation:Statement {SP:{sp},P_ID:{proid}}) "
 								+ "MERGE (h : Mkey{VALUE:{mkey},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) "
+								+ "MERGE (n)-[:KEY]->(h) "
 								+ "RETURN id(n)");
 				if(((SuperConstructorInvocation)node).resolveConstructorBinding()!=null)
 					params.put("mkey", ((SuperConstructorInvocation)node).resolveConstructorBinding().getKey());
@@ -1012,7 +1016,7 @@ public class Query {
 				"CREATE (n: SingleVariableDeclaration:VariableDeclaration "
 				+ "{NAME : {name},VARARGS:{varargs},EXTRA_DIMENSIONS:{ed},P_ID:{proid}}) "
 				+ "MERGE (h : Vkey{VALUE:{key},P_ID:{proid} }) "
-				+ "CREATE (n)-[:KEY]->(h) "
+				+ "MERGE (n)-[:KEY]->(h) "
 				+ "RETURN id(n)");
 
 		JSONObject params = new JSONObject();
@@ -1035,7 +1039,7 @@ public class Query {
 				"CREATE (n: MethodDeclaration :BodyDeclaration"
 				+ "{NAME : {name},CONSTRUCTOR:{constructor},EXTRA_DIMENSIONS:{ed},P_ID:{proid}}) "
 				+ "MERGE (h : Mkey{VALUE:{key},P_ID:{proid} }) "
-				+ "CREATE (n)-[:KEY]->(h) "
+				+ "MERGE (n)-[:KEY]->(h) "
 				+ "RETURN id(n)");
 
 		JSONObject params = new JSONObject();
@@ -1062,7 +1066,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: AnonymousClassDeclaration {P_ID:{proid}})"
 				+ "MERGE (h : Tkey{VALUE:{key},P_ID:{proid} }) "
-								+ "CREATE (n)-[:KEY]->(h) "
+								+ "MERGE (n)-[:KEY]->(h) "
 								+ "RETURN id(n)");
 
 		JSONObject params = new JSONObject();
@@ -1078,7 +1082,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: AnnotationTypeMemberDeclaration :BodyDeclaration{NAME:{name},P_ID:{proid}})"
 					+ "MERGE (h : Tkey{VALUE:{key},P_ID:{proid} }) "
-					+ "CREATE (n)-[:KEY]->(h) "
+					+ "MERGE (n)-[:KEY]->(h) "
 					+ "RETURN id(n)");
 		JSONObject params = new JSONObject();
 		params.put("name", node.getName().getFullyQualifiedName());
@@ -1110,7 +1114,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: Start {P_ID:{proid}})"
 					+ "MERGE (h : Mkey{VALUE:{key},P_ID:{proid} }) "
-					+ "CREATE (n)-[:KEY]->(h) "
+					+ "MERGE (n)-[:KEY]->(h) "
 					+ "RETURN id(n)");
 		params.put("key", key);
 		params.put("proid", pid);
@@ -1127,7 +1131,7 @@ public class Query {
 		query.put("query",
 				"CREATE (n: End {P_ID:{proid}})"
 					+ "MERGE (h : Mkey{VALUE:{key},P_ID:{proid} }) "
-					+ "CREATE (n)-[:KEY]->(h) "
+					+ "MERGE (n)-[:KEY]->(h) "
 					+ "RETURN id(n)");
 		params.put("key", key);
 		params.put("proid", pid);

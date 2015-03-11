@@ -286,6 +286,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ArrayType node) {
+		this.addType(node, node.getComponentType(), ASTProperty.COMPONENT_TYPE);
 		return true;
 	}
 
@@ -365,7 +366,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * @since 3.0
 	 */
 	public boolean visit(BlockComment node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -381,7 +382,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(BooleanLiteral node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -397,7 +398,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(BreakStatement node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -449,7 +450,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(CharacterLiteral node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -636,7 +637,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(ContinueStatement node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -670,7 +671,7 @@ public class JFileVisitor extends ASTVisitor{
 	 * be skipped
 	 */
 	public boolean visit(EmptyStatement node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -1032,7 +1033,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 //			this.nodes.put(tag, new NodeInfo(query));
 //			this.relations.add(new Relation(node,tag,ASTProperty.TAGS));
 //		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -1073,7 +1074,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.0
 	 */
 	public boolean visit(LineComment node) {
-		return true;
+		return false;
 	}
 
 
@@ -1091,7 +1092,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.1
 	 */
 	public boolean visit(MarkerAnnotation node) {
-		return true;
+		return false;
 	}
 
 
@@ -1109,7 +1110,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.0
 	 */
 	public boolean visit(MemberRef node) {
-		return true;
+		return false;
 	}
 
 
@@ -1145,7 +1146,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.0
 	 */
 	public boolean visit(MethodRef node) {
-		return true;
+		return false;
 	}
 
 
@@ -1163,7 +1164,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.0
 	 */
 	public boolean visit(MethodRefParameter node) {
-		return true;
+		return false;
 	}
 
 
@@ -1272,7 +1273,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			this.infos.add(new NodeInfo(Query.MemberValuePairQuery(mvPair)));
 			this.relations.add(new Relation(node,mvPair,rtype,ASTProperty.VALUES));
 		}
-		return true;
+		return false;
 	}
 	
 	
@@ -1400,7 +1401,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(PrimitiveType node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -1416,7 +1417,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(QualifiedName node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -1467,7 +1468,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(SimpleName node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -1483,7 +1484,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(SimpleType node) {
-		return true;
+		return false;
 	}
 
 
@@ -1501,7 +1502,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.1
 	 */
 	public boolean visit(SingleMemberAnnotation node) {
-		return true;
+		return false;
 	}
 
 
@@ -1553,7 +1554,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(StringLiteral node) {
-		return true;
+		return false;
 	}
 
 	/**
@@ -1599,7 +1600,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 */
 	public boolean visit(SuperFieldAccess node) {
 		
-		return true;
+		return false;
 	}
 
 	/**
@@ -1716,7 +1717,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 //				
 //			}
 //		}
-		return true;
+		return false;
 	}
 
 
@@ -1734,7 +1735,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * @since 3.0
 	 */
 	public boolean visit(TextElement node) {
-		return true;
+		return false;
 	}
 
 
@@ -1751,7 +1752,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	 * be skipped
 	 */
 	public boolean visit(ThisExpression node) {
-		return true;
+		return false;
 	}
 
 	/**
