@@ -367,12 +367,13 @@ public class Query {
 	/* Type */
 	public static String typeQuery(Type node) {
 		JSONObject query = new JSONObject();
+		
 		JSONObject params = new JSONObject();
 
 		if (node instanceof PrimitiveType) {
 
 			query.put("query",
-					"MERGE (n: PrimitiveType :Type{ PRIMITIVE_TYPE_CODE : {code},P_ID:{proid}}) "
+					"MERGE (n: PrimitiveType :Type{ PRIMITIVE_TYPE_CODE : {code},T_KEY:{key},P_ID:{proid}}) "
 							+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 							+ "MERGE (n)-[:KEY]->(m) "
 							+ "RETURN id(n)" );
@@ -392,7 +393,7 @@ public class Query {
 
 		} else if (node instanceof SimpleType) {
 
-			query.put("query", "CREATE (n: SimpleType:Type { NAME : {name},IS_FROMSOURCE:{isFS},P_ID:{proid}}) "
+			query.put("query", "MERGE (n: SimpleType:Type { NAME : {name},IS_FROMSOURCE:{isFS},T_KEY:{key},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -413,7 +414,7 @@ public class Query {
 
 			query.put(
 					"query",
-					"CREATE (n: ArrayType:Type { NAME : {name},DIMENTIONS:{dimentions},P_ID:{proid}}) "
+					"MERGE (n: ArrayType:Type { NAME : {name},DIMENTIONS:{dimentions},T_KEY:{key},P_ID:{proid}}) "
 							+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 							+ "MERGE (n)-[:KEY]->(m) "
 							+ "RETURN id(n)" );
@@ -434,7 +435,7 @@ public class Query {
 
 		} else if (node instanceof UnionType) {
 
-			query.put("query", "CREATE (n: UnionType:Type { NAME : {name},P_ID:{proid}}) "
+			query.put("query", "MERGE (n: UnionType:Type { NAME : {name},T_KEY:{key},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -451,7 +452,7 @@ public class Query {
 
 		} else if (node instanceof QualifiedType) {
 
-			query.put("query", "CREATE (n: QualifiedType:Type { NAME : {name},P_ID:{proid}}) "
+			query.put("query", "MERGE (n: QualifiedType:Type { NAME : {name},T_KEY:{key},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -466,7 +467,7 @@ public class Query {
 
 		} else if (node instanceof ParameterizedType) {
 
-			query.put("query", "CREATE (n: ParameterizedType:Type { NAME : {name},P_ID:{proid}}) "
+			query.put("query", "MERGE (n: ParameterizedType:Type { NAME : {name},T_KEY:{key},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -480,7 +481,7 @@ public class Query {
 
 		} else if (node instanceof WildcardType) {
 
-			query.put("query", "CREATE (n: WildcardType:Type { NAME : {name},UPPER_BOUND:{ub},P_ID:{proid}}) "
+			query.put("query", "MERGE (n: WildcardType:Type { NAME : {name},UPPER_BOUND:{ub},T_KEY:{key},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
