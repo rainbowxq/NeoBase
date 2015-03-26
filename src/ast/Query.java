@@ -392,7 +392,7 @@ public class Query {
 
 		} else if (node instanceof SimpleType) {
 
-			query.put("query", "MERGE (n: SimpleType:Type { NAME : {name},IS_FROMSOURCE:{isFS},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: SimpleType:Type { NAME : {name},IS_FROMSOURCE:{isFS},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -413,7 +413,7 @@ public class Query {
 
 			query.put(
 					"query",
-					"MERGE (n: ArrayType:Type { NAME : {name},DIMENTIONS:{dimentions},P_ID:{proid}}) "
+					"CREATE (n: ArrayType:Type { NAME : {name},DIMENTIONS:{dimentions},P_ID:{proid}}) "
 							+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 							+ "MERGE (n)-[:KEY]->(m) "
 							+ "RETURN id(n)" );
@@ -434,7 +434,7 @@ public class Query {
 
 		} else if (node instanceof UnionType) {
 
-			query.put("query", "MERGE (n: UnionType:Type { NAME : {name},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: UnionType:Type { NAME : {name},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -451,7 +451,7 @@ public class Query {
 
 		} else if (node instanceof QualifiedType) {
 
-			query.put("query", "MERGE (n: QualifiedType:Type { NAME : {name},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: QualifiedType:Type { NAME : {name},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -466,7 +466,7 @@ public class Query {
 
 		} else if (node instanceof ParameterizedType) {
 
-			query.put("query", "MERGE (n: ParameterizedType:Type { NAME : {name},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: ParameterizedType:Type { NAME : {name},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -480,7 +480,7 @@ public class Query {
 
 		} else if (node instanceof WildcardType) {
 
-			query.put("query", "MERGE (n: WildcardType:Type { NAME : {name},UPPER_BOUND:{ub},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: WildcardType:Type { NAME : {name},UPPER_BOUND:{ub},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
@@ -503,19 +503,19 @@ public class Query {
 		JSONObject params = new JSONObject();
 		if (node instanceof NormalAnnotation) {
 			//the key recorded here is type binding 
-			query.put("query", "MERGE (n: NormalAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: NormalAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			
 		} else if (node instanceof MarkerAnnotation) {
-			query.put("query", "MERGE (n: MarkerAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: MarkerAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
 			
 		} else if (node instanceof SingleMemberAnnotation) {// SingleMemberAnnotation
-			query.put("query", "MERGE (n: SingleMemberAnnotation :Annotation{ TYPE_NAME : {tname},VALUE : {value},P_ID:{proid}}) "
+			query.put("query", "CREATE (n: SingleMemberAnnotation :Annotation{ TYPE_NAME : {tname},VALUE : {value},P_ID:{proid}}) "
 					+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 					+ "MERGE (n)-[:KEY]->(m) "
 					+ "RETURN id(n)" );
