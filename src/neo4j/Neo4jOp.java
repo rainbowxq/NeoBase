@@ -4,7 +4,6 @@ import javax.ws.rs.core.MediaType;
 
 import log.Log;
 import net.sf.json.JSONObject;
-import ast.Query;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -38,8 +37,8 @@ public class Neo4jOp {
 			        .post( ClientResponse.class );
 
 			String r_s=response.getEntity(String.class);
-			Log.debugLoger( String.format( "[%s],the query is [%s], status code [%d],\n returned data is [%s]",
-					txUri,query, response.getStatus(),r_s) ) ;
+//			Log.debugLoger( String.format( "[%s],the query is [%s], status code [%d],\n returned data is [%s]",
+//					txUri,query, response.getStatus(),r_s) ) ;
 			
 			return r_s;
 			
@@ -68,7 +67,7 @@ public class Neo4jOp {
 			params.put("prop", prop);
 			query.put("params",params);
 			
-			Log.debugLoger(query.toString());
+//			Log.debugLoger(query.toString());
 			/********************************/
 			Neo4jOp.executeQuery(query.toString());
 			/********************************/

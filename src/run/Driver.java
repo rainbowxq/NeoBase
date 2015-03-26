@@ -121,7 +121,7 @@ public class Driver {
 		Stopwatch timer=new Stopwatch();
 		timer.start();
 //		Driver driver=new Driver("org.eclipse.swt","/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt","2.1");
-		Driver driver=new Driver("apache-ant","/home/xiaoq_zhu/Documents/experiment/apache-ant","1.9.4");
+		Driver driver=new Driver("apache-ivy","/home/xiaoq_zhu/Documents/experiment/apache-ivy","2.4.0");
 		
 		driver.parseProject();
 //		driver.parseFile("Simple8BitZipEncoding.java", "/home/xiaoq_zhu/Documents/experiment/apache-ant/main/org/apache/tools/zip/Simple8BitZipEncoding.java", -1);

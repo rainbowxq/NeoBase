@@ -52,8 +52,8 @@ public class TestDriver {
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("ForTest.java","./src/testcases/ForTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
-//		TestDriver.eTest("IfTest.java","./src/testcases/IfTest.java",
-//				new String[]{"./target/classes"},new String[]{"./src"});
+		TestDriver.eTest("IfTest.java","./src/testcases/IfTest.java",
+				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("SwitchTest.java","./src/testcases/SwitchTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("TDStest.java","./src/testcases/TDStest.java",
@@ -61,8 +61,8 @@ public class TestDriver {
 //		TestDriver.eTest("WildcardTypeTest.java","./src/testcases/Simple8BitZipEncoding.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
 		
-		TestDriver.eTest("WildcardTypeTest.java","./src/testcases/WildcardTypeTest.java",
-				new String[]{"./target/classes"},new String[]{"./src"});
+//		TestDriver.eTest("WildcardTypeTest.java","./src/testcases/WildcardTypeTest.java",
+//				new String[]{"./target/classes"},new String[]{"./src"});
 		
 		
 		
