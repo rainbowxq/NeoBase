@@ -2,23 +2,30 @@ package test;
 
 import java.util.List;
 
-import collector.JavaFiles;
-import ast.Parser;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-public class TestDriver {
+import ast2.Parser2;
+import ast2.Query2;
+
+public class TestDriver2 {
 	
 	private static List<String> srcPaths;
 	private static List<String> targetPaths;
+	private static String DPATH = "./data/test";
+	private static GraphDatabaseService db=new GraphDatabaseFactory().newEmbeddedDatabase(DPATH);
 	
 	public static void eTest(String fileName,String filePath,String[] classPaths,String[] filePaths){
-		Parser parser=new Parser(fileName,filePath,4);
-		parser.ececute(classPaths,filePaths);
+		Parser2 parser=new Parser2(fileName,filePath,4);
+		parser.analyse(classPaths, filePaths);
 	}
 	
 	
 	
 	
 	public static void main(String[] args){
+		Query2.setDb(db);
 //		TestDriver.eTest("TestAnnotation.java","./src/testcases/TestAnnotation.java");//pass
 //		TestDriver.eTest("TestTypeParameter.java","./src/testcases/TestTypeParameter.java");//pass
 //		JavaFiles files=new JavaFiles();
@@ -52,8 +59,11 @@ public class TestDriver {
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("ForTest.java","./src/testcases/ForTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
-		TestDriver.eTest("IfTest.java","./src/testcases/IconGenerator.java",
+		TestDriver2.eTest("IfTest.java","./src/testcases/IconGenerator.java",
 				new String[]{"./target/classes"},new String[]{"./src"});
+		Query2.getMaxPid();
+		
+		db.shutdown();
 //		TestDriver.eTest("SwitchTest.java","./src/testcases/SwitchTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("TDStest.java","./src/testcases/TDStest.java",
@@ -114,7 +124,7 @@ public class TestDriver {
 
 
 	public static void setSrcPaths(List<String> srcPaths) {
-		TestDriver.srcPaths = srcPaths;
+		TestDriver2.srcPaths = srcPaths;
 	}
 
 
@@ -128,6 +138,6 @@ public class TestDriver {
 
 
 	public static void setTargetPaths(List<String> targetPaths) {
-		TestDriver.targetPaths = targetPaths;
+		TestDriver2.targetPaths = targetPaths;
 	}
 }

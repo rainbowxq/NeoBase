@@ -55,7 +55,7 @@
            <version>2.3</version>
            <classifier>jdk15</classifier>
        </dependency>
- </dependencies>
+    </dependencies>
 
     <build>
         <plugins>

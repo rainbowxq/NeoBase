@@ -1,17 +1,24 @@
 package run;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import neo4j.Neo4jOp;
-import net.sf.json.JSONObject;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+
 import collector.JavaFiles;
 import collector.Stopwatch;
-import ast.Parser;
 import ast2.Parser2;
+import ast2.Query2;
 
 
-public class Driver {
+public class Driver2 {
 	private List<Long> units=new ArrayList<Long>();
 	private Long id;
 	private String name=null;
@@ -20,33 +27,38 @@ public class Driver {
 	private List<String> targetPaths;
 	private String proPath;
 	
+	private static String DPATH = "./data/graph.db";
+	private static GraphDatabaseService db=new GraphDatabaseFactory().newEmbeddedDatabase(DPATH);
+	private static ExecutionEngine engine = new ExecutionEngine(db);
 	
-	public Driver(String name,String propath,String version){
+	
+	public Driver2(String name,String propath,String version){
 		this.name=name;
 		this.proPath=propath;
 		this.setVersion(version);
+		Query2.setDb(db);
 	}
 	/**
 	 * store the project node into the database and record its id in the database
+	 * @return 
 	 */
-	public void store(int pid){
-		JSONObject query = new JSONObject();
-		query.put("query",
-				"MERGE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN id(n)");
-
-		JSONObject params = new JSONObject();
-		params.put("pname", this.getName());
-		params.put("version", this.getVersion());
-		params.put("pid", pid);
-		query.put("params", params);
-//		Log.debugLoger(query.toString());
-		
-		String a=Neo4jOp.executeQuery(query.toString());
-		String b[]=a.split(" ");
-//		for(int j=0;j<b.length;j++){
-//			System.out.println(b[j]+" "+j);
-//		}
-		this.setId(Long.parseLong(b[12]));
+	public long store(int pid){
+		ResourceIterator<Node> resultIterator = null;
+		Transaction tx = db.beginTx();
+		try {
+			String queryString = "MERGE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN n";
+			Map<String, Object> params = new HashMap<>();
+			params.put("pname", this.getName());
+			params.put("version", this.getVersion());
+			params.put("pid", pid);
+			resultIterator = engine.execute(queryString, params).columnAs("n");
+			Node result = resultIterator.next();
+			tx.success();
+			return result.getId();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**
@@ -66,10 +78,10 @@ public class Driver {
 	}
 	
 	public void parseProject(){
-		int pid=Neo4jOp.getPid()+1;
+		int pid=Query2.getMaxPid();
 		System.out.println("the pid is:"+pid);
-		if(pid<0)
-			return;
+		if(pid==-1)
+		pid=1;
 		this.store(pid);
 		
 		JavaFiles files=new JavaFiles();
@@ -86,9 +98,11 @@ public class Driver {
 		}
 		
 		for(int j=0;j<this.units.size();j++){
-			Neo4jOp.addRelation(this.id, this.units.get(j), "AST", "FILES");
+			Query2.addRelation(this.id, this.units.get(j), "FILES");
 			System.out.println(this.id+","+this.units.get(j));
 		}
+		
+		db.shutdown();
 		
 	}
 	
@@ -124,7 +138,7 @@ public class Driver {
 //		Driver driver=new Driver("org.eclipse.swt","/home/xiaoq_zhu/zxq/workspace/org.eclipse.swt","2.1");
 //		Driver driver=new Driver("apache-ivy","/home/xiaoq_zhu/Documents/experiment/apache-ivy","2.4.0");
 //		Driver driver=new Driver("apache-ant","/home/xiaoq_zhu/Documents/experiment/apache-ant","1.9.4");
-		Driver driver=new Driver("ArtOfIllusion","/home/xiaoq_zhu/Documents/experiment/AoIsrc301","3.0.1");
+		Driver2 driver=new Driver2("ArtOfIllusion","/home/xiaoq_zhu/Documents/experiment/AoIsrc301","3.0.1");
 		
 		driver.parseProject();
 //		driver.parseFile("Simple8BitZipEncoding.java", "/home/xiaoq_zhu/Documents/experiment/apache-ant/main/org/apache/tools/zip/Simple8BitZipEncoding.java", -1);
@@ -139,6 +153,13 @@ public class Driver {
 	public void setVersion(String version) {
 		this.version = version;
 	}
+	public static GraphDatabaseService getDb() {
+		return db;
+	}
+	public static void setDb(GraphDatabaseService db) {
+		Driver2.db = db;
+	}
 	
 	
 }
+

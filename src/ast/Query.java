@@ -91,7 +91,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -113,7 +113,7 @@ public class Query {
 //			params.put("key", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -139,7 +139,7 @@ public class Query {
 			params.put("Key", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 
 	}
@@ -164,7 +164,7 @@ public class Query {
 			params.put("Key", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -186,7 +186,7 @@ public class Query {
 			params.put("Key", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -214,7 +214,7 @@ public class Query {
 			params.put("vkey", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -229,7 +229,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -244,7 +244,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 
 	}
@@ -261,9 +261,9 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -360,7 +360,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 
@@ -373,7 +373,7 @@ public class Query {
 		if (node instanceof PrimitiveType) {
 
 			query.put("query",
-					"MERGE (n: PrimitiveType :Type{ PRIMITIVE_TYPE_CODE : {code},T_KEY:{key},P_ID:{proid}}) "
+					"MERGE (n: PrimitiveType :Type{ PRIMITIVE_TYPE_CODE : {code},P_ID:{proid}}) "
 							+ "MERGE (m:Tkey :Key {VALUE:{key},P_ID:{proid}}) "
 							+ "MERGE (n)-[:KEY]->(m) "
 							+ "RETURN id(n)" );
@@ -494,7 +494,7 @@ public class Query {
 			params.put("proid", pid);
 			query.put("params", params);
 		}
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -537,7 +537,7 @@ public class Query {
 //			params.put("cev", "not exist");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -562,7 +562,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*FieldDeclaration*/
@@ -575,7 +575,7 @@ public class Query {
 		params.put("content", node.getStartPosition());
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*VariableDeclarationFragment*/
@@ -598,7 +598,7 @@ public class Query {
 		params.put("ed", node.getExtraDimensions());
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*Expression*/
@@ -771,7 +771,7 @@ public class Query {
 				query.put("query", squery);
 				params.put("proid", pid);
 				query.put("params", params);
-				Log.debugLoger(query.toString());
+//				Log.debugLoger(query.toString());
 				return query.toString();
 			case ASTNode.NUMBER_LITERAL:
 				squery=
@@ -804,7 +804,10 @@ public class Query {
 				squery=
 						"CREATE (n: StringLiteral:Expression {ESCAPED_VALUE:{value},"
 						+ common;
-					params.put("value", ((StringLiteral)node).getEscapedValue());
+					String value=((StringLiteral)node).getEscapedValue();
+					value.replaceAll("{", "\\{");
+					value.replaceAll("}", "\\}");
+					params.put("value", value);
 				break;
 				
 			case ASTNode.SUPER_FIELD_ACCESS:
@@ -865,7 +868,7 @@ public class Query {
 			params.put("key", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -992,7 +995,7 @@ public class Query {
 		params.put("proid", pid);
 		params.put("sp", node.getStartPosition());
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*Initializer*/
@@ -1003,7 +1006,7 @@ public class Query {
 				"CREATE (n: Initializer :BodyDeclaration{P_ID:{proid}"+setPid);
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -1027,7 +1030,7 @@ public class Query {
 		params.put("ed", node.getExtraDimensions());
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*MethodDeclaration*/
@@ -1054,7 +1057,7 @@ public class Query {
 		params.put("ed", node.getExtraDimensions());
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -1071,7 +1074,7 @@ public class Query {
 		params.put("key",node.resolveBinding().getKey());
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*AnnotationTypeMemberDeclaration*/
@@ -1090,7 +1093,7 @@ public class Query {
 			params.put("key", "null");
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	/*CatchClause*/
@@ -1101,7 +1104,7 @@ public class Query {
 		JSONObject params = new JSONObject();
 		params.put("proid", pid);
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -1118,7 +1121,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 	
@@ -1135,7 +1138,7 @@ public class Query {
 		params.put("proid", pid);
 		
 		query.put("params", params);
-		Log.debugLoger(query.toString());
+//		Log.debugLoger(query.toString());
 		return query.toString();
 	}
 

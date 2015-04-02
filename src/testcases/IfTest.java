@@ -4,7 +4,13 @@ package testcases;
 
 public class IfTest{
 	
-	public int a;
-	public int b;
+	void get(int a){
+		if(a>3){
+			
+		}
+		else{
+			
+		}
+	}
 	
 }

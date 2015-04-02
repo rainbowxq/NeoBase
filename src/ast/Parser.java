@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import log.Log;
 import neo4j.Neo4jOp;
 import node.NodeInfo;
 import node.SENode;
@@ -139,7 +140,19 @@ public class Parser {
 //			for(int j=0;j<b.length;j++){
 //				System.out.println(b[j]+" "+j);
 //			}
+			try{
 			this.setNodeId(i,Long.parseLong(b[12]));
+			}
+			catch(java.lang.NumberFormatException e){
+				System.out.println(this.fileName);
+				System.out.println(this.filePath);
+				System.out.println(this.infos.get(i).getCypherSentence());
+				System.out.println(a);
+				Log.debugLoger(fileName);
+				Log.debugLoger(filePath);
+				Log.debugLoger(this.infos.get(i).getCypherSentence());
+				return;
+			}
 //			System.out.println(this.infos.get(i).getId());
 		}
 		
