@@ -1,6 +1,7 @@
 package test;
 
 import java.util.List;
+ 
 
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -49,7 +50,7 @@ public class TestDriver2 {
 //		TestDriver.eTest("TestInit.java","./src/testcases/TestInit.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
 		
-//		TestDriver.eTest("AssertTest.java","./src/testcases/AssertTest.java",
+		//		TestDriver.eTest("AssertTest.java","./src/testcases/AssertTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("CItest.java","./src/testcases/CItest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
@@ -59,10 +60,18 @@ public class TestDriver2 {
 //				new String[]{"./target/classes"},new String[]{"./src"});
 //		TestDriver.eTest("ForTest.java","./src/testcases/ForTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});
+		org.neo4j.graphdb.Transaction tx = db.beginTx();
+		try
+		{
 		TestDriver2.eTest("IfTest.java","./src/testcases/IconGenerator.java",
 				new String[]{"./target/classes"},new String[]{"./src"});
-		Query2.getMaxPid();
-		
+		tx.success();
+		}
+		finally
+		{
+			tx.finish();
+//			System.out.println("Visited CU and commited");
+		}
 		db.shutdown();
 //		TestDriver.eTest("SwitchTest.java","./src/testcases/SwitchTest.java",
 //				new String[]{"./target/classes"},new String[]{"./src"});

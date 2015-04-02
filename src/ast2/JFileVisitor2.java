@@ -2,7 +2,6 @@ package ast2;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -104,6 +103,7 @@ import relationship.ASTProperty;
  */
 public class JFileVisitor2 extends ASTVisitor{
 	private String fileName;
+//	private Map<Integer,Long> nodes=new HashMap<Integer,Long>();
 	private List<ASTNode> nodes=new ArrayList<ASTNode>();
 	private List<Long> ids=new ArrayList<Long>();
 	private long cuid;
@@ -508,6 +508,7 @@ public class JFileVisitor2 extends ASTVisitor{
 		/*create the root node of the file*/
 		/*construct the query sentence by which to store the node*/
 		long id1=Query2.cuQuery(node, fileName);
+//		nodes.put(node.getStartPosition(), id1);
 		this.ids.add(id1);
 		this.setCuid(id1);
 		this.nodes.add(node);
@@ -519,6 +520,7 @@ public class JFileVisitor2 extends ASTVisitor{
 		id2=Query2.pdQuery(packageNode);
 		this.nodes.add(packageNode);
 		this.ids.add(id2);
+//		this.nodes.put(packageNode.getStartPosition(), id2);
 		Query2.addRelation(id1, id2, ASTProperty.PACKAGE);
 		
 		/*ImportDeclaration*/
@@ -528,6 +530,7 @@ public class JFileVisitor2 extends ASTVisitor{
 			for (int i=0;i<imports.size();i++){
 				ImportDeclaration importNode=imports.get(i);	
 				id2=Query2.idQuery(importNode);
+//				this.nodes.put(importNode.getStartPosition(), id2);
 				this.nodes.add(importNode);
 				this.ids.add(id2);
 				Query2.addRelation(id1, id2, ASTProperty.IMPORTS);
@@ -551,8 +554,10 @@ public class JFileVisitor2 extends ASTVisitor{
 					id2=Query2.edQuery((EnumDeclaration) types.get(i));
 					break;
 				}
+//				this.nodes.put(types.get(i).getStartPosition(), id2);
 				this.nodes.add(types.get(i));
 				this.ids.add(id2);
+				
 				Query2.addRelation(id1, id2, ASTProperty.TYPES);
 			}
 		}
@@ -731,10 +736,12 @@ public class JFileVisitor2 extends ASTVisitor{
 	}
 	
 public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration acd){
-	this.nodes.add(acd);
 	long id2=Query2.anonymousClassDeclarationQuery(acd);
+//	this.nodes.put(acd.getStartPosition(), id2);
+	this.nodes.add(acd);
 	this.ids.add(id2);
 	long id1=this.ids.get(nodes.indexOf(node));
+//	long id1=nodes.get(node.getStartPosition());
 	Query2.addRelation(id1, id2, ASTProperty.ANONYMOUS_CLASS_DECLARATION);
 }
 	/**
@@ -773,11 +780,13 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		@SuppressWarnings("unchecked")
 		long id2=-1;
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		List<EnumConstantDeclaration> ecds=node.enumConstants();
 		for(int i=0;i<ecds.size();i++){
 			this.nodes.add(ecds.get(i));
 			id2=Query2.enumConstantDeclarationQuery(ecds.get(i));
 			this.ids.add(id2);
+//			this.nodes.put(ecds.get(i).getStartPosition(), id2);
 			Query2.addRelation(id1, id2, ASTProperty.ENUM_CONSTANTS);
 		}
 		/*BODY DECLARATIONS*/
@@ -862,8 +871,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addVariableDeclarationFragment(ASTNode node,VariableDeclarationFragment vf,String prop){
 		this.nodes.add(vf);
 		long id2=Query2.variableDeclarationFragmentQuery(vf);
+//		nodes.put(vf.getStartPosition(), id2);
 		this.ids.add(id2);
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		Query2.addRelation(id1, id2, prop);
 	}
 
@@ -1007,8 +1018,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		if(statement!=null){
 			this.nodes.add(statement);
 			long id2=Query2.statementQuery(statement);
+//			this.nodes.put(statement.getStartPosition(), id2);
 			this.ids.add(id2);
 			long id1=ids.get(nodes.indexOf(node));
+//			long id1=nodes.get(node.getStartPosition());
 			Query2.addRelation(id1, id2, prop);
 		}
 	}
@@ -1275,11 +1288,13 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		List <MemberValuePair> mvPairs=node.values();
 		long id2=-1;
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		for(int i=0;i<mvPairs.size();i++){
 			MemberValuePair mvPair=mvPairs.get(i);
 			this.nodes.add(mvPair);
 			id2=Query2.MemberValuePairQuery(mvPair);
 			this.ids.add(id2);
+//			nodes.put(mvPair.getStartPosition(), id2);
 			Query2.addRelation(id1, id2, ASTProperty.VALUES);
 		}
 		return false;
@@ -1316,7 +1331,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		this.nodes.add(annotation);
 		long id2=Query2.AnnotationQuery(annotation);
 		this.ids.add(id2);
-		long id1=ids.get(nodes.indexOf(node));
+//		this.nodes.put(annotation.getStartPosition(),id2);
+//		long id1=nodes.get(node.getStartPosition());
+		long id1=this.ids.get(nodes.indexOf(node));
 		Query2.addRelation(id1, id2, prop);
 		
 	}
@@ -1546,8 +1563,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addSingleVariableDeclaration(ASTNode node,SingleVariableDeclaration svd,String prop){
 		this.nodes.add(svd);
 		long id2=Query2.singleVariableDeclarationQuery(svd);
+//		this.nodes.put(svd.getStartPosition(), id2);
 		this.ids.add(id2);
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		Query2.addRelation(id1, id2, prop);
 	}
 	/**
@@ -1799,6 +1818,7 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		List<VariableDeclarationExpression> vdes=node.resources();
 		long id2=-1;
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		for(int i=0;i<vdes.size();i++){
 			this.nodes.add(vdes.get(i));
 			id2=Query2.expressionQuery(vdes.get(i));
@@ -1910,6 +1930,8 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 					break;
 			}
 			this.ids.add(id2);
+//			this.nodes.put(bd.getStartPosition(), id2);
+//			long id1=nodes.get(node.getStartPosition());
 			long id1=ids.get(nodes.indexOf(node));
 			Query2.addRelation(id1, id2, ASTProperty.BODY_DECLARATIONS);
 		}
@@ -1923,8 +1945,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addTypeParameter(ASTNode node,TypeParameter tpara){
 		this.nodes.add(tpara);
 		long id2=Query2.typeParameterQuery(tpara);
+//		this.nodes.put(tpara.getStartPosition(), id2);
 		this.ids.add(id2);
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		Query2.addRelation(id1, id2, ASTProperty.TYPE_PARAMETERS);
 	}
 	/**
@@ -1935,8 +1959,10 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addJavadoc(ASTNode node,Javadoc javadoc){
 		this.nodes.add(javadoc);
 		long id2=Query2.javadocQuery(javadoc);
+//		nodes.put(javadoc.getStartPosition(), id2);
 		this.ids.add(id2);
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		Query2.addRelation(id1, id2, ASTProperty.JAVA_DOC);
 	}
 	
@@ -1949,7 +1975,14 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		long id2=Query2.iExtendedModifier(modifier);
 		this.ids.add(id2);
 		this.nodes.add((ASTNode) modifier);
+//		if(modifier instanceof Modifier){
+//			nodes.put(((Modifier)modifier).getStartPosition(),id2);
+//		}
+//		else{
+//			nodes.put(((Annotation)modifier).getStartPosition(),id2);
+//		}
 		long id1=ids.get(nodes.indexOf(node));
+//		long id1=nodes.get(node.getStartPosition());
 		Query2.addRelation(id1, id2, ASTProperty.MODIFIERS);
 	}
 
@@ -2032,7 +2065,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void addType(ASTNode node,Type type,String prop){
 		this.nodes.add(type);
 		long id2=Query2.typeQuery(type);
+//		this.nodes.put(type.getStartPosition(), id2);
 		this.ids.add(id2);
+//		long id1=nodes.get(node.getStartPosition());
 		long id1=ids.get(nodes.indexOf(node));
 		Query2.addRelation(id1, id2, prop);
 	}
@@ -2134,7 +2169,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 			long id2=Query2.expressionQuery(expression);
 			this.ids.add(id2);
 			this.nodes.add(expression);
+//			this.nodes.put(expression.getStartPosition(), id2);
 			long id1=ids.get(nodes.indexOf(node));
+//			long id1=this.nodes.get(node.getStartPosition());
 			Query2.addRelation(id1, id2, ASTProperty.BODY_DECLARATIONS);
 		}
 	}
@@ -2189,9 +2226,9 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 		this.fileName = fileName;
 	}
 	
-	public List<ASTNode> getNodes(){
-		return this.nodes;
-	}
+//	public List<ASTNode> getNodes(){
+//		return this.nodes;
+//	}
 
 	public long getCuid() {
 		return cuid;
@@ -2200,6 +2237,1418 @@ public void addAnonymousClassDeclaration(ASTNode node,AnonymousClassDeclaration 
 	public void setCuid(long cuid) {
 		this.cuid = cuid;
 	}
+	
+	
+//	public void endVisit(AnnotationTypeDeclaration node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @since 3.1
+	 */
+//	public void endVisit(AnnotationTypeMemberDeclaration node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(AnonymousClassDeclaration node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ArrayAccess node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ArrayCreation node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ArrayInitializer node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ArrayType node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(AssertStatement node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(Assignment node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(Block node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 * <p>Note: {@link LineComment} and {@link BlockComment} nodes are
+//	 * not considered part of main structure of the AST. This method will
+//	 * only be called if a client goes out of their way to visit this
+//	 * kind of node explicitly.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.0
+//	 */
+//	public void endVisit(BlockComment node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(BooleanLiteral node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(BreakStatement node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(CastExpression node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(CatchClause node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(CharacterLiteral node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ClassInstanceCreation node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(CompilationUnit node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ConditionalExpression node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ConstructorInvocation node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ContinueStatement node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(DoStatement node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(EmptyStatement node) {
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(EnhancedForStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(EnumConstantDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(EnumDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ExpressionStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(FieldAccess node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(FieldDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ForStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(IfStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ImportDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(InfixExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(InstanceofExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(Initializer node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(Javadoc node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(LabeledStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 * <p>Note: {@link LineComment} and {@link BlockComment} nodes are
+//	 * not considered part of main structure of the AST. This method will
+//	 * only be called if a client goes out of their way to visit this
+//	 * kind of node explicitly.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.0
+//	 */
+//	public void endVisit(LineComment node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(MarkerAnnotation node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.0
+//	 */
+//	public void endVisit(MemberRef node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(MemberValuePair node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.0
+//	 */
+//	public void endVisit(MethodRefParameter node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(MethodDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(MethodInvocation node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(Modifier node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(NormalAnnotation node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(NullLiteral node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(NumberLiteral node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(PackageDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(ParameterizedType node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ParenthesizedExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(PostfixExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(PrefixExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(PrimitiveType node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(QualifiedName node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(QualifiedType node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ReturnStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SimpleName node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SimpleType node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(SingleMemberAnnotation node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SingleVariableDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(StringLiteral node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SuperConstructorInvocation node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SuperFieldAccess node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SuperMethodInvocation node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SwitchCase node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SwitchStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(SynchronizedStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.0
+//	 */
+//	public void endVisit(TagElement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.0
+//	 */
+//	public void endVisit(TextElement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ThisExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(ThrowStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(TryStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(TypeDeclaration node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(TypeDeclarationStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(TypeLiteral node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(TypeParameter node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.7.1
+//	 */
+//	public void endVisit(UnionType node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(VariableDeclarationExpression node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(VariableDeclarationStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(VariableDeclarationFragment node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 */
+//	public void endVisit(WhileStatement node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
+//
+//	/**
+//	 * End of visit the given type-specific AST node.
+//	 * <p>
+//	 * The default implementation does nothing. Subclasses may reimplement.
+//	 * </p>
+//	 *
+//	 * @param node the node to visit
+//	 * @since 3.1
+//	 */
+//	public void endVisit(WildcardType node) {
+//		// default implementation: do nothing
+//		int index=this.nodes.indexOf(node);
+//		if(index!=-1){
+//			nodes.remove(index);
+//			ids.remove(index);
+//		}
+//	}
 
 
 
