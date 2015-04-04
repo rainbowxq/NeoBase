@@ -1,5 +1,7 @@
 package run;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +12,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import collector.JavaFiles;
 import collector.Stopwatch;
@@ -25,43 +29,21 @@ public class Driver2 {
 	private List<String> srcPaths;
 	private List<String> targetPaths;
 	private String proPath;
+	private GraphDatabaseBuilder graphDbBuilder;
 
-	private static String DPATH = "./data/graph.db";
-	private static GraphDatabaseService db = new GraphDatabaseFactory()
-			.newEmbeddedDatabase(DPATH);
-	private static ExecutionEngine engine = new ExecutionEngine(db);
+	private static final String DPATH = "./data/test";
+
+	// private final GraphDatabaseService db;
+	// private final ExecutionEngine engine;
 
 	public Driver2(String name, String propath, String version) {
 		this.name = name;
 		this.proPath = propath;
 		this.setVersion(version);
-		Query2.setDb(db);
+		this.createDb();
 	}
 
-	/**
-	 * store the project node into the database and record its id in the
-	 * database
-	 * 
-	 * @return
-	 */
-	public long store(int pid) {
-		ResourceIterator<Node> resultIterator = null;
-		Transaction tx = db.beginTx();
-		try {
-			String queryString = "MERGE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN n";
-			Map<String, Object> params = new HashMap<>();
-			params.put("pname", this.getName());
-			params.put("version", this.getVersion());
-			params.put("pid", pid);
-			resultIterator = engine.execute(queryString, params).columnAs("n");
-			Node result = resultIterator.next();
-			tx.success();
-			return result.getId();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-	}
+
 
 	/**
 	 * parse a single java file
@@ -72,28 +54,27 @@ public class Driver2 {
 	 * @param filePaths
 	 */
 	public void parseFile(String fileName, String filePath, int pid) {
-		org.neo4j.graphdb.Transaction tx = db.beginTx();
-		try {
-			Parser2 parser = new Parser2(fileName, filePath, pid);
-			String[] tarpaths = (String[]) this.targetPaths
-					.toArray(new String[this.targetPaths.size()]);
-			String[] srcpaths = (String[]) this.srcPaths
-					.toArray(new String[this.srcPaths.size()]);
-			parser.analyse(tarpaths, srcpaths);
-			this.units.add(parser.getCid());
-			System.out.println(parser.getCid());
-		} finally {
-			tx.finish();
-			// System.out.println("Visited CU and commited");
-		}
+		Parser2 parser = new Parser2(this.graphDbBuilder, fileName, filePath,
+				pid);
+		String[] tarpaths = (String[]) this.targetPaths
+				.toArray(new String[this.targetPaths.size()]);
+		String[] srcpaths = (String[]) this.srcPaths
+				.toArray(new String[this.srcPaths.size()]);
+		parser.analyse(tarpaths, srcpaths);
+		this.units.add(parser.getCid());
+		System.out.println(parser.getCid());
 	}
 
 	public void parseProject() {
-		int pid = Query2.getMaxPid();
+		GraphDatabaseService db = this.graphDbBuilder.newGraphDatabase();
+		ExecutionEngine engine = ( new ExecutionEngine(db));
+		int pid = Query2.getMaxPid(engine);
 		System.out.println("the pid is:" + pid);
 		if (pid == -1)
 			pid = 1;
-		this.store(pid);
+		Query2 query2=new Query2(engine,pid);
+		query2.projectQuery(this.name,this.version,pid);
+		db.shutdown();
 
 		JavaFiles files = new JavaFiles();
 		files.readFolder(proPath);
@@ -107,13 +88,16 @@ public class Driver2 {
 			this.parseFile(names.get(i), javapaths.get(i), pid);
 
 		}
-
+		
+		db = this.graphDbBuilder.newGraphDatabase();
+		engine = ( new ExecutionEngine(db));
+		query2=new Query2(engine,pid);
 		for (int j = 0; j < this.units.size(); j++) {
-			Query2.addRelation(this.id, this.units.get(j), "FILES");
+			query2.addRelation(this.id, this.units.get(j), "FILES");
 			System.out.println(this.id + "," + this.units.get(j));
 		}
-
 		db.shutdown();
+		// this.registerShutdownHook(db);
 
 	}
 
@@ -160,8 +144,7 @@ public class Driver2 {
 
 		System.out.println("finished!!");
 		timer.stop();
-		System.out.println("time consumed: " + timer.timeInNanoseconds()
-				/ 60000000);
+		System.out.println("time consumed: " + timer.timeInNanoseconds());
 	}
 
 	public String getVersion() {
@@ -172,12 +155,41 @@ public class Driver2 {
 		this.version = version;
 	}
 
-	public static GraphDatabaseService getDb() {
-		return db;
+//	public static GraphDatabaseService getDb() {
+//		return db;
+//	}
+//
+//	public static void setDb(GraphDatabaseService db) {
+//		Driver2.db = db;
+//	}
+
+	public void createDb() {
+		graphDbBuilder = new GraphDatabaseFactory()
+				.newEmbeddedDatabaseBuilder(DPATH);
+
+		// registerShutdownHook( graphDb );
+
 	}
 
-	public static void setDb(GraphDatabaseService db) {
-		Driver2.db = db;
-	}
+	// private void clearDb(String dbPath)
+	// {
+	// try
+	// {
+	// FileUtils.deleteRecursively( new File( dbPath ) );
+	// }
+	// catch ( IOException e )
+	// {
+	// throw new RuntimeException( e );
+	// }
+	// }
+
+//	private static void registerShutdownHook(final GraphDatabaseService graphDb) {
+//		Runtime.getRuntime().addShutdownHook(new Thread() {
+//			@Override
+//			public void run() {
+//				graphDb.shutdown();
+//			}
+//		});
+//	}
 
 }

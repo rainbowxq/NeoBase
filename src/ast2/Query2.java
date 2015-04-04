@@ -65,14 +65,19 @@ import run.Driver2;
 
 public class Query2 {
 
-	private static int pid = -1;
-	private static GraphDatabaseService db;
-	private static ExecutionEngine engine;
+	private  final int pid;
+//	private  final GraphDatabaseService db;
+	private  final ExecutionEngine engine;
 
 	private static final String setPid = ",P_ID:{proid} }) RETURN n";
+	
+	public Query2(ExecutionEngine engine,int pid){
+		this.engine=engine;
+		this.pid=pid;
+	}
 
 	/* PackageDeclaration */
-	public static long pdQuery(PackageDeclaration node) {
+	public long pdQuery(PackageDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "MERGE (n: PackageDeclaration { NAME : {pkgName}"
 				+ setPid;
@@ -91,7 +96,7 @@ public class Query2 {
 	}
 
 	/* ImportDeclaration */
-	public static long idQuery(ImportDeclaration node) {
+	public long idQuery(ImportDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "MERGE (n: ImportDeclaration { NAME : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand}"
@@ -111,7 +116,7 @@ public class Query2 {
 	/*
 	 * generate query sentence for TypeDeclaration
 	 */
-	public static long tdQuery(TypeDeclaration node) {
+	public long tdQuery(TypeDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: TypeDeclaration:AbstractTypeDeclaration:BodyDeclaration { NAME : {typeName},INTERFACE : {isInterface},P_ID:{proid}}) "
@@ -134,7 +139,7 @@ public class Query2 {
 	/*
 	 * generate query sentence for AnnotationTypeDeclaration
 	 */
-	public static long adQuery(AnnotationTypeDeclaration node) {
+	public long adQuery(AnnotationTypeDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "CREATE (n: AnnotationTypeDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {atypeName},P_ID:{proid}}) "
 				+ "MERGE (m:Tkey :Key {VALUE:{Key},P_ID:{proid}}) "
@@ -152,7 +157,7 @@ public class Query2 {
 	}
 
 	/* EnumDeclaration */
-	public static long edQuery(EnumDeclaration node) {
+	public long edQuery(EnumDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "CREATE (n: EnumDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {etypeName},P_ID:{proid}}) "
 				+ "MERGE (m:Tkey :Key {VALUE:{Key},P_ID:{proid}}) "
@@ -171,7 +176,7 @@ public class Query2 {
 	}
 
 	/* EnumConstantDeclaration */
-	public static long enumConstantDeclarationQuery(EnumConstantDeclaration node) {
+	public long enumConstantDeclarationQuery(EnumConstantDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: EnumConstantDeclaration:BodyDeclaration { NAME : {etypeName},P_ID:{proid}}) "
@@ -198,7 +203,7 @@ public class Query2 {
 	}
 
 	/* CompilationUnit */
-	public static long cuQuery(CompilationUnit node, String fileName) {
+	public long cuQuery(CompilationUnit node, String fileName) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: CompilationUnit { NAME : {fileName} "
@@ -213,7 +218,7 @@ public class Query2 {
 	}
 
 	/* Modifier */
-	public static long modifierQuery(Modifier node) {
+	public long modifierQuery(Modifier node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "MERGE (n: Modifier { KEYWORD : {key}" + setPid;
@@ -228,7 +233,7 @@ public class Query2 {
 	}
 
 	/* Javadoc */
-	public static long javadocQuery(Javadoc node) {
+	public long javadocQuery(Javadoc node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: Javadoc {DOC : {doc} " + setPid;
@@ -242,7 +247,7 @@ public class Query2 {
 	}
 
 	/* TypeParameter */
-	public static long typeParameterQuery(TypeParameter node) {
+	public long typeParameterQuery(TypeParameter node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: TypeParameter { NAME : {name},P_ID:{proid}}) "
@@ -262,7 +267,7 @@ public class Query2 {
 	}
 
 	/* Type */
-	public static long typeQuery(Type node) {
+	public long typeQuery(Type node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "";
@@ -324,7 +329,7 @@ public class Query2 {
 	}
 
 	/* Annotation */
-	public static long AnnotationQuery(Annotation node) {
+	public long AnnotationQuery(Annotation node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "";
@@ -361,16 +366,16 @@ public class Query2 {
 	}
 
 	/* IExtendedModifier */
-	public static long iExtendedModifier(IExtendedModifier node) {
+	public long iExtendedModifier(IExtendedModifier node) {
 		if (node instanceof Modifier)
-			return Query2.modifierQuery((Modifier) node);
+			return modifierQuery((Modifier) node);
 		if (node instanceof Annotation)
-			return Query2.AnnotationQuery((Annotation) node);
+			return AnnotationQuery((Annotation) node);
 		return -1L;
 	}
 
 	/* MemberValuePair */
-	public static long MemberValuePairQuery(MemberValuePair node) {
+	public long MemberValuePairQuery(MemberValuePair node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: MemberValuePair { NAME : {name}, VALUE : {value}"
@@ -386,7 +391,7 @@ public class Query2 {
 	}
 
 	/* FieldDeclaration */
-	public static long fieldDeclarationQuery(FieldDeclaration node) {
+	public long fieldDeclarationQuery(FieldDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: FieldDeclaration:BodyDeclaration {SP : {content} "
@@ -401,7 +406,7 @@ public class Query2 {
 	}
 
 	/* VariableDeclarationFragment */
-	public static long variableDeclarationFragmentQuery(
+	public long variableDeclarationFragmentQuery(
 			VariableDeclarationFragment node) {
 
 		ResourceIterator<Node> resultIterator = null;
@@ -426,7 +431,7 @@ public class Query2 {
 	}
 
 	/* Expression */
-	public static long expressionQuery(Expression node) {
+	public long expressionQuery(Expression node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		Map<String, Object> params = new HashMap<>();
@@ -436,7 +441,7 @@ public class Query2 {
 		case ASTNode.MARKER_ANNOTATION:
 		case ASTNode.NORMAL_ANNOTATION:
 		case ASTNode.SINGLE_MEMBER_ANNOTATION:
-			return Query2.AnnotationQuery((Annotation) node);
+			return this.AnnotationQuery((Annotation) node);
 		case ASTNode.ARRAY_ACCESS:
 
 			squery = "CREATE (n: ArrayAccess :Expression{" + common;
@@ -649,7 +654,7 @@ public class Query2 {
 	}
 
 	/* Statement */
-	public static long statementQuery(Statement node) {
+	public long statementQuery(Statement node) {
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "";
 		Map<String, Object> params = new HashMap<>();
@@ -764,7 +769,7 @@ public class Query2 {
 	}
 
 	/* Initializer */
-	public static long initializerQuery(Initializer node) {
+	public long initializerQuery(Initializer node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: Initializer :BodyDeclaration{P_ID:{proid}"
@@ -779,7 +784,7 @@ public class Query2 {
 	}
 
 	/* SingleVariableDeclaration */
-	public static long singleVariableDeclarationQuery(
+	public long singleVariableDeclarationQuery(
 			SingleVariableDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
@@ -804,7 +809,7 @@ public class Query2 {
 	}
 
 	/* MethodDeclaration */
-	public static long methodDeclarationQuery(MethodDeclaration node) {
+	public long methodDeclarationQuery(MethodDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: MethodDeclaration :BodyDeclaration"
@@ -831,7 +836,7 @@ public class Query2 {
 	}
 
 	/* AnonymousClassDeclaration */
-	public static long anonymousClassDeclarationQuery(
+	public long anonymousClassDeclarationQuery(
 			AnonymousClassDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
@@ -848,7 +853,7 @@ public class Query2 {
 	}
 
 	/* AnnotationTypeMemberDeclaration */
-	public static long annotationTypeMemberDeclarationQuery(
+	public long annotationTypeMemberDeclarationQuery(
 			AnnotationTypeMemberDeclaration node) {
 		ResourceIterator<Node> resultIterator = null;
 
@@ -870,7 +875,7 @@ public class Query2 {
 	}
 
 	/* CatchClause */
-	public static long catchClauseQuery(CatchClause node) {
+	public long catchClauseQuery(CatchClause node) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: CatchClause{P_ID:{proid}" + setPid;
@@ -883,7 +888,7 @@ public class Query2 {
 	}
 
 	/* start node in cfg */
-	public static long startQuery(String key) {
+	public long startQuery(String key) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: Start {P_ID:{proid}})"
@@ -898,7 +903,7 @@ public class Query2 {
 	}
 
 	/* end node in cfg */
-	public static long endQuery(String key) {
+	public long endQuery(String key) {
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: End {P_ID:{proid}})"
@@ -912,15 +917,11 @@ public class Query2 {
 		return result.getId();
 	}
 
-	public static int getPid() {
+	public int getPid() {
 		return pid;
 	}
 
-	public static void setPid(int pid) {
-		Query2.pid = pid;
-	}
-
-	public static void addRelation(long id1, long id2, String prop) {
+	public void addRelation(long id1, long id2, String prop) {
 
 		String queryString = "match (f) match (t) where id(f)={from} and id(t)={to} merge (f)-[r:AST {NAME:{prop}}]->(t) ";
 		Map<String, Object> params = new HashMap<>();
@@ -929,8 +930,26 @@ public class Query2 {
 		params.put("prop", prop);
 		engine.execute(queryString, params).columnAs("n");
 	}
-
-	public static int getMaxPid() {
+	
+	/**
+	 * store the project node into the database and record its id in the
+	 * database
+	 * 
+	 * @return
+	 */
+	public long projectQuery(String name,String version,int pid) {
+		ResourceIterator<Node> resultIterator = null;
+		String queryString = "MERGE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN n";
+		Map<String, Object> params = new HashMap<>();
+		params.put("pname", name);
+		params.put("version", version);
+		params.put("pid", pid);
+		resultIterator = engine.execute(queryString, params).columnAs("n");
+		Node result = resultIterator.next();
+		return result.getId();
+	}
+	
+	public static int getMaxPid(ExecutionEngine engine) {
 		ExecutionResult result = null;
 
 		String queryString = "match (n) return max(n.P_ID) as mpid ";
@@ -943,11 +962,6 @@ public class Query2 {
 		}
 		return -1; 
 
-	}
-
-	public static void setDb(GraphDatabaseService db) {
-		Query2.db = db;
-		Query2.engine = new ExecutionEngine(db);
 	}
 
 }
