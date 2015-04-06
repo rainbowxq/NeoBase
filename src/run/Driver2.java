@@ -1,21 +1,11 @@
 package run;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-
 import collector.JavaFiles;
 import collector.Stopwatch;
 import ast2.Parser2;
@@ -73,7 +63,7 @@ public class Driver2 {
 		if (pid == -1)
 			pid = 1;
 		Query2 query2=new Query2(engine,pid);
-		query2.projectQuery(this.name,this.version,pid);
+		this.setId(query2.projectQuery(this.name,this.version,pid));
 		db.shutdown();
 
 		JavaFiles files = new JavaFiles();
