@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -60,6 +61,7 @@ import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 
 import run.Driver2;
 
@@ -67,17 +69,49 @@ public class Query2 {
 
 	private  final int pid;
 //	private  final GraphDatabaseService db;
-	private  final ExecutionEngine engine;
+	private final GraphDatabaseBuilder gbuilder;
+	private GraphDatabaseService db;
+	private  ExecutionEngine engine;
+	private int count=0;
+	private int times=0;
 
 	private static final String setPid = ",P_ID:{proid} }) RETURN n";
 	
-	public Query2(ExecutionEngine engine,int pid){
-		this.engine=engine;
-		this.pid=pid;
+	public Query2(GraphDatabaseBuilder gbuilder){
+		this.gbuilder=gbuilder;
+		this.db=this.gbuilder.newGraphDatabase();
+		this.engine=new ExecutionEngine(this.db);
+		int tmpid=this.getMaxPid();
+		if(tmpid==-1)
+			pid=1;
+		else
+			pid=tmpid;
+	}
+	
+	private void restartDb(){
+		this.db.shutdown();
+		this.db=this.gbuilder.newGraphDatabase();
+		this.engine=new ExecutionEngine(this.db);
+	}
+	
+	private void JudgeCount(){
+		if(count>=5000){
+			this.restartDb();
+			count=0;
+			times++;
+			System.out.println("this is the "+ times+"th 5000 execution");
+		}
+		else
+			count++;
+	}
+	
+	public void shutdownDb(){
+		this.db.shutdown();
 	}
 
 	/* PackageDeclaration */
 	public long pdQuery(PackageDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "MERGE (n: PackageDeclaration { NAME : {pkgName}"
 				+ setPid;
@@ -97,6 +131,7 @@ public class Query2 {
 
 	/* ImportDeclaration */
 	public long idQuery(ImportDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "MERGE (n: ImportDeclaration { NAME : {ImportName} ,STATIC : {Static}, ON_DEMAND:{onDemand}"
@@ -117,6 +152,7 @@ public class Query2 {
 	 * generate query sentence for TypeDeclaration
 	 */
 	public long tdQuery(TypeDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: TypeDeclaration:AbstractTypeDeclaration:BodyDeclaration { NAME : {typeName},INTERFACE : {isInterface},P_ID:{proid}}) "
@@ -140,6 +176,7 @@ public class Query2 {
 	 * generate query sentence for AnnotationTypeDeclaration
 	 */
 	public long adQuery(AnnotationTypeDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "CREATE (n: AnnotationTypeDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {atypeName},P_ID:{proid}}) "
 				+ "MERGE (m:Tkey :Key {VALUE:{Key},P_ID:{proid}}) "
@@ -158,6 +195,7 @@ public class Query2 {
 
 	/* EnumDeclaration */
 	public long edQuery(EnumDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "CREATE (n: EnumDeclaration :AbstractTypeDeclaration:BodyDeclaration{ NAME : {etypeName},P_ID:{proid}}) "
 				+ "MERGE (m:Tkey :Key {VALUE:{Key},P_ID:{proid}}) "
@@ -177,6 +215,7 @@ public class Query2 {
 
 	/* EnumConstantDeclaration */
 	public long enumConstantDeclarationQuery(EnumConstantDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: EnumConstantDeclaration:BodyDeclaration { NAME : {etypeName},P_ID:{proid}}) "
@@ -204,6 +243,7 @@ public class Query2 {
 
 	/* CompilationUnit */
 	public long cuQuery(CompilationUnit node, String fileName) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: CompilationUnit { NAME : {fileName} "
@@ -219,6 +259,7 @@ public class Query2 {
 
 	/* Modifier */
 	public long modifierQuery(Modifier node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "MERGE (n: Modifier { KEYWORD : {key}" + setPid;
@@ -234,6 +275,7 @@ public class Query2 {
 
 	/* Javadoc */
 	public long javadocQuery(Javadoc node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: Javadoc {DOC : {doc} " + setPid;
@@ -248,6 +290,7 @@ public class Query2 {
 
 	/* TypeParameter */
 	public long typeParameterQuery(TypeParameter node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: TypeParameter { NAME : {name},P_ID:{proid}}) "
@@ -268,6 +311,7 @@ public class Query2 {
 
 	/* Type */
 	public long typeQuery(Type node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "";
@@ -330,6 +374,7 @@ public class Query2 {
 
 	/* Annotation */
 	public long AnnotationQuery(Annotation node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "";
@@ -338,17 +383,17 @@ public class Query2 {
 		Map<String, Object> params = new HashMap<>();
 		switch (node.getNodeType()) {
 		case ASTNode.MARKER_ANNOTATION:
-			queryString = "CREATE (n: MarkerAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
+			queryString = "CREATE (n: MarkerAnnotation:Annotation:Expression { TYPE_NAME : {tname},P_ID:{proid}}) "
 					+ common;
 			break;
 		case ASTNode.SINGLE_MEMBER_ANNOTATION:
-			queryString = "CREATE (n: SingleMemberAnnotation :Annotation{ TYPE_NAME : {tname},VALUE : {value},P_ID:{proid}}) "
+			queryString = "CREATE (n: SingleMemberAnnotation :Annotation:Expression{ TYPE_NAME : {tname},VALUE : {value},P_ID:{proid}}) "
 					+ common;
 			params.put("value", ((SingleMemberAnnotation) node).getValue()
 					.toString());
 			break;
 		case ASTNode.NORMAL_ANNOTATION:
-			queryString = "CREATE (n: NormalAnnotation:Annotation { TYPE_NAME : {tname},P_ID:{proid}}) "
+			queryString = "CREATE (n: NormalAnnotation:Annotation:Expression { TYPE_NAME : {tname},P_ID:{proid}}) "
 					+ common;
 			break;
 		}
@@ -376,6 +421,7 @@ public class Query2 {
 
 	/* MemberValuePair */
 	public long MemberValuePairQuery(MemberValuePair node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: MemberValuePair { NAME : {name}, VALUE : {value}"
@@ -392,6 +438,7 @@ public class Query2 {
 
 	/* FieldDeclaration */
 	public long fieldDeclarationQuery(FieldDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: FieldDeclaration:BodyDeclaration {SP : {content} "
@@ -408,7 +455,7 @@ public class Query2 {
 	/* VariableDeclarationFragment */
 	public long variableDeclarationFragmentQuery(
 			VariableDeclarationFragment node) {
-
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: VariableDeclarationFragment:VariableDeclaration "
@@ -432,6 +479,7 @@ public class Query2 {
 
 	/* Expression */
 	public long expressionQuery(Expression node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		Map<String, Object> params = new HashMap<>();
@@ -451,7 +499,8 @@ public class Query2 {
 			squery = "CREATE (n: ArrayCreation :Expression{" + common;
 			break;
 		case ASTNode.ARRAY_INITIALIZER:
-			squery = "CREATE (n: ArrayInitializer:Expression {" + common;
+			squery = "CREATE (n: ArrayInitializer:Expression {CONTENT:{content}," + common;
+			params.put("content",((ArrayInitializer) node).toString());
 			break;
 		case ASTNode.ASSIGNMENT:
 			squery = "CREATE (n: Assignment :Expression{OPERATOR:{operator},"
@@ -586,15 +635,15 @@ public class Query2 {
 
 			break;
 		case ASTNode.STRING_LITERAL:
-			squery = "CREATE (n: StringLiteral:Expression {ESCAPED_VALUE:{value},"
+			squery = "MERGE (n: StringLiteral:Expression {ESCAPED_VALUE:{value},"
 					+ common;
-			String value = ((StringLiteral) node).getEscapedValue();
-			params.put("value", value);
+			params.put("value", ((StringLiteral) node).getEscapedValue());
 			break;
 
 		case ASTNode.SUPER_FIELD_ACCESS:
-			squery = "CREATE (n: SuperFieldAccess:Expression {QUALIFIER:{qualifier},NAME:{name},"
-					+ common;
+			squery = "CREATE (n: SuperFieldAccess:Expression {NAME:{name},P_ID:{proid}}) "
+					+ "MERGE (h : Vkey :Key{VALUE:{vkey},P_ID:{proid} }) "
+					+ "MERGE (n)-[:KEY]->(h) ";
 			if (((SuperFieldAccess) node).getQualifier() != null)
 				params.put("qualifier", ((SuperFieldAccess) node)
 						.getQualifier().getFullyQualifiedName());
@@ -602,6 +651,12 @@ public class Query2 {
 				params.put("qualifier", "null");
 			params.put("name", ((SuperFieldAccess) node).getName()
 					.getFullyQualifiedName());
+			if (((SuperFieldAccess) node).resolveFieldBinding() != null) {
+				params.put("vkey", ((SuperFieldAccess) node).resolveFieldBinding()
+						.getKey());
+			} else {
+				params.put("vkey", "null");
+			}
 
 			break;
 		case ASTNode.SUPER_METHOD_INVOCATION:
@@ -655,6 +710,7 @@ public class Query2 {
 
 	/* Statement */
 	public long statementQuery(Statement node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "";
 		Map<String, Object> params = new HashMap<>();
@@ -770,6 +826,7 @@ public class Query2 {
 
 	/* Initializer */
 	public long initializerQuery(Initializer node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: Initializer :BodyDeclaration{P_ID:{proid}"
@@ -786,6 +843,7 @@ public class Query2 {
 	/* SingleVariableDeclaration */
 	public long singleVariableDeclarationQuery(
 			SingleVariableDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: SingleVariableDeclaration:VariableDeclaration "
@@ -810,6 +868,7 @@ public class Query2 {
 
 	/* MethodDeclaration */
 	public long methodDeclarationQuery(MethodDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: MethodDeclaration :BodyDeclaration"
@@ -838,6 +897,7 @@ public class Query2 {
 	/* AnonymousClassDeclaration */
 	public long anonymousClassDeclarationQuery(
 			AnonymousClassDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: AnonymousClassDeclaration {P_ID:{proid}})"
@@ -855,6 +915,7 @@ public class Query2 {
 	/* AnnotationTypeMemberDeclaration */
 	public long annotationTypeMemberDeclarationQuery(
 			AnnotationTypeMemberDeclaration node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: AnnotationTypeMemberDeclaration :BodyDeclaration{NAME:{name},P_ID:{proid}})"
@@ -876,6 +937,7 @@ public class Query2 {
 
 	/* CatchClause */
 	public long catchClauseQuery(CatchClause node) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: CatchClause{P_ID:{proid}" + setPid;
@@ -889,6 +951,7 @@ public class Query2 {
 
 	/* start node in cfg */
 	public long startQuery(String key) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: Start {P_ID:{proid}})"
@@ -904,6 +967,7 @@ public class Query2 {
 
 	/* end node in cfg */
 	public long endQuery(String key) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 
 		String queryString = "CREATE (n: End {P_ID:{proid}})"
@@ -922,7 +986,7 @@ public class Query2 {
 	}
 
 	public void addRelation(long id1, long id2, String prop) {
-
+		this.JudgeCount();
 		String queryString = "match (f) match (t) where id(f)={from} and id(t)={to} merge (f)-[r:AST {NAME:{prop}}]->(t) ";
 		Map<String, Object> params = new HashMap<>();
 		params.put("from", id1);
@@ -937,7 +1001,8 @@ public class Query2 {
 	 * 
 	 * @return
 	 */
-	public long projectQuery(String name,String version,int pid) {
+	public long projectQuery(String name,String version) {
+		this.JudgeCount();
 		ResourceIterator<Node> resultIterator = null;
 		String queryString = "MERGE (n: Project { NAME : {pname},VERSION:{version},P_ID:{pid}}) RETURN n";
 		Map<String, Object> params = new HashMap<>();
@@ -949,7 +1014,7 @@ public class Query2 {
 		return result.getId();
 	}
 	
-	public static int getMaxPid(ExecutionEngine engine) {
+	public int getMaxPid() {
 		ExecutionResult result = null;
 
 		String queryString = "match (n) return max(n.P_ID) as mpid ";

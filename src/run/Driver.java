@@ -57,7 +57,7 @@ public class Driver {
 	 * @param filePaths
 	 */
 	public void parseFile(String fileName,String filePath,int pid){
-		Parser2 parser=new Parser2(fileName,filePath,pid);
+		Parser parser=new Parser(fileName,filePath,pid);
 		String[] tarpaths=(String[]) this.targetPaths.toArray(new String[this.targetPaths.size()]);
 		String[] srcpaths=(String[]) this.srcPaths.toArray(new String[this.srcPaths.size()]);
 		parser.analyse(tarpaths,srcpaths);

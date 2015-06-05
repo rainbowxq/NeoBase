@@ -22,17 +22,17 @@ public class Parser2 {
 	CompilationUnit javaUnit;
 
 	private Long cid;
-	private final GraphDatabaseBuilder gbuilder;
-	private final int pid;
+	private Query2 query2;
+
+	// private final GraphDatabaseBuilder gbuilder;
 
 	// private final GraphDatabaseService db;
 	// private final ExecutionEngine engine ;
 
-	public Parser2(GraphDatabaseBuilder builder, String fName, String fPath,int pid) {
-		this.gbuilder = builder;
+	public Parser2(Query2 query2, String fName, String fPath) {
 		this.setFileName(fName);
 		this.setFilePath(fPath);
-		this.pid=pid;
+		this.query2=query2;
 	}
 
 	public void analyse(String[] classPaths, String[] filePaths) {
@@ -53,19 +53,9 @@ public class Parser2 {
 		CompilationUnit javaUnit = (CompilationUnit) parser.createAST(null);
 		this.javaUnit = javaUnit;
 
-		GraphDatabaseService db = this.gbuilder.newGraphDatabase();
-		Transaction tx = db.beginTx();
-		try {
-			JFileVisitor2 astVisitor = new JFileVisitor2(
-					new ExecutionEngine(db), this.fileName,pid);
-			javaUnit.accept(astVisitor);
-			this.cid = astVisitor.getCuid();
-			tx.success();
-		} finally {
-			tx.finish();
-			// System.out.println("Visited CU and commited");
-		}
-		db.shutdown();
+		JFileVisitor2 astVisitor = new JFileVisitor2(this.query2, this.fileName);
+		javaUnit.accept(astVisitor);
+		this.cid = astVisitor.getCuid();
 
 	}
 

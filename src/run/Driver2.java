@@ -2,12 +2,15 @@ package run;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+
 import collector.JavaFiles;
 import collector.Stopwatch;
+import ast.Query;
 import ast2.Parser2;
 import ast2.Query2;
 
@@ -43,9 +46,8 @@ public class Driver2 {
 	 * @param classPaths
 	 * @param filePaths
 	 */
-	public void parseFile(String fileName, String filePath, int pid) {
-		Parser2 parser = new Parser2(this.graphDbBuilder, fileName, filePath,
-				pid);
+	public void parseFile(Query2 query2,String fileName, String filePath) {
+		Parser2 parser = new Parser2(query2, fileName, filePath);
 		String[] tarpaths = (String[]) this.targetPaths
 				.toArray(new String[this.targetPaths.size()]);
 		String[] srcpaths = (String[]) this.srcPaths
@@ -56,15 +58,8 @@ public class Driver2 {
 	}
 
 	public void parseProject() {
-		GraphDatabaseService db = this.graphDbBuilder.newGraphDatabase();
-		ExecutionEngine engine = ( new ExecutionEngine(db));
-		int pid = Query2.getMaxPid(engine);
-		System.out.println("the pid is:" + pid);
-		if (pid == -1)
-			pid = 1;
-		Query2 query2=new Query2(engine,pid);
-		this.setId(query2.projectQuery(this.name,this.version,pid));
-		db.shutdown();
+		Query2 query2=new Query2(this.graphDbBuilder);
+		this.setId(query2.projectQuery(this.name,this.version));
 
 		JavaFiles files = new JavaFiles();
 		files.readFolder(proPath);
@@ -75,18 +70,15 @@ public class Driver2 {
 		assert (javapaths.size() == names.size()) : "size doesn't match!!\n";
 		for (int i = 0; i < names.size(); i++) {
 			System.out.println("parse: " + javapaths.get(i));
-			this.parseFile(names.get(i), javapaths.get(i), pid);
+			this.parseFile(query2, names.get(i), javapaths.get(i));
 
 		}
 		
-		db = this.graphDbBuilder.newGraphDatabase();
-		engine = ( new ExecutionEngine(db));
-		query2=new Query2(engine,pid);
 		for (int j = 0; j < this.units.size(); j++) {
 			query2.addRelation(this.id, this.units.get(j), "FILES");
 			System.out.println(this.id + "," + this.units.get(j));
 		}
-		db.shutdown();
+		query2.shutdownDb();
 		// this.registerShutdownHook(db);
 
 	}

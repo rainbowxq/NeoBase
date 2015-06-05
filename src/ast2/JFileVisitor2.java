@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -112,14 +113,17 @@ public class JFileVisitor2 extends ASTVisitor{
 	private List<ASTNode> nodes=new ArrayList<ASTNode>();
 	private List<Long> ids=new ArrayList<Long>();
 	private long cuid;
-	private final ExecutionEngine engine;
-	private final Query2 query2;
+//	private final ExecutionEngine engine;
+//	private final Query2 query2;
+//	private GraphDatabaseService db;
+//	private ExecutionEngine engine;
+	private Query2 query2;
 
-	public JFileVisitor2(ExecutionEngine engine, String name,int pid){
-		this.engine=engine;
+	public JFileVisitor2(Query2 query2, String name){
+		this.query2=query2;
 		this.fileName=name;
-		this.query2=new Query2(this.engine, pid);
 	}
+	
 	
 	/**
 	 * Visits the given type-specific AST node.
